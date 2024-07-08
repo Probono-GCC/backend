@@ -1,6 +1,6 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: Java CI with Gradle
+name: Java CI/CD with Gradle
 
 on:
   push:
@@ -9,9 +9,9 @@ on:
     branches: [ "main" ]
 env:
   AWS_REGION: ap-northeast-2
-  AWS_S3_BUCKET: gcc-auto-deploy-test
-  AWS_CODE_DEPLOY_APPLICATION: test-cicd
-  AWS_CODE_DEPLOY_GROUP: auto-deploy-test-instance
+  AWS_S3_BUCKET: probono-gcc-bucket
+  AWS_CODE_DEPLOY_APPLICATION: probono-gcc-codedeploy-app
+  AWS_CODE_DEPLOY_GROUP: probono-gcc-codedeploy-group
 
 jobs:
   build:
@@ -48,6 +48,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_PRIVATE_ACCESS_KEY }}
     - name: S3에 업로드
-      run: aws deploy push --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --ignore-hidden-files --s3-location s3://${{ env.AWS_S3_BUCKET }}/gcc-backend/$GITHUB_SHA.zip --source .
+      run: aws deploy push --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --ignore-hidden-files --s3-location s3://${{ env.AWS_S3_BUCKET }}/probono-gcc-backend/$GITHUB_SHA.zip --source .
     - name: EC2에 배포
-      run: aws deploy create-deployment --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${{ env.AWS_CODE_DEPLOY_GROUP }} --s3-location bucket=${{ env.AWS_S3_BUCKET }},key=gcc-backend/$GITHUB_SHA.zip,bundleType=zip
+      run: aws deploy create-deployment --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${{ env.AWS_CODE_DEPLOY_GROUP }} --s3-location bucket=${{ env.AWS_S3_BUCKET }},key=probono-gcc-backend/$GITHUB_SHA.zip,bundleType=zip
