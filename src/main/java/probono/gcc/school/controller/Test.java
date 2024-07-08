@@ -11,6 +11,6 @@ public class Test {
     @ResponseBody
     public String test()
     {
-        return "success!!!!!!!!!";
+        return "success";
     }
 }
