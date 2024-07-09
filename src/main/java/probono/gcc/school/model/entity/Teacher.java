@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import probono.gcc.school.model.dto.TeacherRequestDto;
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
@@ -56,4 +57,16 @@ public class Teacher {
 
     @Column
     private Long updated_charged_id;
+
+    public Teacher(TeacherRequestDto requestDto) {
+
+        this.login_id=requestDto.getLogin_id();
+        this.login_pw=requestDto.getLogin_pw();
+        this.name=requestDto.getName();
+        this.created_at=LocalDateTime.now();
+        this.status=Status.ACTIVE;
+        //Dummy data
+        this.created_charged_id=1L;
+
+    }
 }

@@ -18,8 +18,8 @@ public class TeacherService {
 
 
     public TeacherResponseDto createTeacher(TeacherRequestDto requestDto) {
-        Teacher board = new Teacher(requestDto);
-        teacherRepository.save(board);
-        return new TeacherResponseDto(board);
+        Teacher teacher = new Teacher(requestDto);
+        teacherRepository.save(teacher);
+        return new TeacherResponseDto(teacher);
     }
 }
