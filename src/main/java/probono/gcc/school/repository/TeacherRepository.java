@@ -1,5 +1,8 @@
 package probono.gcc.school.repository;
 
-public interface TeacherRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import probono.gcc.school.model.entity.Teacher;
+
+public interface TeacherRepository extends JpaRepository<Teacher, Long> {
 
 }
