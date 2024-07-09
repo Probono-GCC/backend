@@ -5,4 +5,5 @@ import probono.gcc.school.model.entity.Teacher;
 
 public interface TeacherRepository extends JpaRepository<Teacher, Long> {
 
+
 }
