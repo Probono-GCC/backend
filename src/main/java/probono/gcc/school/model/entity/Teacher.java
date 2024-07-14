@@ -58,6 +58,15 @@ public class Teacher {
     @Column
     private Long updated_charged_id;
 
+    @Column
+    private LocalDate birth; // 추가된 필드
+
+    @Column(length = 50)
+    private String pw_question; // 추가된 필드
+
+    @Column(length = 50)
+    private String pw_answer; // 추가된 필드
+
     public Teacher(TeacherRequestDto requestDto) {
 
         this.login_id=requestDto.getLogin_id();
