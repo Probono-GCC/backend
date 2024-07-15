@@ -78,4 +78,12 @@ public class Teacher {
         this.created_charged_id=1L;
 
     }
+
+    // 업데이트 메소드
+    public void update(TeacherRequestDto requestDto) {
+       this.name=requestDto.getName();
+       this.birth=requestDto.getBirth();
+       this.login_pw=requestDto.getLogin_pw();
+
+    }
 }

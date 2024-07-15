@@ -2,13 +2,11 @@ package probono.gcc.school.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import probono.gcc.school.model.dto.TeacherListResponseDto;
 import probono.gcc.school.model.dto.TeacherRequestDto;
 import probono.gcc.school.model.dto.TeacherResponseDto;
+import probono.gcc.school.model.entity.Teacher;
 import probono.gcc.school.service.TeacherService;
 
 import java.util.List;
@@ -32,12 +30,25 @@ public class TeacherController {
         return teacherService.findAllTeacher();
     }
 
+    // 선생님 한 명 조회
+    @GetMapping("/teachers/{id}")
+    public TeacherResponseDto getOneTeacher(@PathVariable Long id) {
+        return teacherService.findOneTeacher(id);
+    }
 
-    //선생님 한 명 조회
+    // 선생님 수정
+    @PutMapping("/teachers/{id}")
+    public Long updateTeacher(@PathVariable Long id, @RequestBody TeacherRequestDto requestDto) {
+        return teacherService.update(id,requestDto);
+    }
 
-    //선생님 수정
+    // 선생님 삭제
+    @DeleteMapping("/teachers/{id}")
+    public Long deleteTeacher(@PathVariable Long id) {
+        return  teacherService.deleteTeacher(id);
+    }
 
-    //선생님 삭제
+
 
 
 

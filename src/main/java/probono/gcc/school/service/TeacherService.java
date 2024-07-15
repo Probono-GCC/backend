@@ -2,6 +2,7 @@ package probono.gcc.school.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.dto.TeacherListResponseDto;
 import probono.gcc.school.model.dto.TeacherRequestDto;
 import probono.gcc.school.model.dto.TeacherResponseDto;
@@ -43,5 +44,26 @@ public class TeacherService {
     }
 
 
+    public TeacherResponseDto findOneTeacher(Long id) {
+        Teacher teacher = teacherRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("fail to findOneTeaher")
+        );
+        return new TeacherResponseDto(teacher);
+    }
+
+    @Transactional
+    public Long update(Long id, TeacherRequestDto requestDto) {
+        Teacher teacher = teacherRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("unvalid id")
+        );
+        teacher.update(requestDto);
+        return teacher.getId();
+    }
+
+    @Transactional
+    public Long deleteTeacher(Long id) {
+        teacherRepository.deleteById(id);
+        return id;
+    }
 
 }
