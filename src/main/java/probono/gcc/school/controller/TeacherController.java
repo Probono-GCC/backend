@@ -23,6 +23,7 @@ public class TeacherController {
     @PostMapping("/teachers")
     public ResponseEntity<TeacherCreateResponseDto>  createTeacher(@RequestBody TeacherCreateRequestDto requestDto){
         TeacherCreateResponseDto teacher = teacherService.createTeacher(requestDto);
+
         // 필드 값 로그로 출력
         logger.info("TeacherResponseDto Details:");
         logger.info("Login ID: {}", teacher.getLogin_id());
@@ -36,8 +37,9 @@ public class TeacherController {
 
     //선생님 목록 조회
     @GetMapping("/teachers")
-    public List<TeacherListResponseDto> getAllTeachers() {
-        return teacherService.findAllTeacher();
+    public ResponseEntity<List<TeacherListResponseDto>>  getAllTeachers() {
+        List<TeacherListResponseDto> teachers = teacherService.findAllTeacher();
+        return ResponseEntity.ok(teachers);
     }
 
     // 선생님 한 명 조회

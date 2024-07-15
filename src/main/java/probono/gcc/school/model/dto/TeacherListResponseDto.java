@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import probono.gcc.school.model.entity.Teacher;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
+@Setter
 public class TeacherListResponseDto {
 
     private Long id;
