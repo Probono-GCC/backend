@@ -1,6 +1,7 @@
 package probono.gcc.school.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import probono.gcc.school.model.dto.TeacherListResponseDto;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
 import probono.gcc.school.model.dto.TeacherCreateResponseDto;
 import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
+import probono.gcc.school.model.entity.Teacher;
 import probono.gcc.school.service.TeacherService;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeacherController {
     private final TeacherService teacherService;
+    private ModelMapper modelMapper;
     private static final Logger logger = LoggerFactory.getLogger(TeacherController.class);
     //선생님 계정 생성
     @PostMapping("/teachers")
@@ -50,9 +53,19 @@ public class TeacherController {
 
     // 선생님 수정
     @PutMapping("/teachers/{id}")
-    public Long updateTeacher(@PathVariable Long id, @RequestBody TeacherUpdateRequestDto requestDto) {
-        return teacherService.update(id,requestDto);
+    public ResponseEntity<Teacher> updateTeacher(@PathVariable Long id, @RequestBody TeacherUpdateRequestDto requestDto) {
+        // 서비스에서 업데이트 수행
+        Long updatedTeacherId = teacherService.update(id, requestDto);
+        // 업데이트된 Teacher 객체를 조회
+        Teacher updatedTeacher = teacherService.findById(updatedTeacherId);
+        // 업데이트된 Teacher 객체를 응답 본문으로 반환
+        return ResponseEntity.ok(updatedTeacher);
     }
+
+//    private Teacher convertToEntity(TeacherUpdateRequestDto requestDto) {
+//        Teacher teacher = modelMapper.map(requestDto, Teacher.class);
+//        return teacher;
+//    }
 
     // 선생님 삭제
     @DeleteMapping("/teachers/{id}")

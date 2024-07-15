@@ -14,8 +14,8 @@ public class TeacherUpdateRequestDto {
     private LocalDate birth;
     private String phone_num;
     private String pw_answer;
-    private String login_previous_pw; //Previous PW
-    private String login_new_pw; //New PW
+
+    private String login_pw;
     private LocalDateTime updated_at;
     private Long updated_charged_id;
 

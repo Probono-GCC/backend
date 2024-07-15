@@ -91,12 +91,18 @@ public class Teacher {
 //    }
 
     // 업데이트 메소드
-    public void update(TeacherUpdateRequestDto requestDto) {
-       this.name=requestDto.getName();
-       this.birth=requestDto.getBirth();
-       this.login_pw=requestDto.getLogin_new_pw();
-       this.updated_at=requestDto.getUpdated_at();
-       this.updated_charged_id=requestDto.getUpdated_charged_id();
-
+    public void update(TeacherUpdateRequestDto updateTeacher) {
+       this.name=updateTeacher.getName();
+       this.birth=updateTeacher.getBirth();
+       this.login_pw=updateTeacher.getLogin_pw();
+       this.updated_at=updateTeacher.getUpdated_at();
+       this.updated_charged_id=updateTeacher.getUpdated_charged_id();
     }
+
+
+    // 논리적 삭제를 위한 메소드
+    public void delete() {
+        this.status = Status.INACTIVE;
+    }
+
 }

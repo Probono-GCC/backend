@@ -82,18 +82,29 @@ public class TeacherService {
     }
 
     @Transactional
-    public Long update(Long id, TeacherUpdateRequestDto requestDto) {
+    public Long update(Long id, TeacherUpdateRequestDto updateTeacher) {
         Teacher teacher = teacherRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("unvalid id")
         );
-        teacher.update(requestDto);
+        //Dummy Data
+        //updateTeacher.setUpdated_charged_id = 1L ;
+        teacher.update(updateTeacher);
         return teacher.getId();
     }
 
     @Transactional
     public Long deleteTeacher(Long id) {
-        teacherRepository.deleteById(id);
-        return id;
+        Teacher teacher = teacherRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("unvalid id")
+        );
+        teacher.delete();
+        return teacher.getId();
     }
 
+    public Teacher findById(Long updatedTeacherId) {
+        Teacher teacher = teacherRepository.findById(updatedTeacherId).orElseThrow(
+                () -> new IllegalArgumentException("unvalid id")
+        );
+        return teacher;
+    }
 }
