@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import probono.gcc.school.model.dto.TeacherRequestDto;
-import probono.gcc.school.model.enums.Grades;
+import probono.gcc.school.model.dto.TeacherCreateRequestDto;
+import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
 
@@ -67,23 +67,36 @@ public class Teacher {
     @Column(length = 50)
     private String pw_answer; // 추가된 필드
 
-    public Teacher(TeacherRequestDto requestDto) {
-
-        this.login_id=requestDto.getLogin_id();
-        this.login_pw=requestDto.getLogin_pw();
-        this.name=requestDto.getName();
-        this.created_at=LocalDateTime.now();
-        this.status=Status.ACTIVE;
-        //Dummy data
-        this.created_charged_id=1L;
-
+    @PrePersist
+    protected void onCreate() {
+        this.created_at = LocalDateTime.now();
     }
 
+    @PreUpdate
+    protected void onUpdate() {
+        this.updated_at = LocalDateTime.now();
+    }
+
+
+//    public Teacher(TeacherCreateRequestDto requestDto) {
+//
+//        this.login_id=requestDto.getLogin_id();
+//        this.login_pw=requestDto.getLogin_pw();
+//        this.name=requestDto.getName();
+//        this.created_at=LocalDateTime.now();
+//        this.status=Status.ACTIVE;
+//        //Dummy data
+//        this.created_charged_id=1L;
+//
+//    }
+
     // 업데이트 메소드
-    public void update(TeacherRequestDto requestDto) {
+    public void update(TeacherUpdateRequestDto requestDto) {
        this.name=requestDto.getName();
        this.birth=requestDto.getBirth();
-       this.login_pw=requestDto.getLogin_pw();
+       this.login_pw=requestDto.getLogin_new_pw();
+       this.updated_at=requestDto.getUpdated_at();
+       this.updated_charged_id=requestDto.getUpdated_charged_id();
 
     }
 }

@@ -7,13 +7,11 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @Getter
-public class TeacherRequestDto {
+public class TeacherCreateRequestDto {
 
-    private Long id;
-    private String login_id;
     private String name;
+    private String login_id;
     private String login_pw;
-    private LocalDate birth;
-
+    //private String re_type_pw;
 
 }
