@@ -23,20 +23,29 @@ public class TeacherService {
     private ModelMapper modelMapper;
 
     public TeacherCreateResponseDto createTeacher(TeacherCreateRequestDto requestDto) {
-        // TeacherCreateRequestDto를 Teacher 엔티티로 변환
-        Teacher teacher = convertToEntity(requestDto);
+        //requestDto의 login_pw와 re_type_pw가 같은지 확인하고 다르면 예외처리
+        //같으면 re_type_pw field를 빼고 나머지 field로 requestDto 새로 생성해서 객체 만들기
+        if (!requestDto.getLogin_pw().equals(requestDto.getRe_type_pw())) {
+            // Throw an exception if passwords do not match
+            throw new IllegalArgumentException("Password and re-type password do not match");
+        }
+
+        // Create a new TeacherCreateRequestDto without the re_type_pw field
+        TeacherCreateRequestDto sanitizedRequestDto = new TeacherCreateRequestDto();
+        sanitizedRequestDto.setName(requestDto.getName());
+        sanitizedRequestDto.setLogin_id(requestDto.getLogin_id());
+        sanitizedRequestDto.setLogin_pw(requestDto.getLogin_pw());
+
+        // Convert sanitizedRequestDto to Teacher entity
+        Teacher teacher = convertToEntity(sanitizedRequestDto);
+
         //created_charded_id를 Dummy data로 set
         teacher.setCreated_charged_id(1L);
         teacher.setStatus(Status.ACTIVE);
         // Teacher 엔티티를 데이터베이스에 저장
         Teacher teacherCreated=teacherRepository.save(teacher);
         return convertToDto(teacherCreated);
-//        // Teacher 엔티티를 TeacherResponseDto로 변환
-//        TeacherCreateResponseDto teacherResponseDto = modelMapper.map(teacher, TeacherCreateResponseDto.class);
-//        return teacherResponseDto;
-//        Post post = convertToEntity(postDto);
-//        Post postCreated = postService.createPost(post));
-//        return convertToDto(postCreated);
+
     }
 
     private TeacherCreateResponseDto convertToDto(Teacher teacherCreated) {
