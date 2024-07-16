@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import probono.gcc.school.model.dto.TeacherListResponseDto;
+import probono.gcc.school.model.dto.TeacherResponseDto;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
 import probono.gcc.school.model.dto.TeacherCreateResponseDto;
 import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
@@ -23,48 +23,34 @@ public class TeacherService {
     private ModelMapper modelMapper;
 
     public TeacherCreateResponseDto createTeacher(TeacherCreateRequestDto requestDto) {
-        //requestDto의 login_pw와 re_type_pw가 같은지 확인하고 다르면 예외처리
-        //같으면 re_type_pw field를 빼고 나머지 field로 requestDto 새로 생성해서 객체 만들기
-        if (!requestDto.getLogin_pw().equals(requestDto.getRe_type_pw())) {
-            // Throw an exception if passwords do not match
-            throw new IllegalArgumentException("Password and re-type password do not match");
-        }
 
         // Create a new TeacherCreateRequestDto without the re_type_pw field
-        TeacherCreateRequestDto sanitizedRequestDto = new TeacherCreateRequestDto();
-        sanitizedRequestDto.setName(requestDto.getName());
-        sanitizedRequestDto.setLogin_id(requestDto.getLogin_id());
-        sanitizedRequestDto.setLogin_pw(requestDto.getLogin_pw());
+        TeacherCreateRequestDto teacherCreateRequestDto = new TeacherCreateRequestDto();
+        teacherCreateRequestDto.setName(requestDto.getName());
+        teacherCreateRequestDto.setLogin_id(requestDto.getLogin_id());
+        teacherCreateRequestDto.setLogin_pw(requestDto.getLogin_pw());
 
-        // Convert sanitizedRequestDto to Teacher entity
-        Teacher teacher = convertToEntity(sanitizedRequestDto);
+        // Convert teacherCreateRequestDto to Teacher entity
+        Teacher teacher = modelMapper.map(requestDto, Teacher.class);
 
         //created_charded_id를 Dummy data로 set
         teacher.setCreated_charged_id(1L);
         teacher.setStatus(Status.ACTIVE);
+
         // Teacher 엔티티를 데이터베이스에 저장
+        // 여기서 save 메소드 호출 시 @PrePersist 메소드가 호출
         Teacher teacherCreated=teacherRepository.save(teacher);
-        return convertToDto(teacherCreated);
+        return modelMapper.map(teacherCreated, TeacherCreateResponseDto.class);
 
-    }
-
-    private TeacherCreateResponseDto convertToDto(Teacher teacherCreated) {
-        TeacherCreateResponseDto responseDto = modelMapper.map(teacherCreated, TeacherCreateResponseDto.class);
-        return responseDto;
-    }
-
-    private Teacher convertToEntity(TeacherCreateRequestDto requestDto) {
-        Teacher teacher = modelMapper.map(requestDto, Teacher.class);
-        return teacher;
     }
 
     // 모든 Teacher 가져오기
-    public List<TeacherListResponseDto> findAllTeacher() {
+    public List<TeacherResponseDto> findAllTeacher() {
         try {
             List<Teacher> teacherList = teacherRepository.findAll();
             // stream과 mapper를 사용하여 리스트 변환
             return teacherList.stream()
-                    .map(teacher -> modelMapper.map(teacher, TeacherListResponseDto.class))
+                    .map(teacher -> modelMapper.map(teacher, TeacherResponseDto.class))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             // Exception handling
@@ -72,13 +58,11 @@ public class TeacherService {
         }
     }
 
-
-    public TeacherCreateResponseDto findOneTeacher(Long id) {
+    public TeacherResponseDto findOneTeacher(Long id) {
         Teacher teacher = teacherRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("fail to findOneTeaher")
         );
-//        return new TeacherCreateResponseDto(teacher);
-        return null;
+        return modelMapper.map(teacher, TeacherResponseDto.class);
     }
 
     @Transactional
@@ -88,6 +72,9 @@ public class TeacherService {
         );
         //Dummy Data
         //updateTeacher.setUpdated_charged_id = 1L ;
+        //updated_charded_id를 Dummy data로 set
+        //teacher.setCreated_charged_id(1L);
+        teacher.setUpdated_charged_id(1L);
         teacher.update(updateTeacher);
         return teacher.getId();
     }
@@ -107,4 +94,6 @@ public class TeacherService {
         );
         return teacher;
     }
+
+
 }

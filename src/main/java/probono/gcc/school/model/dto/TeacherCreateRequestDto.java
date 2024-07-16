@@ -14,6 +14,5 @@ public class TeacherCreateRequestDto {
     private String name;
     private String login_id;
     private String login_pw;
-    private String re_type_pw;
 
 }

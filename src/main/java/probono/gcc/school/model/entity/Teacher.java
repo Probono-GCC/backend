@@ -78,18 +78,6 @@ public class Teacher {
     }
 
 
-//    public Teacher(TeacherCreateRequestDto requestDto) {
-//
-//        this.login_id=requestDto.getLogin_id();
-//        this.login_pw=requestDto.getLogin_pw();
-//        this.name=requestDto.getName();
-//        this.created_at=LocalDateTime.now();
-//        this.status=Status.ACTIVE;
-//        //Dummy data
-//        this.created_charged_id=1L;
-//
-//    }
-
     // 업데이트 메소드
     public void update(TeacherUpdateRequestDto updateTeacher) {
        this.name=updateTeacher.getName();

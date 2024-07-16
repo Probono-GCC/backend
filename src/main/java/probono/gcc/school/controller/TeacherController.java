@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import probono.gcc.school.model.dto.TeacherListResponseDto;
+import probono.gcc.school.model.dto.TeacherResponseDto;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
 import probono.gcc.school.model.dto.TeacherCreateResponseDto;
 import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
@@ -40,15 +40,16 @@ public class TeacherController {
 
     //선생님 목록 조회
     @GetMapping("/teachers")
-    public ResponseEntity<List<TeacherListResponseDto>>  getAllTeachers() {
-        List<TeacherListResponseDto> teachers = teacherService.findAllTeacher();
+    public ResponseEntity<List<TeacherResponseDto>>  getAllTeachers() {
+        List<TeacherResponseDto> teachers = teacherService.findAllTeacher();
         return ResponseEntity.ok(teachers);
     }
 
     // 선생님 한 명 조회
     @GetMapping("/teachers/{id}")
-    public TeacherCreateResponseDto getOneTeacher(@PathVariable Long id) {
-        return teacherService.findOneTeacher(id);
+    public ResponseEntity<TeacherResponseDto> getOneTeacher(@PathVariable Long id) {
+        TeacherResponseDto teacher=teacherService.findOneTeacher(id);
+        return ResponseEntity.ok(teacher);
     }
 
     // 선생님 수정
@@ -61,11 +62,6 @@ public class TeacherController {
         // 업데이트된 Teacher 객체를 응답 본문으로 반환
         return ResponseEntity.ok(updatedTeacher);
     }
-
-//    private Teacher convertToEntity(TeacherUpdateRequestDto requestDto) {
-//        Teacher teacher = modelMapper.map(requestDto, Teacher.class);
-//        return teacher;
-//    }
 
     // 선생님 삭제
     @DeleteMapping("/teachers/{id}")
