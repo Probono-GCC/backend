@@ -32,10 +32,10 @@ public class TeacherController {
         TeacherCreateResponseDto teacher = teacherService.createTeacher(requestDto);
 
         // 필드 값 로그로 출력
-        logger.info("TeacherResponseDto Details:");
-        logger.info("Login ID: {}", teacher.getLogin_id());
-        logger.info("Name: {}", teacher.getName());
-        logger.info("Login PW: {}", teacher.getLogin_pw());
+//        logger.info("TeacherResponseDto Details:");
+//        logger.info("Login ID: {}", teacher.getLogin_id());
+//        logger.info("Name: {}", teacher.getName());
+//        logger.info("Login PW: {}", teacher.getLogin_pw());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
 
@@ -77,9 +77,26 @@ public class TeacherController {
 
     // 선생님 삭제
     @DeleteMapping("/teachers/{id}")
-    public Long deleteTeacher(@PathVariable Long id) {
-        return  teacherService.deleteTeacher(id);
+    public ResponseEntity<?> deleteTeacher(@PathVariable Long id) {
+        try {
+            // 서비스에서 삭제 수행
+            Long deletedTeacherId = teacherService.deleteTeacher(id);
+            // 삭제된 Teacher를 조회 시, 존재하지 않을 경우 예외 처리
+            Teacher deletedTeacher = teacherService.findById(deletedTeacherId);
+            // Teacher 엔티티를 DTO로 변환
+            TeacherResponseDto responseDto = modelMapper.map(deletedTeacher, TeacherResponseDto.class);
+            // 성공적인 삭제 후 응답 반환
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException ex) {
+            // 존재하지 않는 ID로 인한 예외 처리
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception ex) {
+            // 다른 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+        }
     }
+
+
 
 
 
