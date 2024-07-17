@@ -2,27 +2,32 @@ package probono.gcc.school.model.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import probono.gcc.school.model.entity.Teacher;
+import lombok.Setter;
+import probono.gcc.school.model.enums.Sex;
+import probono.gcc.school.model.enums.Status;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
+@Setter
 public class TeacherResponseDto {
 
+    private Long id;
     private String login_id;
+    private String login_pw;
     private String name;
-    private LocalDateTime createdAt;
+    private Sex sex;
+    private String phone_num;
+    private Status status;
+    private LocalDateTime created_at;
+    private LocalDateTime updated_at;
     private Long created_charged_id;
-    //나머지 column들도 처리
+    private Long updated_charged_id;
+    private LocalDate birth;
+    private String pw_question;
+    private String pw_answer;
 
-    //Teacher의 정보를 받아 TeacherResponseDto를 생성
-    public TeacherResponseDto(Teacher teacher){
-        this.login_id=teacher.getLogin_id();
-        this.name=teacher.getName();
-        this.createdAt=teacher.getCreated_at();
-        this.created_charged_id=teacher.getCreated_charged_id();
 
-    }
 }
