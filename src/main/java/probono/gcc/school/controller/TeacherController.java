@@ -1,5 +1,9 @@
 package probono.gcc.school.controller;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -58,7 +62,7 @@ public class TeacherController {
 
     // 선생님 수정
     @PutMapping("/teachers/{id}")
-    public ResponseEntity<?> updateTeacher(@PathVariable Long id, @RequestBody TeacherUpdateRequestDto requestDto) {
+    public ResponseEntity<TeacherResponseDto> updateTeacher(@PathVariable Long id, @RequestBody TeacherUpdateRequestDto requestDto) {
         try {
             // 서비스에서 업데이트 수행
             Long updatedTeacherId = teacherService.update(id, requestDto);
@@ -70,14 +74,18 @@ public class TeacherController {
             return ResponseEntity.ok(responseDto);
         } catch (ResponseStatusException ex) {
             // 예외 처리: ResponseStatusException이 발생할 경우, 클라이언트에게 에러 응답을 반환
-            return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
-
+            return ResponseEntity.status(ex.getStatusCode()).body(null);
         }
     }
 
     // 선생님 삭제
     @DeleteMapping("/teachers/{id}")
-    public ResponseEntity<?> deleteTeacher(@PathVariable Long id) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Teacher deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Teacher not found", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
+    })
+    public ResponseEntity<TeacherResponseDto> deleteTeacher(@PathVariable Long id) {
         try {
             // 서비스에서 삭제 수행
             Long deletedTeacherId = teacherService.deleteTeacher(id);
@@ -89,17 +97,12 @@ public class TeacherController {
             return ResponseEntity.ok(responseDto);
         } catch (IllegalArgumentException ex) {
             // 존재하지 않는 ID로 인한 예외 처리
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception ex) {
             // 다른 예외 처리
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
-
-
-
-
 
 
 }

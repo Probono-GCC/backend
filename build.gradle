@@ -24,6 +24,8 @@ dependencies {
 	implementation 'org.modelmapper:modelmapper:3.0.0'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	//swagger: spring doc 의존성 추가
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0'
 }
 
 tasks.named('bootBuildImage') {
