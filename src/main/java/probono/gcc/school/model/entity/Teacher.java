@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import probono.gcc.school.model.enums.Grades;
+import probono.gcc.school.model.dto.TeacherCreateRequestDto;
+import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
 
@@ -56,4 +57,27 @@ public class Teacher {
 
     @Column
     private Long updated_charged_id;
+
+    @Column
+    private LocalDate birth; // 추가된 필드
+
+    @Column(length = 50)
+    private String pw_question; // 추가된 필드
+
+    @Column(length = 50)
+    private String pw_answer; // 추가된 필드
+
+    @PrePersist
+    protected void onCreate() {
+        this.created_at = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updated_at = LocalDateTime.now();
+    }
+
+
+
+
 }
