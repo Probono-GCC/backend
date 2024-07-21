@@ -15,10 +15,18 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
     permissions:
       contents: read
+
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+          MYSQL_DATABASE: probono_db
 
     steps:
     - uses: actions/checkout@v4
@@ -29,6 +37,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    # - uses: mirromutth/mysql-action@v1.1
+    #   with:
+    #     host port: 3306 # Optional, default value is 3306. The port of host
+    #     container port: 3306 # Optional, default value is 3306. The port of containe
+    #     mysql database: 'probono_db' # Optional, default value is "test". The specified database which will be create
+    #     mysql root password: ${{ secrets.ROOT_PASSWORD }} # Required if "mysql user" is empty, default is empty. The root superuser password
     # gradlew 실행 관한 부여(windows에서 작업한 소스를 push하면 기본권한이 644이므로 필요)
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew # run 키워드는 job에게 runner위에서 실행하도록 명령
