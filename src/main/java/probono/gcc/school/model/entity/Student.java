@@ -77,6 +77,9 @@ public class Student {
     @Column
     private Long updated_charged_id;
 
+    @Column(length = 50)
+    private String pw_answer; // 추가된 필드
+
     public void promoteToNextGrade() {
         if (grade != null) {
             this.grade = this.grade.getNextGrade();
