@@ -62,9 +62,6 @@ public class Teacher {
     private LocalDate birth; // 추가된 필드
 
     @Column(length = 50)
-    private String pw_question; // 추가된 필드
-
-    @Column(length = 50)
     private String pw_answer; // 추가된 필드
 
     @PrePersist
@@ -76,8 +73,6 @@ public class Teacher {
     protected void onUpdate() {
         this.updated_at = LocalDateTime.now();
     }
-
-
 
 
 }
