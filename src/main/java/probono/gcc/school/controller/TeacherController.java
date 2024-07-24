@@ -15,14 +15,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import probono.gcc.school.model.dto.TeacherResponseDto;
-import probono.gcc.school.model.dto.TeacherCreateRequestDto;
-import probono.gcc.school.model.dto.TeacherCreateResponseDto;
-import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
+import probono.gcc.school.model.dto.*;
 import probono.gcc.school.model.entity.Teacher;
 import probono.gcc.school.service.TeacherService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -33,6 +31,12 @@ public class TeacherController {
     //선생님 계정 생성
     @PostMapping("/teachers")
     public ResponseEntity<TeacherCreateResponseDto>  createTeacher(@RequestBody TeacherCreateRequestDto requestDto){
+        // ID 중복 체크 로직 추가
+        boolean isDuplicate = teacherService.isLoginIdDuplicate(requestDto.getLoginId());
+        if (isDuplicate) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // 409 Conflict
+        }
+
         TeacherCreateResponseDto teacher = teacherService.createTeacher(requestDto);
 
         // 필드 값 로그로 출력
@@ -42,6 +46,9 @@ public class TeacherController {
 //        logger.info("Login PW: {}", teacher.getLogin_pw());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
+
+
+
 
     }
 
@@ -102,6 +109,14 @@ public class TeacherController {
             // 다른 예외 처리
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    // ID 중복 체크 메소드
+    // 중복이면 return true , 중복이 아니면 return false
+    @GetMapping("teachers/check-id")
+    public ResponseEntity<Boolean> checkIdDuplicate(@RequestBody TeacherCheckIdDTO teacherCheckIdDTO) {
+        boolean isDuplicate = teacherService.isLoginIdDuplicate(teacherCheckIdDTO.getLoginId());
+        return ResponseEntity.ok(isDuplicate);
     }
 
 

@@ -24,11 +24,11 @@ public class Teacher {
 
     @NotNull
     @Column(length = 20)
-    private String login_id;
+    private String loginId;
 
     @NotNull
     @Column(length = 20)
-    private String login_pw;
+    private String loginPw;
 
     @NotNull
     @Column(length = 40)
