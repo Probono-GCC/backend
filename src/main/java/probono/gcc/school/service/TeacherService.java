@@ -26,23 +26,32 @@ public class TeacherService {
     private ModelMapper modelMapper;
 
     public TeacherCreateResponseDto createTeacher(TeacherCreateRequestDto requestDto) {
+//
+//        // Convert teacherCreateRequestDto to Teacher entity
+//        Teacher teacher = modelMapper.map(requestDto, Teacher.class);
+//
+//        //created_charded_id를 Dummy data로 set
+//        teacher.setCreated_charged_id(1L);
+//        teacher.setStatus(Status.ACTIVE);
+//
+//        // Teacher 엔티티를 데이터베이스에 저장
+//        // 여기서 save 메소드 호출 시 @PrePersist 메소드가 호출
+//        Teacher teacherCreated=teacherRepository.save(teacher);
+//        return modelMapper.map(teacherCreated, TeacherCreateResponseDto.class);
 
-        // Create a new TeacherCreateRequestDto without the re_type_pw field
-        TeacherCreateRequestDto teacherCreateRequestDto = new TeacherCreateRequestDto();
-        teacherCreateRequestDto.setName(requestDto.getName());
-        teacherCreateRequestDto.setLogin_id(requestDto.getLogin_id());
-        teacherCreateRequestDto.setLogin_pw(requestDto.getLogin_pw());
-
-        // Convert teacherCreateRequestDto to Teacher entity
-        Teacher teacher = modelMapper.map(requestDto, Teacher.class);
-
-        //created_charded_id를 Dummy data로 set
-        teacher.setCreated_charged_id(1L);
+        // 수동으로 Teacher 엔티티를 생성하고 값을 설정
+        Teacher teacher = new Teacher();
+        teacher.setName(requestDto.getName());
+        teacher.setLoginId(requestDto.getLoginId());
+        teacher.setLoginPw(requestDto.getLoginPw());
+        teacher.setCreated_charged_id(1L); // Dummy data 설정
         teacher.setStatus(Status.ACTIVE);
 
         // Teacher 엔티티를 데이터베이스에 저장
         // 여기서 save 메소드 호출 시 @PrePersist 메소드가 호출
-        Teacher teacherCreated=teacherRepository.save(teacher);
+        Teacher teacherCreated = teacherRepository.save(teacher);
+
+        // 저장된 Teacher 엔티티를 TeacherCreateResponseDto로 매핑
         return modelMapper.map(teacherCreated, TeacherCreateResponseDto.class);
 
     }
@@ -81,8 +90,8 @@ public class TeacherService {
         teacher.setPhone_num(requestDto.getPhone_num());
 
         //requestDto의 previous_pw와 teacher.getLogin_pw()가 같을시에만 로그인 비밀번호를 업데이트
-        if (requestDto.getPrevious_pw() != null && requestDto.getPrevious_pw().equals(teacher.getLogin_pw())) {
-            teacher.setLogin_pw(requestDto.getNew_pw());
+        if (requestDto.getPrevious_pw() != null && requestDto.getPrevious_pw().equals(teacher.getLoginPw())) {
+            teacher.setLoginPw(requestDto.getNew_pw());
         }else if (requestDto.getPrevious_pw() != null) {
             // 비밀번호가 일치하지 않을 경우 예외를 던짐
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Previous password is incorrect.");
@@ -116,5 +125,10 @@ public class TeacherService {
         return teacher;
     }
 
+
+    // ID 중복 체크 메소드
+    public boolean isLoginIdDuplicate(String loginId) {
+        return teacherRepository.existsByLoginId(loginId);
+    }
 
 }
