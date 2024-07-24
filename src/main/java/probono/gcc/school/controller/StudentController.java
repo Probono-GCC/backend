@@ -13,7 +13,7 @@ import probono.gcc.school.service.StudentService;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/students")
 public class StudentController {
     @Autowired
     private StudentService studentService;
@@ -21,13 +21,13 @@ public class StudentController {
     @Autowired
     private StudentRepository studentRepository;
 
-    @PostMapping("/new-student")
+    @PostMapping("")
     public ResponseEntity<StudentResponseDto> createStudent(@RequestBody StudentCreateRequestDto studentCreateRequestDto) {
         StudentResponseDto createdStudent = studentService.createStudent(studentCreateRequestDto);
         return ResponseEntity.ok(createdStudent);
     }
 
-    @GetMapping("/StudentResponseDto{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<StudentResponseDto> getStudentById(@PathVariable Long id) {
         Optional<StudentResponseDto> student = studentService.getStudentById(id);
         return student.map(ResponseEntity::ok)
