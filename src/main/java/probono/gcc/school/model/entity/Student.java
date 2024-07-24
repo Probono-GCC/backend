@@ -23,11 +23,11 @@ public class Student {
 
     @NotNull
     @Column(length = 20)
-    private String login_id;
+    private String loginId;
 
     @NotNull
     @Column(length = 20)
-    private String login_pw;
+    private String loginPw;
 
     @NotNull
     @Column(length = 40)
@@ -35,7 +35,7 @@ public class Student {
 
     @NotNull
     @Column
-    private Integer serial_number;
+    private Integer serialNumber;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -48,16 +48,16 @@ public class Student {
     private Sex sex;
 
     @Column(length = 20)
-    private String phone_num;
+    private String phoneNum;
 
     @Column(length = 20)
-    private String father_phone_num;
+    private String fatherPhoneNum;
 
     @Column(length = 20)
-    private String mother_phone_num;
+    private String motherPhoneNum;
 
     @Column(length = 20)
-    private String guardians_phone_num;
+    private String guardiansPhoneNum;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -65,20 +65,20 @@ public class Student {
 
     @NotNull
     @Column
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     @NotNull
     @Column
-    private Long created_charged_id;
+    private Long createdChargedId;
 
     @Column
-    private Long updated_charged_id;
+    private Long updatedChargedId;
 
     @Column(length = 50)
-    private String pw_answer; // 추가된 필드
+    private String pwAnswer; // 추가된 필드
 
     public void promoteToNextGrade() {
         if (grade != null) {

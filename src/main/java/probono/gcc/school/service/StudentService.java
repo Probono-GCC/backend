@@ -22,16 +22,16 @@ public class StudentService {
 
     public StudentResponseDto createStudent(StudentCreateRequestDto studentCreateRequestDto){
         Student student = new Student();
-        student.setLogin_id(studentCreateRequestDto.getLogin_id());
-        student.setLogin_pw(studentCreateRequestDto.getLogin_pw());
+        student.setLoginId(studentCreateRequestDto.getLogin_id());
+        student.setLoginPw(studentCreateRequestDto.getLogin_pw());
         student.setName(studentCreateRequestDto.getName());
-        student.setSerial_number(studentCreateRequestDto.getSerial_number());
+        student.setSerialNumber(studentCreateRequestDto.getSerial_number());
         student.setGrade(studentCreateRequestDto.getGrade());
         student.setStatus(Status.ACTIVE);
-        student.setCreated_at(LocalDateTime.now());
-        student.setUpdated_at(null);
-        student.setCreated_charged_id(-1L);
-        student.setUpdated_charged_id(-1L);
+        student.setCreatedAt(LocalDateTime.now());
+        student.setUpdatedAt(null);
+        student.setCreatedChargedId(-1L);
+        student.setUpdatedChargedId(-1L);
 
         Student savedStudent = studentRepository.save(student);
         return mapToResponseDto(savedStudent);
@@ -45,16 +45,16 @@ public class StudentService {
 
         // Update fields from request DTO
         existingStudent.setName(studentUpdateRequestDto.getName());
-        existingStudent.setSerial_number((studentUpdateRequestDto.getSerial_number()));
+        existingStudent.setSerialNumber((studentUpdateRequestDto.getSerial_number()));
         existingStudent.setGrade(studentUpdateRequestDto.getGrade());
         existingStudent.setBirth(studentUpdateRequestDto.getBirth());
         existingStudent.setSex(studentUpdateRequestDto.getSex());
-        existingStudent.setPhone_num(studentUpdateRequestDto.getPhone_num());
-        existingStudent.setFather_phone_num(studentUpdateRequestDto.getFather_phone_num());
-        existingStudent.setMother_phone_num(studentUpdateRequestDto.getMother_phone_num());
-        existingStudent.setGuardians_phone_num(studentUpdateRequestDto.getGuardians_phone_num());
-        existingStudent.setUpdated_at(LocalDateTime.now());
-        existingStudent.setUpdated_charged_id(-1L);
+        existingStudent.setPhoneNum(studentUpdateRequestDto.getPhone_num());
+        existingStudent.setFatherPhoneNum(studentUpdateRequestDto.getFather_phone_num());
+        existingStudent.setMotherPhoneNum(studentUpdateRequestDto.getMother_phone_num());
+        existingStudent.setGuardiansPhoneNum(studentUpdateRequestDto.getGuardians_phone_num());
+        existingStudent.setUpdatedAt(LocalDateTime.now());
+        existingStudent.setUpdatedChargedId(-1L);
 
         // Save the updated student
         Student savedStudent = studentRepository.save(existingStudent);
@@ -65,8 +65,8 @@ public class StudentService {
 
         // Update fields from request DT
         existingStudent.setStatus(Status.INACTIVE);
-        existingStudent.setUpdated_at(LocalDateTime.now());
-        existingStudent.setUpdated_charged_id(-1L);
+        existingStudent.setUpdatedAt(LocalDateTime.now());
+        existingStudent.setUpdatedChargedId(-1L);
 
         // Save the updated student
         Student savedStudent = studentRepository.save(existingStudent);
@@ -77,21 +77,21 @@ public class StudentService {
     private StudentResponseDto mapToResponseDto(Student student) {
         StudentResponseDto responseDto = new StudentResponseDto();
         responseDto.setId(student.getId());
-        responseDto.setLogin_id(student.getLogin_id());
+        responseDto.setLogin_id(student.getLoginId());
         responseDto.setName(student.getName());
-        responseDto.setSerial_number(student.getSerial_number());
+        responseDto.setSerial_number(student.getSerialNumber());
         responseDto.setGrade(student.getGrade());
         responseDto.setBirth(student.getBirth());
         responseDto.setSex(student.getSex());
-        responseDto.setPhone_num(student.getPhone_num());
-        responseDto.setFather_phone_num(student.getFather_phone_num());
-        responseDto.setMother_phone_num(student.getMother_phone_num());
-        responseDto.setGuardians_phone_num(student.getGuardians_phone_num());
+        responseDto.setPhone_num(student.getPhoneNum());
+        responseDto.setFather_phone_num(student.getFatherPhoneNum());
+        responseDto.setMother_phone_num(student.getMotherPhoneNum());
+        responseDto.setGuardians_phone_num(student.getGuardiansPhoneNum());
         responseDto.setStatus(student.getStatus());
-        responseDto.setCreated_at(student.getCreated_at());
-        responseDto.setUpdated_at(student.getUpdated_at());
-        responseDto.setCreated_charged_id(student.getCreated_charged_id());
-        responseDto.setUpdated_charged_id(student.getUpdated_charged_id());
+        responseDto.setCreated_at(student.getCreatedAt());
+        responseDto.setUpdated_at(student.getUpdatedAt());
+        responseDto.setCreated_charged_id(student.getCreatedChargedId());
+        responseDto.setUpdated_charged_id(student.getUpdatedChargedId());
         return responseDto;
     }
 }
