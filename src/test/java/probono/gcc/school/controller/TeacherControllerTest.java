@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
+import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
 import probono.gcc.school.model.entity.Teacher;
 import probono.gcc.school.repository.TeacherRepository;
 import probono.gcc.school.service.TeacherService;
@@ -16,6 +17,7 @@ import probono.gcc.school.service.TeacherService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,7 +65,7 @@ public class TeacherControllerTest {
     }
 
     @Test
-    @DisplayName("/teachers 요청 시 모든 선생님 목록을 조회한다.")
+    @DisplayName("모든 선생님 목록을 조회 TEST.")
     void getAllTeachers() throws Exception {
         // given
         TeacherCreateRequestDto requestDto1 = TeacherCreateRequestDto.builder()
@@ -90,4 +92,36 @@ public class TeacherControllerTest {
         // then
         assertThat(teacherRepository.count()).isEqualTo(2L);
     }
+
+    @Test
+    @DisplayName("특정 선생님 정보를 수정 TEST")
+    void updateTeacher() throws Exception {
+        // given
+        TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
+                .name("testName")
+                .loginId("testId")
+                .loginPw("testPw")
+                .build();
+
+        Long id = teacherService.createTeacher(requestDto).getId();
+
+        TeacherUpdateRequestDto updateRequestDto = TeacherUpdateRequestDto.builder()
+                .name("updatedName")
+                .previous_pw("testPw")
+                .new_pw("updatedPw")
+                .build();
+        String json = objectMapper.writeValueAsString(updateRequestDto);
+
+        // when
+        mockMvc.perform(put("/teachers/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // then
+        assertThat(teacherRepository.findById(id).get().getName()).isEqualTo("updatedName");
+    }
+
+
 }
