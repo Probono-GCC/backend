@@ -8,9 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TeacherCreateResponseDto {
-
+    private Long id;
     private String loginId;
     private String name;
     private String loginPw;
+
     //private String re_type_pw;
 }
