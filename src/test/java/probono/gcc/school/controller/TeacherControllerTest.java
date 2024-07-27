@@ -48,8 +48,6 @@ public class TeacherControllerTest {
 
         String json = objectMapper.writeValueAsString(requestDto);
 
-
-
         //when
         mockMvc.perform(post("/teachers")
                         .contentType(MediaType.APPLICATION_JSON)
