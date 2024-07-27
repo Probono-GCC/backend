@@ -1,6 +1,8 @@
 package probono.gcc.school.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,18 @@ public class TeacherControllerTest {
 
     @Autowired
     private TeacherService teacherService;
+
+    @BeforeEach
+    void setUp() {
+        // 데이터베이스 초기화 또는 필요한 데이터 설정
+        //teacherRepository.deleteAll(); // 모든 테이블의 모든 데이터 삭제
+    }
+
+    @AfterEach
+    void tearDown() {
+        // 데이터베이스 정리
+        teacherRepository.deleteAll(); // 모든 테이블의 모든 데이터 삭제
+    }
 
     @Test
     @DisplayName("teacher 생성 TEST")
