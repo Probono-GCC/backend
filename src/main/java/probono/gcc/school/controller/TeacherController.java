@@ -113,7 +113,7 @@ public class TeacherController {
 
     // ID 중복 체크 메소드
     // 중복이면 return true , 중복이 아니면 return false
-    @GetMapping("teachers/check-id")
+    @PostMapping("teachers/check-id")
     public ResponseEntity<Boolean> checkIdDuplicate(@RequestBody TeacherCheckIdDTO teacherCheckIdDTO) {
         boolean isDuplicate = teacherService.isLoginIdDuplicate(teacherCheckIdDTO.getLoginId());
         return ResponseEntity.ok(isDuplicate);

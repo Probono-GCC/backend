@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import probono.gcc.school.model.dto.TeacherCheckIdDTO;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
 import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
 import probono.gcc.school.model.entity.Teacher;
@@ -149,34 +150,34 @@ public class TeacherControllerTest {
     }
 
 
-//    @Test
-//    @DisplayName("/teachers/check-id 요청 시 ID 중복 여부를 체크한다.")
-//    void checkIdDuplicate() throws Exception {
-//        // given
-//        TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
-//                .name("testName")
-//                .loginId("testId")
-//                .loginPw("testPw")
-//                .build();
-//
-//        teacherService.createTeacher(requestDto);
-//
-//        TeacherCheckIdDTO checkIdDTO = TeacherCheckIdDTO.builder()
-//                .loginId("testId")
-//                .build();
-//        String json = objectMapper.writeValueAsString(checkIdDTO);
-//
-//        // when
-//        mockMvc.perform(post("/teachers/check-id")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(json))
-//                .andExpect(status().isOk())
-//                .andDo(print());
-//
-//        // then
-//        boolean isDuplicate = teacherRepository.existsByLoginId("testId");
-//        assertThat(isDuplicate).isTrue();
-//    }
+    @Test
+    @DisplayName("ID 중복 여부를 체크 TEST")
+    void checkIdDuplicate() throws Exception {
+        // given
+        TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
+                .name("testName")
+                .loginId("testId")
+                .loginPw("testPw")
+                .build();
+
+        teacherService.createTeacher(requestDto);
+
+        TeacherCheckIdDTO checkIdDTO = TeacherCheckIdDTO.builder()
+                .loginId("testId")
+                .build();
+        String json = objectMapper.writeValueAsString(checkIdDTO);
+
+        // when
+        mockMvc.perform(post("/teachers/check-id")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // then
+        boolean isDuplicate = teacherRepository.existsByLoginId("testId");
+        assertThat(isDuplicate).isTrue();
+    }
 
 
 }
