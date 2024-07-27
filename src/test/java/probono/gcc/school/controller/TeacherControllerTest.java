@@ -11,13 +11,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
 import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
 import probono.gcc.school.model.entity.Teacher;
+import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.TeacherRepository;
 import probono.gcc.school.service.TeacherService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -47,6 +46,8 @@ public class TeacherControllerTest {
                 .build();
 
         String json = objectMapper.writeValueAsString(requestDto);
+
+
 
         //when
         mockMvc.perform(post("/teachers")
@@ -122,6 +123,60 @@ public class TeacherControllerTest {
         // then
         assertThat(teacherRepository.findById(id).get().getName()).isEqualTo("updatedName");
     }
+
+    @Test
+    @DisplayName("특정 선생님을 삭제 TEST")
+    void deleteTeacher() throws Exception {
+        // given
+        TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
+                .name("testName")
+                .loginId("testId")
+                .loginPw("testPw")
+                .build();
+
+        Long id = teacherService.createTeacher(requestDto).getId();
+
+        // when
+        mockMvc.perform(delete("/teachers/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // then
+        Teacher deletedTeacher = teacherRepository.findById(id).orElse(null);
+        assertThat(deletedTeacher).isNotNull();
+        assertThat(deletedTeacher.getStatus()).isEqualTo(Status.INACTIVE);
+    }
+
+
+//    @Test
+//    @DisplayName("/teachers/check-id 요청 시 ID 중복 여부를 체크한다.")
+//    void checkIdDuplicate() throws Exception {
+//        // given
+//        TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
+//                .name("testName")
+//                .loginId("testId")
+//                .loginPw("testPw")
+//                .build();
+//
+//        teacherService.createTeacher(requestDto);
+//
+//        TeacherCheckIdDTO checkIdDTO = TeacherCheckIdDTO.builder()
+//                .loginId("testId")
+//                .build();
+//        String json = objectMapper.writeValueAsString(checkIdDTO);
+//
+//        // when
+//        mockMvc.perform(post("/teachers/check-id")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(json))
+//                .andExpect(status().isOk())
+//                .andDo(print());
+//
+//        // then
+//        boolean isDuplicate = teacherRepository.existsByLoginId("testId");
+//        assertThat(isDuplicate).isTrue();
+//    }
 
 
 }
