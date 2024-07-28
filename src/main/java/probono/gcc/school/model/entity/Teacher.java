@@ -3,6 +3,7 @@ package probono.gcc.school.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Teacher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)//mysql의 auto increment

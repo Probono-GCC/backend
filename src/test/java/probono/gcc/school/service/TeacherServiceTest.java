@@ -1,4 +1,4 @@
-package probono.gcc.school.controller;
+package probono.gcc.school.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -8,24 +8,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import probono.gcc.school.model.dto.TeacherCheckIdDTO;
 import probono.gcc.school.model.dto.TeacherCreateRequestDto;
+import probono.gcc.school.model.dto.TeacherCreateResponseDto;
+import probono.gcc.school.model.dto.TeacherResponseDto;
 import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
 import probono.gcc.school.model.entity.Teacher;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.TeacherRepository;
-import probono.gcc.school.service.TeacherService;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TeacherControllerTest {
+public class TeacherServiceTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -41,7 +39,7 @@ public class TeacherControllerTest {
     @BeforeEach
     void setUp() {
         // 데이터베이스 초기화 또는 필요한 데이터 설정
-        //teacherRepository.deleteAll(); // 모든 테이블의 모든 데이터 삭제
+        teacherRepository.deleteAll(); // 모든 테이블의 모든 데이터 삭제
     }
 
     @AfterEach
@@ -51,23 +49,17 @@ public class TeacherControllerTest {
     }
 
     @Test
-    @DisplayName("Controller : teacher 생성 TEST")
-    void createTeacher() throws Exception{
-        //given
+    @DisplayName("Service : teacher 생성 TEST")
+    void createTeacher() {
+        // given
         TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
                 .loginId("testId")
                 .name("testName")
                 .loginPw("testPw")
                 .build();
 
-        String json = objectMapper.writeValueAsString(requestDto);
-
-        //when
-        mockMvc.perform(post("/teachers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andDo(print());
+        // when
+        TeacherCreateResponseDto responseDto = teacherService.createTeacher(requestDto);
 
         // then
         assertThat(teacherRepository.count()).isEqualTo(1L);
@@ -75,12 +67,11 @@ public class TeacherControllerTest {
         assertThat(savedTeacher.getLoginId()).isEqualTo("testId");
         assertThat(savedTeacher.getName()).isEqualTo("testName");
         assertThat(savedTeacher.getLoginPw()).isEqualTo("testPw");
-
     }
 
     @Test
-    @DisplayName("Controller : 모든 선생님 목록을 조회 TEST.")
-    void getAllTeachers() throws Exception {
+    @DisplayName("Service : 모든 선생님 목록을 조회 TEST")
+    void findAllTeacher() {
         // given
         TeacherCreateRequestDto requestDto1 = TeacherCreateRequestDto.builder()
                 .name("testName1")
@@ -98,18 +89,35 @@ public class TeacherControllerTest {
         teacherService.createTeacher(requestDto2);
 
         // when
-        mockMvc.perform(get("/teachers")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+        List<TeacherResponseDto> teachers = teacherService.findAllTeacher();
 
         // then
-        assertThat(teacherRepository.count()).isEqualTo(2L);
+        assertThat(teachers.size()).isEqualTo(2);
     }
 
     @Test
-    @DisplayName("Controller : 특정 선생님 정보를 수정 TEST")
-    void updateTeacher() throws Exception {
+    @DisplayName("Service : 특정 선생님 정보를 조회 TEST")
+    void findOneTeacher() {
+        // given
+        TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
+                .name("testName")
+                .loginId("testId")
+                .loginPw("testPw")
+                .build();
+
+        Long id = teacherService.createTeacher(requestDto).getId();
+
+        // when
+        TeacherResponseDto teacher = teacherService.findOneTeacher(id);
+
+        // then
+        assertThat(teacher).isNotNull();
+        assertThat(teacher.getName()).isEqualTo("testName");
+    }
+
+    @Test
+    @DisplayName("Service : 특정 선생님 정보를 수정 TEST")
+    void updateTeacher() {
         // given
         TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
                 .name("testName")
@@ -124,22 +132,19 @@ public class TeacherControllerTest {
                 .previous_pw("testPw")
                 .new_pw("updatedPw")
                 .build();
-        String json = objectMapper.writeValueAsString(updateRequestDto);
 
         // when
-        mockMvc.perform(put("/teachers/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk())
-                .andDo(print());
+        Long updatedId = teacherService.update(id, updateRequestDto);
 
         // then
-        assertThat(teacherRepository.findById(id).get().getName()).isEqualTo("updatedName");
+        Teacher updatedTeacher = teacherRepository.findById(updatedId).get();
+        assertThat(updatedTeacher.getName()).isEqualTo("updatedName");
+        assertThat(updatedTeacher.getLoginPw()).isEqualTo("updatedPw");
     }
 
     @Test
-    @DisplayName("Controller : 특정 선생님을 삭제 TEST")
-    void deleteTeacher() throws Exception {
+    @DisplayName("Service : 특정 선생님을 삭제 TEST")
+    void deleteTeacher() {
         // given
         TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
                 .name("testName")
@@ -150,21 +155,17 @@ public class TeacherControllerTest {
         Long id = teacherService.createTeacher(requestDto).getId();
 
         // when
-        mockMvc.perform(delete("/teachers/" + id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+        Long deletedId = teacherService.deleteTeacher(id);
 
         // then
-        Teacher deletedTeacher = teacherRepository.findById(id).orElse(null);
+        Teacher deletedTeacher = teacherRepository.findById(deletedId).orElse(null);
         assertThat(deletedTeacher).isNotNull();
         assertThat(deletedTeacher.getStatus()).isEqualTo(Status.INACTIVE);
     }
 
-
     @Test
-    @DisplayName("ID 중복 여부를 체크 TEST")
-    void checkIdDuplicate() throws Exception {
+    @DisplayName("Service : ID 중복 여부를 체크 TEST")
+    void checkIdDuplicate() {
         // given
         TeacherCreateRequestDto requestDto = TeacherCreateRequestDto.builder()
                 .name("testName")
@@ -174,22 +175,11 @@ public class TeacherControllerTest {
 
         teacherService.createTeacher(requestDto);
 
-        TeacherCheckIdDTO checkIdDTO = TeacherCheckIdDTO.builder()
-                .loginId("testId")
-                .build();
-        String json = objectMapper.writeValueAsString(checkIdDTO);
-
         // when
-        mockMvc.perform(post("/teachers/check-id")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk())
-                .andDo(print());
+        boolean isDuplicate = teacherService.isLoginIdDuplicate("testId");
 
         // then
-        boolean isDuplicate = teacherRepository.existsByLoginId("testId");
         assertThat(isDuplicate).isTrue();
     }
-
 
 }
