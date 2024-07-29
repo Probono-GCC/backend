@@ -5,4 +5,8 @@ import probono.gcc.school.model.entity.Student;
 import probono.gcc.school.model.entity.Teacher;
 
 public interface StudentRepository extends JpaRepository<Student, Long> {
+
+  boolean existsByLoginId(String loginId);
+
+  boolean existsBySerialNumber(Integer serialNumber);
 }
