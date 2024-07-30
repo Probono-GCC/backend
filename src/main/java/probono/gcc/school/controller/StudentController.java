@@ -70,8 +70,23 @@ public class StudentController {
       return ResponseEntity.notFound().build();
     }
     Student existingStudent = optionalStudent.get();
-    StudentResponseDto updatedStudent = studentService.updateStudent(studentUpdateRequestDto,
-        existingStudent);
+
+    existingStudent.setName(studentUpdateRequestDto.getName());
+    existingStudent.setSerialNumber((studentUpdateRequestDto.getSerialNumber()));
+    existingStudent.setGrade(studentUpdateRequestDto.getGrade());
+    existingStudent.setBirth(studentUpdateRequestDto.getBirth());
+    existingStudent.setSex(studentUpdateRequestDto.getSex());
+    existingStudent.setPhoneNum(studentUpdateRequestDto.getPhoneNum());
+    existingStudent.setFatherPhoneNum(studentUpdateRequestDto.getFatherPhoneNum());
+    existingStudent.setMotherPhoneNum(studentUpdateRequestDto.getMotherPhoneNum());
+    existingStudent.setGuardiansPhoneNum(studentUpdateRequestDto.getGuardiansPhoneNum());
+
+    Logs history = existingStudent.getLogs();
+    history.updateLogs(Status.ACTIVE, history.getCreatedAt(), history.getCreatedChargedId(),
+        LocalDateTime.now(), -1L);
+    existingStudent.setLogs(history);
+
+    StudentResponseDto updatedStudent = studentService.updateStudent(existingStudent);
     return ResponseEntity.ok(updatedStudent);
   }
 

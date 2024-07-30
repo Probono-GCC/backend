@@ -20,7 +20,7 @@ public class StudentService {
 
   public StudentResponseDto createStudent(Student student) {
     validateDuplicateStudentLoginId(student); //아이디 중복 검증
-    validateDuplicateStudentSN(student); //아이디 중복 검증
+    validateDuplicateStudentSN(student); //serialNumber 중복 검증
 
     Student savedStudent = studentRepository.save(student);
     return mapToResponseDto(savedStudent);
@@ -39,36 +39,27 @@ public class StudentService {
   }
 
   public Optional<StudentResponseDto> getStudentById(Long id) {
-    return studentRepository.findById(id).map(this::mapToResponseDto);
+    return studentRepository.findById(id)
+        .filter(
+            student -> !student.getLogs().getStatus().equals(Status.INACTIVE))  // INACTIVE 상태 필터링
+        .map(this::mapToResponseDto);
   }
 
-  public StudentResponseDto updateStudent(StudentUpdateRequestDto studentUpdateRequestDto,
-      Student existingStudent) {
-    Logs logs = new Logs(Status.ACTIVE, LocalDateTime.now(), -1L);
-
-    // Update fields from request DTO
-    existingStudent.setName(studentUpdateRequestDto.getName());
-    existingStudent.setSerialNumber((studentUpdateRequestDto.getSerial_number()));
-    existingStudent.setGrade(studentUpdateRequestDto.getGrade());
-    existingStudent.setBirth(studentUpdateRequestDto.getBirth());
-    existingStudent.setSex(studentUpdateRequestDto.getSex());
-    existingStudent.setPhoneNum(studentUpdateRequestDto.getPhone_num());
-    existingStudent.setFatherPhoneNum(studentUpdateRequestDto.getFather_phone_num());
-    existingStudent.setMotherPhoneNum(studentUpdateRequestDto.getMother_phone_num());
-    existingStudent.setGuardiansPhoneNum(studentUpdateRequestDto.getGuardians_phone_num());
-    existingStudent.setLogs(logs);
+  public StudentResponseDto updateStudent(Student student) {
+    validateDuplicateStudentSN(student); //serialNumber 중복 검증
 
     // Save the updated student
-    Student savedStudent = studentRepository.save(existingStudent);
+    Student savedStudent = studentRepository.save(student);
     return mapToResponseDto(savedStudent);
   }
 
   public StudentResponseDto deleteStudent(Student existingStudent) {
 
     // Update fields from request DT
-    Logs logs = new Logs(Status.ACTIVE, LocalDateTime.now(), -1L);
-    existingStudent.setLogs(logs);
-
+    Logs history = existingStudent.getLogs();
+    history.updateLogs(Status.INACTIVE, history.getCreatedAt(), history.getCreatedChargedId(),
+        LocalDateTime.now(), -1L);
+    existingStudent.setLogs(history);
     // Save the updated student
     Student savedStudent = studentRepository.save(existingStudent);
     return mapToResponseDto(savedStudent);

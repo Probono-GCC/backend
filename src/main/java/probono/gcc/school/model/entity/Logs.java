@@ -14,6 +14,7 @@ import probono.gcc.school.model.enums.Status;
 
 @Embeddable
 @NoArgsConstructor
+@Data
 public class Logs {
 
   @NotNull
@@ -38,17 +39,11 @@ public class Logs {
     this.updatedChargedId = null;
   }
 
-  public Logs(Status status, LocalDateTime updatedAt, Long updatedChargedId) {
+  public void updateLogs(Status status, LocalDateTime createdAt, Long createdChargedId,
+      LocalDateTime updatedAt, Long updatedChargedId) {
     this.status = status;
     this.updatedAt = updatedAt;
     this.updatedChargedId = updatedChargedId;
   }
 
-//  public void UpdateLogs(Status status, LocalDateTime createdAt, LocalDateTime updatedAt, Long createdChargedId, Long updatedChargedId) {
-//    this.status = Status.ACTIVE;
-//    this.createdAt = LocalDateTime.now();
-//    this.updatedAt = null;
-//    this.createdChargedId = -1L;
-//    this.updatedChargedId = null;
-//  }
 }
