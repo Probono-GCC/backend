@@ -17,72 +17,58 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)//mysql의 auto increment
-    private Long id;
 
-    @NotNull
-    @Column(length = 20)
-    private String login_id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)//mysql의 auto increment
+  private Long id;
 
-    @NotNull
-    @Column(length = 20)
-    private String login_pw;
+  @NotNull
+  @Column(length = 20)
+  private String loginId;
 
-    @NotNull
-    @Column(length = 40)
-    private String name;
+  @NotNull
+  @Column(length = 20)
+  private String loginPw;
 
-    @NotNull
-    @Column
-    private Integer serial_number;
+  @NotNull
+  @Column(length = 40)
+  private String name;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private Grades grade;
+  @NotNull
+  @Column
+  private Integer serialNumber;
 
-    @Column
-    private LocalDate birth;
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private Grades grade;
 
-    @Enumerated(EnumType.STRING)
-    private Sex sex;
+  @Column
+  private LocalDate birth;
 
-    @Column(length = 20)
-    private String phone_num;
+  @Enumerated(EnumType.STRING)
+  private Sex sex;
 
-    @Column(length = 20)
-    private String father_phone_num;
+  @Column(length = 20)
+  private String phoneNum;
 
-    @Column(length = 20)
-    private String mother_phone_num;
+  @Column(length = 20)
+  private String fatherPhoneNum;
 
-    @Column(length = 20)
-    private String guardians_phone_num;
+  @Column(length = 20)
+  private String motherPhoneNum;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private Status status;
+  @Column(length = 20)
+  private String guardiansPhoneNum;
 
-    @NotNull
-    @Column
-    private LocalDateTime created_at;
+  @Embedded
+  private Logs logs;
 
-    @Column
-    private LocalDateTime updated_at;
+  @Column(length = 50)
+  private String pwAnswer; // 추가된 필드
 
-    @NotNull
-    @Column
-    private Long created_charged_id;
-
-    @Column
-    private Long updated_charged_id;
-
-    @Column(length = 50)
-    private String pw_answer; // 추가된 필드
-
-    public void promoteToNextGrade() {
-        if (grade != null) {
-            this.grade = this.grade.getNextGrade();
-        }
+  public void promoteToNextGrade() {
+    if (grade != null) {
+      this.grade = this.grade.getNextGrade();
     }
+  }
 }
