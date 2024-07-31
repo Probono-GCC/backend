@@ -2,18 +2,28 @@ package probono.gcc.school.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Sections;
-import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Class {
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SchoolClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)//mysql의 auto increment
+    @Column(name="CLASS_ID")
     private Long id;
 
     @NotNull
@@ -54,6 +64,9 @@ public class Class {
     protected void onUpdate() {
         this.updated_at = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "schoolClass")
+    private final List<Teacher> teachers = new ArrayList<>();
 
 
 }

@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import probono.gcc.school.model.dto.TeacherCreateRequestDto;
-import probono.gcc.school.model.dto.TeacherUpdateRequestDto;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
 
@@ -76,6 +74,25 @@ public class Teacher {
         this.updated_at = LocalDateTime.now();
     }
 
+    @ManyToOne
+    @JoinColumn(name="CLASS_ID")
+    private SchoolClass schoolClass;
+
+    // 연관관계 편의 메서드
+    public void setSchoolClass(SchoolClass schoolClass) {
+
+        // 기존 팀과 연관관계를 제거
+        if (this.schoolClass != null) {
+            this.schoolClass.getTeachers().remove(this);
+        }
+
+
+        // 새로운 연관관계 설정
+        this.schoolClass = schoolClass;
+        if (schoolClass != null) { // 연관관계 제거 시, team == null
+            schoolClass.getTeachers().add(this);
+        }
+    }
 
 
 

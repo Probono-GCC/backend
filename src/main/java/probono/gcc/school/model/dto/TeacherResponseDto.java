@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 public class TeacherResponseDto {
 
     private Long id;
-    private String login_id;
-    private String login_pw;
+    private String loginId;
+    private String loginPw;
     private String name;
     private Sex sex;
     private String phone_num;
