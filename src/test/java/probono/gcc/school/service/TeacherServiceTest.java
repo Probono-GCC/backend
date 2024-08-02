@@ -93,6 +93,19 @@ public class TeacherServiceTest {
 
         // then
         assertThat(teachers.size()).isEqualTo(2);
+        // 필드 매핑 확인
+        TeacherResponseDto teacher1 = teachers.get(0);
+        TeacherResponseDto teacher2 = teachers.get(1);
+
+        // 첫 번째 TeacherResponseDto 필드 검증
+        assertThat(teacher1.getName()).isEqualTo(requestDto1.getName());
+        assertThat(teacher1.getLoginId()).isEqualTo(requestDto1.getLoginId());
+        assertThat(teacher1.getLoginPw()).isEqualTo(requestDto1.getLoginPw());
+
+        // 두 번째 TeacherResponseDto 필드 검증
+        assertThat(teacher2.getName()).isEqualTo(requestDto2.getName());
+        assertThat(teacher2.getLoginId()).isEqualTo(requestDto2.getLoginId());
+        assertThat(teacher2.getLoginPw()).isEqualTo(requestDto2.getLoginPw());
     }
 
     @Test
