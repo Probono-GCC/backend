@@ -14,12 +14,12 @@ import java.sql.Timestamp;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
-@Table(name = "image")
-public class Image {
+@Table(name = "course_user")
+public class CourseUser {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long imageId;
+  private Long cuId;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -37,8 +37,12 @@ public class Image {
   private Long updatedChargeId;
 
   @ManyToOne
-  @JoinColumn(name = "noticeId")
-  private Notice noticeId;
+  @JoinColumn(name = "courseId")
+  private Course courseId;
+
+  @ManyToOne
+  @JoinColumn(name = "loginId")
+  private Users loginId;
 
   // Getters and Setters
 

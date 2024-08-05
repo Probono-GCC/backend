@@ -7,19 +7,23 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.sql.Timestamp;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
-@Table(name = "image")
-public class Image {
+@Table(name = "subject")
+public class Subject {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long imageId;
+  private Long subjectId;
+
+  @Column(nullable = false, unique = true, length = 20)
+  private String name;
+
+  @Column(nullable = false)
+  private boolean isElective;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -32,13 +36,10 @@ public class Image {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private long createdChargeId;
+  private Long createdChargeId;
 
+  @Column
   private Long updatedChargeId;
-
-  @ManyToOne
-  @JoinColumn(name = "noticeId")
-  private Notice noticeId;
 
   // Getters and Setters
 
