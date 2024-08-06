@@ -21,6 +21,9 @@ public class Image {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long imageId;
 
+  @Column(length = 2048, nullable = false)
+  private String imagePath;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Status status;
