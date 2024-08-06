@@ -4,14 +4,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @NoArgsConstructor
 @Getter
 @Setter
-public class SubjectResponseDTO {
+public class TeacherCreateRequestDto {
 
-  private Long subjectId;
+    private String name;
+    private String login_id;
+    private String login_pw;
 
-  private String name;
-
-  private boolean isElective;
 }
