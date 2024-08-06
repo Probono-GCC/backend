@@ -1,0 +1,67 @@
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java CI/CD with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+env:
+  AWS_REGION: ap-northeast-2
+  AWS_S3_BUCKET: probono-gcc-bucket
+  AWS_CODE_DEPLOY_APPLICATION: probono-gcc-codedeploy-app
+  AWS_CODE_DEPLOY_GROUP: probono-gcc-codedeploy-group
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+          MYSQL_DATABASE: probono_db
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # - uses: mirromutth/mysql-action@v1.1
+    #   with:
+    #     host port: 3306 # Optional, default value is 3306. The port of host
+    #     container port: 3306 # Optional, default value is 3306. The port of containe
+    #     mysql database: 'probono_db' # Optional, default value is "test". The specified database which will be create
+    #     mysql root password: ${{ secrets.ROOT_PASSWORD }} # Required if "mysql user" is empty, default is empty. The root superuser password
+    # gradlew 실행 관한 부여(windows에서 작업한 소스를 push하면 기본권한이 644이므로 필요)
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew # run 키워드는 job에게 runner위에서 실행하도록 명령
+
+    # Configure Gradle for optimal use in GiHub Actions, including caching of downloaded dependencies.
+    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+
+    - name: Build with Gradle Wrapper
+      run: ./gradlew build
+
+    - name: Setting AWS credential
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: ${{ env.AWS_REGION }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_PRIVATE_ACCESS_KEY }}
+    - name: S3에 업로드
+      run: aws deploy push --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --ignore-hidden-files --s3-location s3://${{ env.AWS_S3_BUCKET }}/probono-gcc-backend/$GITHUB_SHA.zip --source .
+    - name: EC2에 배포
+      run: aws deploy create-deployment --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${{ env.AWS_CODE_DEPLOY_GROUP }} --s3-location bucket=${{ env.AWS_S3_BUCKET }},key=probono-gcc-backend/$GITHUB_SHA.zip,bundleType=zip
