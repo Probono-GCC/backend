@@ -40,6 +40,10 @@ public class Image {
   @JoinColumn(name = "noticeId")
   private Notice noticeId;
 
+  @Column(length = 2048, nullable = false)
+  private String imagePath;
+
+
   // Getters and Setters
 
 }

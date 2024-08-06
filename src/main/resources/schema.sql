@@ -88,7 +88,8 @@ CREATE TABLE image (
                              updatedAt TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                              createdChargeId BIGINT NOT NULL,
                              updatedChargeId BIGINT NULL,
-                             noticeId BIGINT
+                             noticeId BIGINT,
+                             imagePath VARCHAR(2048) NOT NULL
 );
 
 ALTER TABLE users
