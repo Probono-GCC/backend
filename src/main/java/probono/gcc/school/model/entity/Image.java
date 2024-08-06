@@ -21,9 +21,6 @@ public class Image {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long imageId;
 
-  @Column(length = 2048, nullable = false)
-  private String imagePath;
-
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Status status;
@@ -42,6 +39,10 @@ public class Image {
   @ManyToOne
   @JoinColumn(name = "noticeId")
   private Notice noticeId;
+
+  @Column(length = 2048, nullable = false)
+  private String imagePath;
+
 
   // Getters and Setters
 

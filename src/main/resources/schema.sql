@@ -83,13 +83,13 @@ CREATE TABLE course_user (
 );
 CREATE TABLE image (
                              imageId BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                             imagePath VARCHAR(2048) NOT NULL,
                              status ENUM('ACTIVE', 'INACTIVE') NOT NULL,
                              createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                              updatedAt TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
                              createdChargeId BIGINT NOT NULL,
                              updatedChargeId BIGINT NULL,
-                             noticeId BIGINT
+                             noticeId BIGINT,
+                             imagePath VARCHAR(2048) NOT NULL
 
 );
 
