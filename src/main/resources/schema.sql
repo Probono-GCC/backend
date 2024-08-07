@@ -90,7 +90,6 @@ CREATE TABLE image (
                              updatedChargeId BIGINT NULL,
                              noticeId BIGINT,
                              imagePath VARCHAR(2048) NOT NULL
-
 );
 
 ALTER TABLE users
