@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.sql.Timestamp;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import probono.gcc.school.model.enums.Status;
@@ -31,6 +32,7 @@ public class Image {
   @Column(nullable = false)
   private Status status;
 
+  @CreationTimestamp
   @Column(nullable = false, updatable = false)
   private Timestamp createdAt;
 
