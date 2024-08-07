@@ -45,21 +45,6 @@ public class ImageService {
     return modelMapper.map(savedImage, ImageResponseDTO.class);
   }
 
-//  public ImageResponseDTO createPostImage(ImageRequestDTO requestDto) {
-//    //notice crud 작업한 뒤 수정
-//    //    Notice notice = noticeRepository.findById(requestDto.getNoticeId())
-//    //        .orElseThrow(() -> new ResourceNotFoundException("Notice not found"));
-//
-//    Image image = new Image();
-//    image.setStatus(Status.ACTIVE);
-//    image.setCreatedChargeId(1L);
-//    image.setImagePath(requestDto.getImagePath());
-//
-//    Image savedImage = imageRepository.save(image);
-//
-//    return modelMapper.map(savedImage, ImageResponseDTO.class);
-//  }
-
 
   public List<ImageResponseDTO> findAllProfileImages() {
     try {
@@ -102,4 +87,22 @@ public class ImageService {
 
     return image;
   }
+
+  //  public ImageResponseDTO createPostImage(ImageRequestDTO requestDto) {
+//    //notice crud 작업한 뒤 수정
+//    //    Notice notice = noticeRepository.findById(requestDto.getNoticeId())
+//    //        .orElseThrow(() -> new ResourceNotFoundException("Notice not found"));
+//
+//    Image image = new Image();
+//    image.setStatus(Status.ACTIVE);
+//    image.setCreatedChargeId(1L);
+//    image.setImagePath(requestDto.getImagePath());
+//
+//    Image savedImage = imageRepository.save(image);
+//
+//    return modelMapper.map(savedImage, ImageResponseDTO.class);
+//  }
+
+
+
 }
