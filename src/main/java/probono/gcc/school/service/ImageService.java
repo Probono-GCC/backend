@@ -81,4 +81,25 @@ public class ImageService {
     );
     return modelMapper.map(image, ImageResponseDTO.class);
   }
+
+  public Long deleteProfileImage(Long id) {
+    Image image = imageRepository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
+    // 논리적 삭제 수행
+    image.setStatus(Status.INACTIVE);
+    // Dummy Data
+    image.setUpdatedChargeId(2L);
+
+    // 엔티티를 저장하여 변경 사항을 데이터베이스에 반영
+    imageRepository.save(image);
+
+    return image.getImageId();
+  }
+
+  public Image findById(Long id) {
+    Image image = imageRepository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
+
+    return image;
+  }
 }
