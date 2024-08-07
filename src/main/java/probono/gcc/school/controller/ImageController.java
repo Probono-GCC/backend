@@ -36,31 +36,21 @@ public class ImageController {
 
   }
 
-  //notice crud 작업한 뒤 수정할 것
-  @PostMapping("/post/images")
-  public ResponseEntity<ImageResponseDTO> createPostImage(
-      @RequestBody ImageRequestDTO requestDto) {
-
-    ImageResponseDTO image = imageService.createProfileImage(requestDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(image);
-
+  //프로필 이미지 목록 조회
+  @GetMapping("/profile/images")
+  public ResponseEntity<List<ImageResponseDTO>> getAllProfileImages() {
+    List<ImageResponseDTO> images = imageService.findAllProfileImages();
+    return ResponseEntity.ok(images);
   }
 
-//  // 이미지 목록 조회
-//  @GetMapping("/images")
-//  public ResponseEntity<List<ImageResponseDTO>> getAllImages() {
-//    List<ImageResponseDTO> images = imageService.findAllImages();
-//    return ResponseEntity.ok(images);
-//  }
-//
-//  // 이미지 한 장 조회
-//  @GetMapping("/images/{id}")
-//  public ResponseEntity<ImageResponseDTO> getOneImage(@PathVariable Long id) {
-//    ImageResponseDTO image = imageService.findOneImage(id);
-//    return ResponseEntity.ok(image);
-//  }
-//
-//
+
+  // 이미지 한 장 조회
+  @GetMapping("profile/images/{id}")
+  public ResponseEntity<ImageResponseDTO> getOneImage(@PathVariable Long id) {
+    ImageResponseDTO image = imageService.findOneImage(id);
+    return ResponseEntity.ok(image);
+  }
+
 //  // 이미지 삭제
 //  @DeleteMapping("/images/{id}")
 //  @ApiResponses(value = {
@@ -85,6 +75,16 @@ public class ImageController {
 //      // 다른 예외 처리
 //      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 //    }
+//  }
+
+//  //notice crud 작업한 뒤 수정할 것
+//  @PostMapping("/post/images")
+//  public ResponseEntity<ImageResponseDTO> createPostImage(
+//      @RequestBody ImageRequestDTO requestDto) {
+//
+//    ImageResponseDTO image = imageService.createProfileImage(requestDto);
+//    return ResponseEntity.status(HttpStatus.CREATED).body(image);
+//
 //  }
 
 
