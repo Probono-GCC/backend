@@ -72,10 +72,11 @@ public class ImageController {
     } catch (Exception ex) {
       // 다른 예외 처리
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+
     }
   }
 
-//  //notice crud 작업한 뒤 수정할 것
+  //notice crud 작업한 뒤 수정할 것
 //  @PostMapping("/post/images")
 //  public ResponseEntity<ImageResponseDTO> createPostImage(
 //      @RequestBody ImageRequestDTO requestDto) {
