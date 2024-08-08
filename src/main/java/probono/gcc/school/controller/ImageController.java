@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import probono.gcc.school.exception.S3Exception;
 import probono.gcc.school.model.dto.ImageRequestDTO;
 import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.entity.Image;
@@ -32,14 +33,19 @@ public class ImageController {
   private S3ImageService s3ImageService;
 
   @PostMapping("/profile/images")
-  public ResponseEntity<ImageResponseDTO> createProfileImage(@RequestPart("image") MultipartFile image) {
-    String profileImageUrl = s3ImageService.upload(image);
-    ImageRequestDTO requestDto = new ImageRequestDTO();
-    requestDto.setImagePath(profileImageUrl);
-    // set other fields of requestDto as necessary
+  public ResponseEntity<?> createProfileImage(@RequestPart("image") MultipartFile image) {
+    try {
+      String profileImageUrl = s3ImageService.upload(image);
+      ImageRequestDTO requestDto = new ImageRequestDTO();
+      requestDto.setImagePath(profileImageUrl);
+      // set other fields of requestDto as necessary
 
-    ImageResponseDTO imageResponse = imageService.createProfileImage(requestDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
+      ImageResponseDTO imageResponse = imageService.createProfileImage(requestDto);
+      return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
+    } catch (S3Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to upload image: " + e.getMessage());
+    }
   }
 
   //이미지 생성
@@ -73,23 +79,25 @@ public class ImageController {
       @ApiResponse(responseCode = "404", description = "Image not found", content = @Content(mediaType = "application/json")),
       @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
   })
-  public ResponseEntity<ImageResponseDTO> deleteProfileImage(@PathVariable Long id) {
+
+  public ResponseEntity<?> deleteProfileImage(@PathVariable Long id) {
     try {
-      // 서비스에서 삭제 수행
+      // 삭제 시 이미지 정보 조회 및 삭제
       Long deletedImageId = imageService.deleteProfileImage(id);
-      // 삭제된 Image를 조회 시, 존재하지 않을 경우 예외 처리
       Image deletedImage = imageService.findById(deletedImageId);
-      // Image 엔티티를 DTO로 변환
+
+      // 이미지 삭제 후 S3에서 삭제
+      s3ImageService.deleteImageFromS3(deletedImage.getImagePath());
+
+      // Image 엔티티를 DTO로 변환하여 응답 반환
       ImageResponseDTO responseDto = modelMapper.map(deletedImage, ImageResponseDTO.class);
-      // 성공적인 삭제 후 응답 반환
       return ResponseEntity.ok(responseDto);
     } catch (IllegalArgumentException ex) {
-      // 존재하지 않는 ID로 인한 예외 처리
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
+    } catch (S3Exception ex) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image from S3: " + ex.getMessage());
     } catch (Exception ex) {
-      // 다른 예외 처리
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image");
     }
   }
 
