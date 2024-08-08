@@ -14,25 +14,42 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import probono.gcc.school.model.dto.ImageRequestDTO;
 import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.service.ImageService;
+import probono.gcc.school.service.S3ImageService;
 
 @RestController
 @AllArgsConstructor
 public class ImageController {
   private final ImageService imageService;
   private ModelMapper modelMapper;
-  //이미지 생성
-  @PostMapping("/profile/images")
-  public ResponseEntity<ImageResponseDTO> createProfileImage(
-      @RequestBody ImageRequestDTO requestDto) {
-    ImageResponseDTO image = imageService.createProfileImage(requestDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(image);
 
+  private S3ImageService s3ImageService;
+
+  @PostMapping("/profile/images")
+  public ResponseEntity<ImageResponseDTO> createProfileImage(@RequestPart("image") MultipartFile image) {
+    String profileImageUrl = s3ImageService.upload(image);
+    ImageRequestDTO requestDto = new ImageRequestDTO();
+    requestDto.setImagePath(profileImageUrl);
+    // set other fields of requestDto as necessary
+
+    ImageResponseDTO imageResponse = imageService.createProfileImage(requestDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
   }
+
+  //이미지 생성
+//  @PostMapping("/profile/images")
+//  public ResponseEntity<ImageResponseDTO> createProfileImage(
+//      @RequestBody ImageRequestDTO requestDto) {
+//    ImageResponseDTO image = imageService.createProfileImage(requestDto);
+//    return ResponseEntity.status(HttpStatus.CREATED).body(image);
+//
+//  }
 
   //프로필 이미지 목록 조회
   @GetMapping("/profile/images")

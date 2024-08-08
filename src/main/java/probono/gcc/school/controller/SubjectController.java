@@ -37,15 +37,13 @@ public class SubjectController {
   public ResponseEntity<SubjectResponseDTO> createSubject(
       @RequestBody SubjectRequestDTO requestDto) {
 
-    SubjectResponseDTO subject = subjectService.createSubject(requestDto);
-
-    // 필드 값 로그로 출력
-//        logger.info("TeacherResponseDto Details:");
-//        logger.info("Login ID: {}", teacher.getLogin_id());
-//        logger.info("Name: {}", teacher.getName());
-//        logger.info("Login PW: {}", teacher.getLogin_pw());
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(subject);
+    try {
+      SubjectResponseDTO subject = subjectService.createSubject(requestDto);
+      return ResponseEntity.status(HttpStatus.CREATED).body(subject);
+    } catch (IllegalArgumentException ex) {
+      logger.error("Error creating subject: {}", ex.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // HTTP 409 Conflict
+    }
 
   }
 

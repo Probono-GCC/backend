@@ -2,6 +2,7 @@ package probono.gcc.school.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,11 @@ public class SubjectService {
     private SubjectRepository subjectRepository;
 
     public SubjectResponseDTO createSubject(SubjectRequestDTO requestDto) {
+        Optional<Subject> existingSubject = subjectRepository.findByName(requestDto.getName());
+        if (existingSubject.isPresent()) {
+            throw new IllegalArgumentException("A subject with the same name already exists.");
+        }
+
         Subject subject = new Subject();
         subject.setName(requestDto.getName());
         subject.setElective(requestDto.isElective());
