@@ -21,11 +21,11 @@ public class ImageService {
   private ModelMapper modelMapper;
   private ImageRepository imageRepository;
 
+  private S3ImageService s3ImageService;
+
   private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
   public ImageResponseDTO createProfileImage(ImageRequestDTO requestDto) {
-//    Notice notice = noticeRepository.findById(requestDto.getNoticeId())
-//        .orElseThrow(() -> new ResourceNotFoundException("Notice not found"));
 
     Image image = new Image();
     image.setStatus(Status.ACTIVE);
@@ -33,15 +33,8 @@ public class ImageService {
     image.setImagePath(requestDto.getImagePath());
 
     Image savedImage = imageRepository.save(image);
-//    logger.info("Image createdAt from savedImage: {}", savedImage.getCreatedAt());
-//    imageRepository.flush(); // 데이터베이스에 즉시 반영
+    logger.info("Image createdAt from savedImage: {}", savedImage.getCreatedAt());
 
-//    // 데이터베이스에서 최신 createdAt 값을 재조회
-//    Image reloadedImage = imageRepository.findById(savedImage.getImageId())
-//        .orElseThrow(() -> new RuntimeException("Image not found"));
-//
-//    // Log the createdAt value
-//    logger.info("Image createdAt from database: {}", reloadedImage.getCreatedAt());
     return modelMapper.map(savedImage, ImageResponseDTO.class);
   }
 
@@ -70,6 +63,10 @@ public class ImageService {
   public Long deleteProfileImage(Long id) {
     Image image = imageRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
+
+    //s3에서 이미지 삭제 수행
+    s3ImageService.deleteImageFromS3(image.getImagePath());
+
     // 논리적 삭제 수행
     image.setStatus(Status.INACTIVE);
     // Dummy Data
