@@ -15,6 +15,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
@@ -38,10 +39,11 @@ public class Subject {
   @Column(nullable = false)
   private Status status;
 
-//  @CreationTimestamp
+  @CreationTimestamp
   @Column(nullable = false, updatable = false)
   private Timestamp createdAt;
 
+  @UpdateTimestamp
   @Column
   private Timestamp updatedAt;
 
