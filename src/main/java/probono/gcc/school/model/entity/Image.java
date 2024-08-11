@@ -38,13 +38,14 @@ public class Image {
   @Column(nullable = false, updatable = false)
   private Timestamp createdAt;
 
-  @Column
   @UpdateTimestamp
+  @Column
   private Timestamp updatedAt;
 
   @Column(nullable = false)
   private long createdChargeId;
 
+  @Column(nullable = false)
   private Long updatedChargeId;
 
   @ManyToOne
