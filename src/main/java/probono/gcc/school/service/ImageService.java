@@ -43,9 +43,6 @@ public class ImageService {
     logger.info("Image createdAt from savedImage: {}", savedImage.getCreatedAt());
 
     return modelMapper.map(savedImage, ImageResponseDTO.class);
-
-
-<<<<<<< HEAD
   }
 
   public ImageResponseDTO saveNoticeImage(String imagePath, Long noticeId) {
@@ -63,8 +60,6 @@ public class ImageService {
     Image savedImage = imageRepository.save(image);
 
     return modelMapper.map(savedImage, ImageResponseDTO.class);
-=======
->>>>>>> 9e71a36aa84c9695fdf4745c063e859f83dabf18
   }
 
 
