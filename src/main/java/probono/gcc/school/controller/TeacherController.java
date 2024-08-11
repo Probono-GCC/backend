@@ -44,10 +44,10 @@ public class TeacherController {
       TeacherResponseDTO teacher = teacherService.createTeacher(requestDto);
       return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
     } catch (CustomException ex) {
-      logger.error("Error occurred during teacher creation: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+      logger.error("[CustomException]Error occurred during teacher creation: {}", ex.getMessage());
+      return ResponseEntity.status(ex.getStatus()).body(null);
     } catch (Exception ex) {
-      logger.error("Unexpected error occurred: {}", ex.getMessage());
+      logger.error("[Exception]Unexpected error occurred: {}", ex.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
   }
@@ -142,6 +142,9 @@ public class TeacherController {
       return ResponseEntity.ok("Login ID is available.");
     }
   }
+
+  //담당하는 class 할당(담임선생님)
+
 
 
 

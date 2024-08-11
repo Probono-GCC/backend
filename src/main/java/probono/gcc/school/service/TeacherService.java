@@ -44,6 +44,22 @@ public class TeacherService {
   public TeacherResponseDTO createTeacher(TeacherRequestDTO requestDto) {
 
     try {
+      // 필수 필드 null 체크
+      if (requestDto.getName() == null || requestDto.getName().trim().isEmpty()) {
+        logger.info("Name is required.");
+        throw new CustomException("Name is required.", HttpStatus.BAD_REQUEST);
+      }
+
+      if (requestDto.getLoginId() == null || requestDto.getLoginId().trim().isEmpty()) {
+        logger.info("LoginId is required.");
+        throw new CustomException("Login ID is required.", HttpStatus.BAD_REQUEST);
+      }
+
+      if (requestDto.getLoginPw() == null || requestDto.getLoginPw().trim().isEmpty()) {
+        logger.info("LoginPw is required.");
+        throw new CustomException("Login Password is required.", HttpStatus.BAD_REQUEST);
+      }
+
       //loginId 중복 확인 체크
       if (teacherRepository.existsByLoginId(requestDto.getLoginId())) {
         throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
@@ -72,11 +88,11 @@ public class TeacherService {
       throw new CustomException("Teacher creation failed due to conflict with existing data.", HttpStatus.CONFLICT);
 
     }
-    catch (Exception ex) {
-      // Handle any other unforeseen exceptions
-      logger.error("Unexpected error during teacher creation: {}", ex.getMessage());
-      throw new CustomException("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    catch (Exception ex) {
+//      // Handle any other unforeseen exceptions
+//      logger.error("Unexpected error during teacher creation: {}", ex.getMessage());
+//      throw new CustomException("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
 
   }
@@ -123,7 +139,6 @@ public class TeacherService {
     Users teacher = teacherRepository.findByLoginId(loginId).orElseThrow(
         () -> new CustomException("Teacher with loginId " + loginId + " not found.",HttpStatus.NOT_FOUND)
     );
-
 
     if (teacher.getBirth() == null && teacher.getSex() == null && teacher.getPwAnswer() == null) {
       firstTimeUpdate(teacher, requestDto);
@@ -173,14 +188,28 @@ public class TeacherService {
     updateTeacherFieldIfNull(teacher::getBirth, teacher::setBirth, requestDto.getBirth(), "Birth is missing in the request.");
     updateTeacherFieldIfNull(teacher::getSex, teacher::setSex, requestDto.getSex(), "Sex is missing in the request.");
     updateTeacherFieldIfNull(teacher::getPwAnswer, teacher::setPwAnswer, requestDto.getPwAnswer(), "Password answer is missing in the request.");
-    // Example usage for ImageId
-    updateTeacherImageIdFieldIfNull(teacher::getImageId, teacher::setImageId, requestDto.getImageId(), "Image ID is missing in the request.");
 
+    //requestDto에 imageId가 있으면 update
+    updateTeacherImageIdField(teacher::getImageId, teacher::setImageId, requestDto.getImageId(), "Image ID is missing in the request.");
+    //requestDto에 loginPw가 있으면 update
+    updateTeacherLoginPwField(teacher::getLoginPw,teacher::setLoginPw,requestDto.getLoginPw(),"Login Pw is missing in the request.");
 
 
   }
 
-  private void updateTeacherImageIdFieldIfNull(Supplier<Image> getImageId, Consumer<Image> setImageId, Long imageId, String errorMessage) {
+  private void updateTeacherLoginPwField(Supplier<String> getLoginPw, Consumer<String> setLoginPw, String loginPw, String errorMessage) {
+    if (loginPw != null) {
+      // 새로운 비밀번호가 제공된 경우 업데이트
+      setLoginPw.accept(loginPw);
+    } else if (getLoginPw.get() == null) {
+      // 기존 비밀번호가 없고 새로운 비밀번호도 제공되지 않은 경우 예외 처리
+      throw new CustomException(errorMessage, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+
+
+  private void updateTeacherImageIdField(Supplier<Image> getImageId, Consumer<Image> setImageId, Long imageId, String errorMessage) {
     if (imageId != null) {
       Image image = imageRepository.findById(imageId)
           .orElseThrow(() -> new CustomException("Image not found with id: " + imageId, HttpStatus.NOT_FOUND));
