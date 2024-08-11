@@ -1,5 +1,6 @@
 package probono.gcc.school.model.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,13 +10,25 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.sql.Timestamp;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import probono.gcc.school.model.enums.NoticeType;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
 @Table(name = "notice")
+@Getter
+@Setter
+@DynamicInsert
+@DynamicUpdate
 public class Notice {
 
   @Id
@@ -33,6 +46,7 @@ public class Notice {
   private Status status;
 
   @Column(nullable = false, updatable = false)
+  @CreationTimestamp
   private Timestamp createdAt;
 
   @Column
@@ -62,6 +76,12 @@ public class Notice {
   @ManyToOne
   @JoinColumn(name = "courseId")
   private Course courseId;
+
+  /**
+   * Image완성 이후 추가 로직 필요
+   */
+//  @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
+//  private List<Notice> notice;
 
   // Getters and Setters
 }
