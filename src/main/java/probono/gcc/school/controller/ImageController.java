@@ -26,19 +26,34 @@ import probono.gcc.school.service.S3ImageService;
 @RestController
 @AllArgsConstructor
 public class ImageController {
+
   private final ImageService imageService;
   private ModelMapper modelMapper;
 
   private S3ImageService s3ImageService;
 
   @PostMapping("/profile/images")
-  public ResponseEntity<ImageResponseDTO> createProfileImage(@RequestPart("image") MultipartFile image) {
+  public ResponseEntity<ImageResponseDTO> createProfileImage(
+      @RequestPart("image") MultipartFile image) {
     String profileImageUrl = s3ImageService.upload(image);
     ImageRequestDTO requestDto = new ImageRequestDTO();
     requestDto.setImagePath(profileImageUrl);
     // set other fields of requestDto as necessary
 
     ImageResponseDTO imageResponse = imageService.createProfileImage(requestDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
+  }
+
+  @PostMapping("/notice/images")
+  public ResponseEntity<ImageResponseDTO> saveNoticeImage(
+      @RequestPart("image") MultipartFile image, Long noticeId) {
+    String imagePath = s3ImageService.upload(image);
+
+//    ImageRequestDTO requestDto = new ImageRequestDTO();
+//    requestDto.setImagePath(profileImageUrl);
+    // set other fields of requestDto as necessary
+
+    ImageResponseDTO imageResponse = imageService.saveNoticeImage(imagePath, noticeId);
     return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
   }
 

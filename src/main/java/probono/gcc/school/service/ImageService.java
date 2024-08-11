@@ -1,8 +1,10 @@
 package probono.gcc.school.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,17 +13,22 @@ import probono.gcc.school.model.dto.ImageRequestDTO;
 import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.entity.Image;
+import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ImageRepository;
+import probono.gcc.school.repository.NoticeRepository;
 import probono.gcc.school.repository.SubjectRepository;
 
 @Service
 @AllArgsConstructor
 public class ImageService {
+
   private ModelMapper modelMapper;
   private ImageRepository imageRepository;
 
   private S3ImageService s3ImageService;
+
+  private NoticeRepository noticeRepository;
 
   private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
@@ -34,6 +41,23 @@ public class ImageService {
 
     Image savedImage = imageRepository.save(image);
     logger.info("Image createdAt from savedImage: {}", savedImage.getCreatedAt());
+
+    return modelMapper.map(savedImage, ImageResponseDTO.class);
+  }
+
+  public ImageResponseDTO saveNoticeImage(String imagePath, Long noticeId) {
+
+    Image image = new Image();
+    image.setImagePath(imagePath);
+    image.setCreatedChargeId(1L);
+
+    Optional<Notice> findNotice = noticeRepository.findById(noticeId);
+    if (findNotice.isEmpty()) {
+      throw new IllegalArgumentException("NoticeId가 올바르지 않습니다.");
+    }
+    image.setNoticeId(findNotice.get());
+
+    Image savedImage = imageRepository.save(image);
 
     return modelMapper.map(savedImage, ImageResponseDTO.class);
   }
@@ -99,7 +123,6 @@ public class ImageService {
 //
 //    return modelMapper.map(savedImage, ImageResponseDTO.class);
 //  }
-
 
 
 }

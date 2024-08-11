@@ -15,6 +15,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
@@ -38,6 +39,7 @@ public class Image {
   private Timestamp createdAt;
 
   @Column
+  @UpdateTimestamp
   private Timestamp updatedAt;
 
   @Column(nullable = false)
@@ -51,7 +53,6 @@ public class Image {
 
   @Column(length = 2048, nullable = false)
   private String imagePath;
-
 
   // Getters and Setters
 
