@@ -9,22 +9,34 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Image;
+import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-public class TeacherRequestDTO {
+public class StudentResponseDTO {
   private String loginId;
   private String loginPw;
-  private String name;//
-  private LocalDate birth;//최초 1회 입력
-  private Sex sex;//최초 1회 입력
-  private String phoneNum;//
-  private String pwAnswer;//최초 1회 입력
-  private Classes classId;
-  private Long imageId;
+  private String name;
+  private int serialNumber;
+  private Grades grade;
+  private LocalDate birth;
+  private Sex sex;
+  private String phoneNum;
+  private String fatherPhoneNum;
+  private String motherPhoneNum;
+  private String guardiansPhoneNum;
+  private String pwAnswer;
+  private Role role;
+  private Status status;
+  private Timestamp createdAt;
+  private Timestamp updatedAt;
+  private Long createdChargeId;
+  private Long updatedChargeId;
+  private Image imageId;
 
 }

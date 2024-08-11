@@ -7,6 +7,7 @@ CREATE TABLE users (
                           name VARCHAR(40) NOT NULL,
                           serialNumber INT NULL UNIQUE,
                           sex ENUM('FEMALE', 'MALE'),
+                          grade ENUM('LOWER_KG', 'NURSERY', 'PLAYGROUP', 'UPPER_KG', 'CLASS1', 'CLASS2', 'CLASS3', 'CLASS4', 'CLASS5', 'CLASS6', 'CLASS7', 'CLASS8', 'CLASS9', 'CLASS10', 'GRADUATED') ,
                           phoneNum VARCHAR(20),
                           pwAnswer VARCHAR(50),
                           birth DATE,

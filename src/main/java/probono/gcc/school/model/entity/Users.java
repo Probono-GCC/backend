@@ -17,6 +17,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.Persistable;
+import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
@@ -38,6 +39,9 @@ public class Users implements Persistable<String> {
 
   @Column(unique = true)
   private Integer serialNumber;
+
+  @Enumerated(EnumType.STRING)
+  private Grades grade;
 
   @Enumerated(EnumType.STRING)
   private Sex sex;
