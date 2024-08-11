@@ -38,6 +38,7 @@ public class Image {
   @Column(nullable = false, updatable = false)
   private Timestamp createdAt;
 
+  @UpdateTimestamp
   @Column
   @UpdateTimestamp
   private Timestamp updatedAt;
@@ -45,6 +46,7 @@ public class Image {
   @Column(nullable = false)
   private long createdChargeId;
 
+  @Column(nullable = false)
   private Long updatedChargeId;
 
   @ManyToOne

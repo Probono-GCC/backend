@@ -5,7 +5,7 @@ CREATE TABLE users (
                           loginId VARCHAR(20) NOT NULL,
                           loginPw VARCHAR(255) NOT NULL,
                           name VARCHAR(40) NOT NULL,
-                          serialNumber INT NOT NULL UNIQUE,
+                          serialNumber INT NULL UNIQUE,
                           sex ENUM('FEMALE', 'MALE'),
                           phoneNum VARCHAR(20),
                           pwAnswer VARCHAR(50),
