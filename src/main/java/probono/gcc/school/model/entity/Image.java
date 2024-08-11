@@ -55,7 +55,6 @@ public class Image {
   @Column(length = 2048, nullable = false)
   private String imagePath;
 
-
   // Getters and Setters
 
 }

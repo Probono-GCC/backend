@@ -5,11 +5,13 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.model.dto.ClassResponse;
 import probono.gcc.school.model.dto.CreateClassRequest;
+import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Notice;
@@ -20,6 +22,7 @@ import probono.gcc.school.repository.ClassRepository;
 @RequiredArgsConstructor
 public class ClassService {
 
+  private final ModelMapper modelMapper;
   private final ClassRepository classRepository;
 
   /**
@@ -30,7 +33,8 @@ public class ClassService {
 
     validateDuplicateClass(requestClass); //중복 클래스 검증
     Classes savedClass = classRepository.save(requestClass);
-    return mapToResponseDto(savedClass);
+    return modelMapper.map(savedClass, ClassResponse.class);
+    //return mapToResponseDto(savedClass);
   }
 
   private void validateDuplicateClass(Classes requestClass) {
@@ -99,7 +103,11 @@ public class ClassService {
         .filter(n -> n.getStatus() == Status.ACTIVE)
         .map(
             m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
-                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews()))
+                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
+                m.getImageList().stream()
+                    .map(image -> modelMapper.map(image, ImageResponseDTO.class))
+                    .collect(Collectors.toList())
+            ))
         .collect(
             Collectors.toList());
     return collect;

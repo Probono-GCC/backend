@@ -7,13 +7,16 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.dto.ClassResponse;
 import probono.gcc.school.model.dto.CreateClassRequest;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
+import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.entity.Classes;
+import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.enums.NoticeType;
 import probono.gcc.school.model.enums.Status;
@@ -24,6 +27,7 @@ import probono.gcc.school.repository.NoticeRepository;
 @RequiredArgsConstructor
 public class NoticeService {
 
+  private final ModelMapper modelMapper;
   private final NoticeRepository noticeRepository;
   private final ClassRepository classRepository;
 
@@ -32,6 +36,9 @@ public class NoticeService {
 
     if (requestNotice.getType().equals(NoticeType.CLASS)) {
       Optional<Classes> findClass = classRepository.findById(classId);
+      if (findClass.isEmpty()) {
+        throw new IllegalArgumentException("ClassId가 올바르지 않습니다.");
+      }
       requestNotice.setClassId(findClass.get());
     } else if (requestNotice.getType().equals(NoticeType.COURSE)) {
       /**
@@ -43,14 +50,31 @@ public class NoticeService {
     return mapToResponseDto(savedNotice);
   }
 
+  @Transactional
   public NoticeResponse getNotice(Long id) {
-    Notice noticeEntity = this.getNoticeById(id);
+    Notice findNotice = this.getNoticeById(id);
+    List<Image> imageList = findNotice.getImageList();
+
+//    List<ImageResponseDTO> imageResponse = imageList.stream()
+//        .filter(n -> n.getStatus() == Status.ACTIVE)
+//        .map(
+//            m -> new ImageResponseDTO(m.getImageId(), m.getImagePath(), m.getCreatedChargeId()
+//            ))
+//        .collect(Collectors.toList());
+//
+//    NoticeResponse noticeResponse = mapToResponseDto(findNotice);
+//    noticeResponse.setImageList(imageResponse);
+//    noticeResponse.setViews(noticeResponse.getViews() + 1);
     /**
      * view증가 로직
      */
-    noticeEntity.setViews(noticeEntity.getViews() + 1);
-    noticeRepository.save(noticeEntity);
-    return mapToResponseDto(noticeEntity);
+    findNotice.setViews(findNotice.getViews() + 1);
+    noticeRepository.save(findNotice);
+
+//    return mapToResponseDto(findNotice);
+//    return noticeResponse;
+
+    return modelMapper.map(findNotice, NoticeResponse.class);
   }
 
   @Transactional
@@ -81,6 +105,12 @@ public class NoticeService {
   public void deleteNotice(Long id) {
     Notice existingNotice = this.getNoticeById(id);
     existingNotice.setStatus(Status.INACTIVE);
+
+    List<Image> existingImageList = existingNotice.getImageList();
+
+    for (Image image : existingImageList) {
+      image.setStatus(Status.INACTIVE);
+    }
 
     LocalDateTime now = LocalDateTime.now();
     Timestamp timestamp = Timestamp.valueOf(now);
