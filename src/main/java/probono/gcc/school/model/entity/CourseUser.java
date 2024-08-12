@@ -11,10 +11,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.sql.Timestamp;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
 @Table(name = "course_user")
+@Getter
+@Setter
+@DynamicInsert
+@DynamicUpdate
 public class CourseUser {
 
   @Id
