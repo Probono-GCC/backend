@@ -12,30 +12,42 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.TemporalType;
 import java.sql.Timestamp;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
 @Table(name = "course")
+@Getter
+@Setter
+@DynamicInsert
+@DynamicUpdate
 public class Course {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long courseId;
+  private long courseId;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Status status;
 
   @Column(nullable = false, updatable = false)
+  @CreationTimestamp
   private Timestamp createdAt;
 
   @Column
+  @UpdateTimestamp
   private Timestamp updatedAt;
 
   @Column(nullable = false)
   private long createdChargeId;
 
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @ManyToOne
   @JoinColumn(name = "subjectId")

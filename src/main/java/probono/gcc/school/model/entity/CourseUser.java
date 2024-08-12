@@ -19,7 +19,7 @@ public class CourseUser {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long cuId;
+  private long cuId;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -34,7 +34,7 @@ public class CourseUser {
   @Column(nullable = false)
   private long createdChargeId;
 
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @ManyToOne
   @JoinColumn(name = "courseId")

@@ -18,7 +18,7 @@ import probono.gcc.school.model.enums.Sections;
 @AllArgsConstructor
 public class ClassResponse {
 
-  private Long classId;
+  private long classId;
   private int year;
 
   private Grades grade;
