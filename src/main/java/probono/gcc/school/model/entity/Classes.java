@@ -34,7 +34,7 @@ public class Classes {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long classId;
+  private long classId;
 
   @Column(nullable = false)
   private int year;
@@ -61,13 +61,16 @@ public class Classes {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private Long createdChargeId;
+  private long createdChargeId;
 
   @Column
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Notice> notice;
+
+  @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Course> courseList;
 
   // Getters and Setters
 }

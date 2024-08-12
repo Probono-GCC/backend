@@ -81,10 +81,10 @@ public class Users implements Persistable<String> {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private Long createdChargeId;
+  private long createdChargeId;
 
   @Column
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @ManyToOne
   @JoinColumn(name = "classId")

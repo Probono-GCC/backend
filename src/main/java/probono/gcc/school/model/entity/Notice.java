@@ -33,7 +33,7 @@ public class Notice {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long noticeId;
+  private long noticeId;
 
   @Column(nullable = false, length = 100)
   private String title;
@@ -53,10 +53,10 @@ public class Notice {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private Long createdChargeId;
+  private long createdChargeId;
 
   @Column
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @Column(nullable = false)
   private int views;

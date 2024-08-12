@@ -27,7 +27,7 @@ public class Image {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long imageId;
+  private long imageId;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -46,7 +46,7 @@ public class Image {
   private long createdChargeId;
 
   @Column(nullable = false)
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @ManyToOne
   @JoinColumn(name = "noticeId")
