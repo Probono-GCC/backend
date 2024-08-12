@@ -22,29 +22,29 @@ public class CourseUserController {
 
   private final CourseUserService courseUserService;
 
-  @PostMapping("/course")
+  @PostMapping("/courseUser")
   public ResponseEntity<CourseUserResponse> createCourseUser(
       @RequestBody @Valid CreateCourseUserRequest request) {
-    CourseResponse createdCourse = courseUserService.create(request);
-    return ResponseEntity.ok(createdCourse);
+    CourseUserResponse createdCourseUser = courseUserService.create(request);
+    return ResponseEntity.ok(createdCourseUser);
   }
 
-  @GetMapping("/course/{id}")
-  public ResponseEntity<CourseResponse> getCourse(@PathVariable long id) {
-    CourseResponse findCourse = courseService.getCourse(id);
-    return ResponseEntity.ok(findCourse);
+  @GetMapping("/courseUser/{id}")
+  public ResponseEntity<CourseUserResponse> getCourseUser(@PathVariable long id) {
+    CourseUserResponse findCourseUser = courseUserService.getCourseUser(id);
+    return ResponseEntity.ok(findCourseUser);
   }
 
-  @PutMapping("/course/{id}")
-  public ResponseEntity<CourseResponse> updateCourse(@PathVariable long id,
-      @RequestBody @Valid CreateCourseRequest request) {
-    CourseResponse updateCourse = courseService.updateCourse(id, request);
-    return ResponseEntity.ok(updateCourse);
+  @PutMapping("/courseUser/{id}")
+  public ResponseEntity<CourseUserResponse> updateCourseUser(@PathVariable long id,
+      @RequestBody @Valid CreateCourseUserRequest request) {
+    CourseUserResponse updatedCourseUser = courseUserService.updateCourseUser(id, request);
+    return ResponseEntity.ok(updatedCourseUser);
   }
 
-  @DeleteMapping("/course/{id}")
-  public ResponseEntity<Void> deleteCourse(@PathVariable long id) {
-    courseService.deleteCourse(id);
+  @DeleteMapping("/courseUser/{id}")
+  public ResponseEntity<Void> deleteCourseUser(@PathVariable long id) {
+    courseUserService.deleteCourseUser(id);
     return ResponseEntity.noContent().build();
   }
 }

@@ -10,8 +10,10 @@ import probono.gcc.school.model.dto.ClassResponse;
 import probono.gcc.school.model.dto.StudentDTO;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.course.CourseResponse;
+import probono.gcc.school.model.dto.course.CreateCourseRequest;
 import probono.gcc.school.model.dto.courseUser.CourseUserResponse;
 import probono.gcc.school.model.dto.courseUser.CreateCourseUserRequest;
+import probono.gcc.school.model.dto.users.StudentResponse;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.CourseUser;
@@ -58,6 +60,52 @@ public class CourseUserService {
     return mapToResponseDto(savedCourseUser);
   }
 
+  @Transactional(readOnly = true)
+  public CourseUserResponse getCourseUser(long id) {
+    CourseUser findCourseUser = getCourseUserById(id);
+    return mapToResponseDto(findCourseUser);
+  }
+
+  @Transactional
+  public CourseUserResponse updateCourseUser(long id, CreateCourseUserRequest request) {
+    CourseUser existingCourseUser = getCourseUserById(id);
+
+    Course findCourse = courseRepository.findById(request.getCourseId()).orElseThrow(
+        () -> new NoSuchElementException("Course not found with id " + request.getCourseId()));
+    if (Status.INACTIVE.equals(findCourse.getStatus())) {
+      throw new NoSuchElementException("Course not found with id: " + request.getCourseId());
+    }
+
+    Users findUser = userRepository.findByLoginId(request.getLoginId()).orElseThrow(
+        () -> new NoSuchElementException("User not found with LoginId " + request.getLoginId()));
+
+    existingCourseUser.setCourseId(findCourse);
+    existingCourseUser.setLoginId(findUser);
+    existingCourseUser.setUpdatedChargeId(-1l);
+
+    CourseUser savedCourseUser = courseUserRepository.save(existingCourseUser);
+    return mapToResponseDto(savedCourseUser);
+  }
+
+  @Transactional
+  public void deleteCourseUser(long id) {
+    CourseUser existingCourseUser = getCourseUserById(id);
+    existingCourseUser.setStatus(Status.INACTIVE);
+    existingCourseUser.setUpdatedChargeId(-1l);
+
+    courseUserRepository.save(existingCourseUser);
+  }
+
+  public CourseUser getCourseUserById(long id) {
+    CourseUser findCourseUser = courseUserRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("courseUser not found with id " + id));
+    if (Status.INACTIVE.equals(findCourseUser.getStatus())) {
+      throw new NoSuchElementException("courseUser not found with id " + id);
+    }
+
+    return findCourseUser;
+  }
+
   private void validateDuplicateCourseUser(Course findCourse, Users findUser) {
     if (courseUserRepository.existsByCourseIdAndLoginId(findCourse, findUser)) {
       throw new DuplicateEntityException("이미 존재하는 CourseUser 입니다.");
@@ -71,10 +119,18 @@ public class CourseUserService {
 
     CourseResponse savedCourse = modelMapper.map(savedCourseUser.getCourseId(),
         CourseResponse.class);
-    StudentDTO savedUser = modelMapper.map(savedCourseUser.getLoginId(), StudentDTO.class);
+    StudentResponse savedStudent = modelMapper.map(savedCourseUser.getLoginId(),
+        StudentResponse.class);
+    ClassResponse savedClass = modelMapper.map(savedCourseUser.getCourseId().getClassId(),
+        ClassResponse.class);
+    SubjectResponseDTO savedSubject = modelMapper.map(savedCourseUser.getCourseId().getSubjectId(),
+        SubjectResponseDTO.class);
 
     responseDto.setCourse(savedCourse);
-    responseDto.setUser(savedUser);
+    responseDto.getCourse().setClassResponse(savedClass);
+    responseDto.getCourse().setSubjectResponseDTO(savedSubject);
+
+    responseDto.setStudent(savedStudent);
     return responseDto;
   }
 }
