@@ -50,6 +50,7 @@ public class Notice {
   private Timestamp createdAt;
 
   @Column
+  @UpdateTimestamp
   private Timestamp updatedAt;
 
   @Column(nullable = false)

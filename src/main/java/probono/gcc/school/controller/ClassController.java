@@ -58,7 +58,7 @@ public class ClassController {
   }
 
   @DeleteMapping("/class/{id}")
-  public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteClass(@PathVariable Long id) {
     classService.deleteClass(id);
     return ResponseEntity.noContent().build();
   }

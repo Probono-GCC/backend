@@ -13,10 +13,14 @@ import probono.gcc.school.model.dto.ClassResponse;
 import probono.gcc.school.model.dto.CreateClassRequest;
 import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.NoticeResponse;
+import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.entity.Classes;
+import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
+import probono.gcc.school.repository.CourseRepository;
+import probono.gcc.school.repository.CourseUserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,11 @@ public class ClassService {
 
   private final ModelMapper modelMapper;
   private final ClassRepository classRepository;
+
+  private final CourseService courseService;
+
+  private final CourseRepository courseRepository;
+
 
   /**
    * 클래스 생성
@@ -67,6 +76,11 @@ public class ClassService {
     Classes existingClass = this.getClassById(id);
     existingClass.setStatus(Status.INACTIVE);
     existingClass.setUpdatedChargeId(-1L);
+
+    List<Course> classCourseList = courseRepository.findByClassId(existingClass);
+    for (Course course : classCourseList) {
+      courseService.deleteCourse(course.getCourseId());
+    }
 
     Classes savedClass = classRepository.save(existingClass);
   }

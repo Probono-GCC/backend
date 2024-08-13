@@ -18,7 +18,9 @@ import probono.gcc.school.model.dto.ClassResponse;
 import probono.gcc.school.model.dto.CreateClassRequest;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
 import probono.gcc.school.model.dto.NoticeResponse;
+import probono.gcc.school.model.dto.UpdateNoticeRequest;
 import probono.gcc.school.model.entity.Notice;
+import probono.gcc.school.model.enums.NoticeType;
 import probono.gcc.school.service.NoticeService;
 
 @RestController
@@ -28,7 +30,7 @@ public class NoticeController {
   private final NoticeService noticeService;
 
   @PostMapping("/notice")
-  public ResponseEntity<NoticeResponse> createStudent(
+  public ResponseEntity<NoticeResponse> createNotice(
       @RequestBody @Valid CreateNoticeRequest request) {
     Notice notice = new Notice();
     notice.setTitle(request.getTitle());
@@ -53,15 +55,33 @@ public class NoticeController {
     return ResponseEntity.ok(noticeResponse);
   }
 
-//  @GetMapping("/classNoticeList/{id}")
-//  public ResponseEntity<List<NoticeResponse>> getClassNoticeList(@PathVariable Long id) {
-//    List<NoticeResponse> noticeList = noticeService.getNoticeList(id);
-//    return ResponseEntity.ok(noticeList);
-//  }
+  @GetMapping("/notice/classNoticeList/{id}")
+  public ResponseEntity<List<NoticeResponse>> getClassNoticeList(@PathVariable Long id) {
+    List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.CLASS);
+    return ResponseEntity.ok(noticeList);
+  }
+
+  @GetMapping("/notice/classAndCourseNoticeList/{id}")
+  public ResponseEntity<List<NoticeResponse>> getClassAndCourseNoticeList(@PathVariable Long id) {
+    List<NoticeResponse> noticeList = noticeService.getClassAndCourseNoticeList(id);
+    return ResponseEntity.ok(noticeList);
+  }
+
+  @GetMapping("/notice/courseNoticeList/{id}")
+  public ResponseEntity<List<NoticeResponse>> getCourseNoticeList(@PathVariable Long id) {
+    List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.COURSE);
+    return ResponseEntity.ok(noticeList);
+  }
+
+  @GetMapping("/notice/schoolNoticeList/{id}")
+  public ResponseEntity<List<NoticeResponse>> getSchoolNoticeList(@PathVariable Long id) {
+    List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.SCHOOL);
+    return ResponseEntity.ok(noticeList);
+  }
 
   @PutMapping("/notice/{id}")
   public ResponseEntity<NoticeResponse> updateNotice(@PathVariable Long id,
-      @RequestBody @Valid CreateNoticeRequest request) {
+      @RequestBody @Valid UpdateNoticeRequest request) {
     NoticeResponse updatedNotice = noticeService.updateNotice(id, request);
     return ResponseEntity.ok(updatedNotice);
   }

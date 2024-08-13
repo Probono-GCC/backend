@@ -89,7 +89,7 @@ public class ImageService {
         .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
 
     //s3에서 이미지 삭제 수행
-    s3ImageService.deleteImageFromS3(image.getImagePath());
+    //s3ImageService.deleteImageFromS3(image.getImagePath());
 
     // 논리적 삭제 수행
     image.setStatus(Status.INACTIVE);
