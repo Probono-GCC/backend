@@ -1,5 +1,6 @@
 package probono.gcc.school.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +15,14 @@ import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.course.CreateCourseRequest;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
+import probono.gcc.school.model.entity.CourseUser;
+import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.entity.Subject;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.CourseRepository;
+import probono.gcc.school.repository.CourseUserRepository;
+import probono.gcc.school.repository.NoticeRepository;
 import probono.gcc.school.repository.SubjectRepository;
 
 @Service
@@ -29,6 +34,14 @@ public class CourseService {
   private final ClassRepository classRepository;
 
   private final SubjectRepository subjectRepository;
+
+  private final NoticeRepository noticeRepository;
+
+  private final NoticeService noticeService;
+
+  private final CourseUserRepository courseUserRepository;
+
+  private final CourseUserService courseUserService;
 
   @Transactional
   public CourseResponse create(long classId, long subjectId) {
@@ -86,6 +99,16 @@ public class CourseService {
     Course existingCourse = getCourseById(id);
     existingCourse.setStatus(Status.INACTIVE);
     existingCourse.setUpdatedChargeId(-1l);
+
+    List<Notice> courseNoticeList = noticeRepository.findByCourseId(existingCourse);
+    for (Notice notice : courseNoticeList) {
+      noticeService.deleteNotice(notice.getNoticeId());
+    }
+
+    List<CourseUser> courseUsersList = courseUserRepository.findByCourseId(existingCourse);
+    for (CourseUser courseUser : courseUsersList) {
+      courseUserService.deleteCourseUser(courseUser.getCuId());
+    }
 
     courseRepository.save(existingCourse);
   }

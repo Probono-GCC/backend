@@ -17,6 +17,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
+import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
 
 @Entity
@@ -30,6 +31,10 @@ public class CourseUser {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long cuId;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Role role;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)

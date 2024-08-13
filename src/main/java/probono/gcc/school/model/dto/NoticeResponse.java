@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Users;
@@ -40,6 +41,8 @@ public class NoticeResponse {
   private Long updatedChargeId;
 
   private int views;
+
+  //private CourseResponse courseResponse;
 
   private List<ImageResponseDTO> imageList;
 }

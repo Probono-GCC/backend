@@ -7,18 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.model.dto.ClassResponse;
-import probono.gcc.school.model.dto.StudentDTO;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.course.CourseResponse;
-import probono.gcc.school.model.dto.course.CreateCourseRequest;
 import probono.gcc.school.model.dto.courseUser.CourseUserResponse;
 import probono.gcc.school.model.dto.courseUser.CreateCourseUserRequest;
-import probono.gcc.school.model.dto.users.StudentResponse;
-import probono.gcc.school.model.entity.Classes;
+import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.CourseUser;
-import probono.gcc.school.model.entity.Subject;
 import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.CourseRepository;
 import probono.gcc.school.repository.CourseUserRepository;
@@ -55,6 +52,14 @@ public class CourseUserService {
     courseUser.setCourseId(findCourse);
     courseUser.setLoginId(findUser);
     courseUser.setCreatedChargeId(-1l);
+
+    if (Role.STUDENT.equals(findUser.getRole())) {
+      courseUser.setRole(Role.STUDENT);
+    } else if (Role.STUDENT.equals(findUser.getRole())) {
+      courseUser.setRole(Role.TEACHER);
+    } else {
+      throw new IllegalArgumentException("course에 할당할 수 없는 유저입니다.");
+    }
 
     CourseUser savedCourseUser = courseUserRepository.save(courseUser);
     return mapToResponseDto(savedCourseUser);
@@ -119,8 +124,8 @@ public class CourseUserService {
 
     CourseResponse savedCourse = modelMapper.map(savedCourseUser.getCourseId(),
         CourseResponse.class);
-    StudentResponse savedStudent = modelMapper.map(savedCourseUser.getLoginId(),
-        StudentResponse.class);
+    UserResponse savedUser = modelMapper.map(savedCourseUser.getLoginId(),
+        UserResponse.class);
     ClassResponse savedClass = modelMapper.map(savedCourseUser.getCourseId().getClassId(),
         ClassResponse.class);
     SubjectResponseDTO savedSubject = modelMapper.map(savedCourseUser.getCourseId().getSubjectId(),
@@ -130,7 +135,7 @@ public class CourseUserService {
     responseDto.getCourse().setClassResponse(savedClass);
     responseDto.getCourse().setSubjectResponseDTO(savedSubject);
 
-    responseDto.setStudent(savedStudent);
+    responseDto.setUser(savedUser);
     return responseDto;
   }
 }
