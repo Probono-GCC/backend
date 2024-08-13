@@ -66,11 +66,7 @@ public class StudentService {
       throw new CustomException("Student creation failed due to conflict with existing data.", HttpStatus.CONFLICT);
 
     }
-    catch (Exception ex) {
-      // Handle any other unforeseen exceptions
-      logger.error("Unexpected error during student creation: {}", ex.getMessage());
-      throw new CustomException("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+
 
   }
 
