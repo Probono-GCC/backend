@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.users.StudentCreateRequestDTO;
@@ -135,6 +136,8 @@ public class StudentController {
       return ResponseEntity.ok("Login ID is available.");
     }
   }
+
+
 
 
 

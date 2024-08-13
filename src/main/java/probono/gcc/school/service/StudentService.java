@@ -48,13 +48,14 @@ public class StudentService {
       Users student = new Users();
       student.setLoginId(requestDto.getLoginId());
       student.setSerialNumber(requestDto.getSerialNumber());
+      logger.info("requestDto.getSerialNumber() : {}",requestDto.getSerialNumber());
+      logger.info("student.getSerialNumber() : {}",student.getSerialNumber());
       student.setName(requestDto.getName());
       student.setLoginPw(requestDto.getLoginPw());
       student.setGrade(requestDto.getGrade());
       student.setStatus(ACTIVE);
       student.setCreatedChargeId(1L); // Set the createdChargeId
       student.setRole(Role.STUDENT);
-      student.setSerialNumber(null);
 
       Users studentCreated = studentRepository.save(student);
       return modelMapper.map(studentCreated, StudentResponseDTO.class);

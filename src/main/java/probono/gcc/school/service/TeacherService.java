@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,14 @@ import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Subject;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
+import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.ImageRepository;
 import probono.gcc.school.repository.UserRepository;
 
@@ -38,6 +41,7 @@ public class TeacherService {
   private ModelMapper modelMapper;
   private UserRepository teacherRepository;
   private ImageRepository imageRepository;
+  private ClassRepository classRepository;
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
 
@@ -257,5 +261,27 @@ public class TeacherService {
       return true;
     }
     return false;
+  }
+
+  //teacher의 담당 class 할당
+  public Users assignClass(String loginId, Long classId) {
+    // Find the teacher by loginId
+    Users teacher = teacherRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + loginId, HttpStatus.NOT_FOUND));
+
+    // Find the class by classId
+    Classes assignedClass = classRepository.findById(classId)
+        .orElseThrow(() -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
+
+    Hibernate.initialize(assignedClass.getNotice());
+
+    // Assign the class to the teacher
+    teacher.setClassId(assignedClass);
+
+    // Save the updated teacher entity
+    teacherRepository.save(teacher);
+
+    return teacher;
+
   }
 }
