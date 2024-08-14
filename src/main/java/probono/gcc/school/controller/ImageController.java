@@ -27,6 +27,7 @@ import probono.gcc.school.service.S3ImageService;
 @RestController
 @AllArgsConstructor
 public class ImageController {
+
   private final ImageService imageService;
   private ModelMapper modelMapper;
 
@@ -46,6 +47,19 @@ public class ImageController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to upload image: " + e.getMessage());
     }
+  }
+
+  @PostMapping("/notice/images")
+  public ResponseEntity<ImageResponseDTO> saveNoticeImage(
+      @RequestPart("image") MultipartFile image, Long noticeId) {
+    String imagePath = s3ImageService.upload(image);
+
+//    ImageRequestDTO requestDto = new ImageRequestDTO();
+//    requestDto.setImagePath(profileImageUrl);
+    // set other fields of requestDto as necessary
+
+    ImageResponseDTO imageResponse = imageService.saveNoticeImage(imagePath, noticeId);
+    return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
   }
 
   //이미지 생성
@@ -95,7 +109,8 @@ public class ImageController {
     } catch (IllegalArgumentException ex) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
     } catch (S3Exception ex) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image from S3: " + ex.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to delete image from S3: " + ex.getMessage());
     } catch (Exception ex) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image");
     }

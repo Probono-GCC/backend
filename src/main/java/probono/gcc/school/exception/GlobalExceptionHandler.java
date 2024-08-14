@@ -29,6 +29,13 @@ public class GlobalExceptionHandler {
         .status(HttpStatus.CONFLICT) // 409 Conflict
         .body(ex.getMessage()); // 예외 메시지 반환
   }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST) // 400 Bad Request
+        .body(ex.getMessage()); // 예외 메시지 반환
+  }
 //
 //  @ExceptionHandler(EntityNotFoundException.class)
 //  public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {

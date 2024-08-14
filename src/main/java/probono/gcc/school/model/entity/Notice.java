@@ -33,7 +33,7 @@ public class Notice {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long noticeId;
+  private long noticeId;
 
   @Column(nullable = false, length = 100)
   private String title;
@@ -50,13 +50,14 @@ public class Notice {
   private Timestamp createdAt;
 
   @Column
+  @UpdateTimestamp
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private Long createdChargeId;
+  private long createdChargeId;
 
   @Column
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @Column(nullable = false)
   private int views;
@@ -80,8 +81,8 @@ public class Notice {
   /**
    * Image완성 이후 추가 로직 필요
    */
-//  @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
-//  private List<Notice> notice;
+  @OneToMany(mappedBy = "noticeId", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Image> imageList;
 
   // Getters and Setters
 }

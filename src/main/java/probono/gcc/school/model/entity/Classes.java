@@ -34,7 +34,7 @@ public class Classes {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long classId;
+  private long classId;
 
   @Column(nullable = false)
   private int year;
@@ -61,10 +61,10 @@ public class Classes {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private Long createdChargeId;
+  private long createdChargeId;
 
   @Column
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Notice> notice;
@@ -72,5 +72,8 @@ public class Classes {
   @OneToMany(mappedBy = "loginId")
   private List<Users> users;
 
+
+  @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Course> courseList;
 
 }

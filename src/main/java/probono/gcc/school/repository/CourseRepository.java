@@ -5,15 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
-import probono.gcc.school.model.entity.Notice;
+import probono.gcc.school.model.entity.Subject;
 
 @Repository
-public interface NoticeRepository extends JpaRepository<Notice, Long> {
+public interface CourseRepository extends JpaRepository<Course, Long> {
 
-  List<Notice> findByClassId(Classes classId);
+  boolean existsByClassIdAndSubjectId(Classes findClass, Subject findSubject);
 
-  List<Notice> findByCourseId(Course courseId);
-
-  List<Notice> findByClassIdIsNullAndCourseIdIsNull();
+  List<Course> findByClassId(Classes findclass);
 
 }
