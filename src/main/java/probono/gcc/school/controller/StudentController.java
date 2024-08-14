@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.users.StudentCreateRequestDTO;
@@ -26,6 +27,7 @@ import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.service.ImageService;
 import probono.gcc.school.service.StudentService;
 
 @Slf4j
@@ -50,6 +52,7 @@ public class StudentController {
   public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
     try {
       List<StudentResponseDTO> students = studentService.findAllStudents();
+
       return ResponseEntity.ok(students);
     } catch (Exception ex) {
       logger.error("Unexpected error occurred while fetching students: {}", ex.getMessage());
@@ -60,20 +63,14 @@ public class StudentController {
   // 특정 Student 조회 (loginId로 조회)
   @GetMapping("/students/{loginId}")
   public ResponseEntity<StudentResponseDTO> getOneStudent(@PathVariable String loginId) {
-    try {
-      StudentResponseDTO student = studentService.findOneStudent(loginId);
-      return ResponseEntity.ok(student);
-    } catch (CustomException ex) {
-      logger.error("Student not found: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    } catch (Exception ex) {
-      logger.error("Unexpected error occurred while fetching the student: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+
+    StudentResponseDTO student = studentService.findOneStudent(loginId);
+    return ResponseEntity.ok(student);
+
   }
 
   @PutMapping("/students/{loginId}")
-  public ResponseEntity<TeacherResponseDTO> updateTeacher(
+  public ResponseEntity<?> updateStudent(
       @PathVariable String loginId, @RequestBody @Valid StudentUpdateRequestDTO requestDto) {
     try {
 
@@ -88,10 +85,10 @@ public class StudentController {
       return ResponseEntity.ok(responseDto);
     } catch (CustomException ex) {
       logger.error("Error occurred during student update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     } catch (Exception ex) {
       logger.error("Unexpected error occurred during student update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
   }
 
@@ -104,9 +101,11 @@ public class StudentController {
   })
   public ResponseEntity<?> deleteStudent(@PathVariable String loginId) {
     try {
+
       // Perform delete operation using service
       studentService.deleteStudent(loginId);
       Users deletedStudent = studentService.findById(loginId);
+
       // Teacher 엔티티를 DTO로 변환
 
       StudentResponseDTO responseDTO = modelMapper.map(deletedStudent, StudentResponseDTO.class);
@@ -135,9 +134,6 @@ public class StudentController {
       return ResponseEntity.ok("Login ID is available.");
     }
   }
-
-
-
 
 
 }

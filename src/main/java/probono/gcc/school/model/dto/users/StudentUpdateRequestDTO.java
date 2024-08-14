@@ -28,6 +28,6 @@ public class StudentUpdateRequestDTO {
   private String motherPhoneNum;//항상 바꿀 수 있음
   private String guardiansPhoneNum;//항상 바꿀 수 있음
   private String pwAnswer;//최초 1회 접속 시에만 바꿀 수 있음 //최초 1회 접속 시 입력
-  private Long imageId;//항상 바꿀 수 있음
+  private Long imageId;//항상 바꿀 수 있음 //최초 1회 접속 시 입력
 
 }

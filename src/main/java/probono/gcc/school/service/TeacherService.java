@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,14 @@ import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Subject;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
+import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.ImageRepository;
 import probono.gcc.school.repository.UserRepository;
 
@@ -38,6 +41,8 @@ public class TeacherService {
   private ModelMapper modelMapper;
   private UserRepository teacherRepository;
   private ImageRepository imageRepository;
+  private ClassRepository classRepository;
+  private ImageService imageService;
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
 
@@ -81,11 +86,11 @@ public class TeacherService {
       // Convert and return the saved entity to a DTO
       return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
 
-    }
-    catch (DataIntegrityViolationException ex) {
+    } catch (DataIntegrityViolationException ex) {
       // Handle database-related exceptions (including SQL constraint violations)
       logger.error("Database integrity violation: {}", ex.getMessage());
-      throw new CustomException("Teacher creation failed due to conflict with existing data.", HttpStatus.CONFLICT);
+      throw new CustomException("Teacher creation failed due to conflict with existing data.",
+          HttpStatus.CONFLICT);
 
     }
 //    catch (Exception ex) {
@@ -94,13 +99,12 @@ public class TeacherService {
 //      throw new CustomException("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
 //    }
 
-
   }
 
   // Retrieve all teachers
   public List<TeacherResponseDTO> findAllTeachers() {
     try {
-      List<Users> teacherList = teacherRepository.findAll();
+      List<Users> teacherList = teacherRepository.findByStatus(ACTIVE);
       // Use stream and ModelMapper to convert entity list to DTO list
       return teacherList.stream()
           .map(teacher -> modelMapper.map(teacher, TeacherResponseDTO.class))
@@ -114,19 +118,13 @@ public class TeacherService {
 
   // Retrieve a single teacher by ID
   public TeacherResponseDTO findOneTeacher(String loginId) {
-    try {
-      Users teacher = teacherRepository.findByLoginId(loginId).orElseThrow(
-          () -> new IllegalArgumentException("Teacher not found with ID: " + loginId)
-      );
-      // Convert the found entity to a DTO
-      return modelMapper.map(teacher, TeacherResponseDTO.class);
-    } catch (IllegalArgumentException e) {
-      logger.error("Teacher not found: {}", e.getMessage());
-      throw e;
-    } catch (Exception e) {
-      logger.error("Unexpected error occurred while fetching the teacher: {}", e.getMessage());
-      throw new RuntimeException("An unexpected error occurred while fetching the teacher", e);
-    }
+
+    Users teacher = teacherRepository.findByLoginIdAndStatus(loginId, ACTIVE).orElseThrow(
+        () -> new IllegalArgumentException("Teacher not found with ID: " + loginId)
+    );
+    // Convert the found entity to a DTO
+    return modelMapper.map(teacher, TeacherResponseDTO.class);
+
   }
 
   @Transactional
@@ -136,11 +134,12 @@ public class TeacherService {
     //loginId로 DB 조회했을 때 birth, sex , pwAnswer가 null이라면 requestDto에서 해당값 get해서 update하기
     // 세 값 하나라도 빠지면 예외처리
     // DB에서 loginId로 교사 정보 조회
-    Users teacher = teacherRepository.findByLoginId(loginId).orElseThrow(
-        () -> new CustomException("Teacher with loginId " + loginId + " not found.",HttpStatus.NOT_FOUND)
+    Users teacher = teacherRepository.findByLoginIdAndStatus(loginId, ACTIVE).orElseThrow(
+        () -> new CustomException("Teacher with loginId " + loginId + " not found.",
+            HttpStatus.NOT_FOUND)
     );
-
-    if (teacher.getBirth() == null && teacher.getSex() == null && teacher.getPwAnswer() == null) {
+    if (teacher.getBirth() == null && teacher.getSex() == null && teacher.getPwAnswer() == null
+        && teacher.getImageId() == null) {
       firstTimeUpdate(teacher, requestDto);
     } else {
       logger.info("enter into subsequentUpdate()");
@@ -149,13 +148,17 @@ public class TeacherService {
 
     teacherRepository.save(teacher);
 
-
     return teacher.getLoginId();
 
   }
 
 
   private void subsequentUpdate(Users teacher, TeacherRequestDTO requestDto) {
+    //pwAnswer가 있으면 예외처리
+    if (requestDto.getPwAnswer() != null) {
+      throw new CustomException("Cannot update pwAnswer anymore", HttpStatus.BAD_REQUEST);
+    }
+
     //name,birth,phoneNum,loginPw,imageId
     if (requestDto.getName() != null) {
       teacher.setName(requestDto.getName());
@@ -171,10 +174,12 @@ public class TeacherService {
     }
     if (requestDto.getImageId() != null) {
       Image image = imageRepository.findById(requestDto.getImageId())
-          .orElseThrow(() -> new CustomException("Image not found",HttpStatus.NOT_FOUND));
+          .orElseThrow(() -> new CustomException("Image not found", HttpStatus.NOT_FOUND));
       teacher.setImageId(image);
     }
-
+    if (requestDto.getSex() != null) {
+      teacher.setSex(requestDto.getSex());
+    }
 
     //`updated_charged_id`를 설정
     teacher.setUpdatedChargeId(2L); // Dummy data 설정
@@ -185,34 +190,37 @@ public class TeacherService {
   }
 
   private void firstTimeUpdate(Users teacher, TeacherRequestDTO requestDto) {
-    updateTeacherFieldIfNull(teacher::getBirth, teacher::setBirth, requestDto.getBirth(), "Birth is missing in the request.");
-    updateTeacherFieldIfNull(teacher::getSex, teacher::setSex, requestDto.getSex(), "Sex is missing in the request.");
-    updateTeacherFieldIfNull(teacher::getPwAnswer, teacher::setPwAnswer, requestDto.getPwAnswer(), "Password answer is missing in the request.");
+    updateTeacherFieldIfNull(teacher::getBirth, teacher::setBirth, requestDto.getBirth(),
+        "Birth is missing in the request.");
+    updateTeacherFieldIfNull(teacher::getSex, teacher::setSex, requestDto.getSex(),
+        "Sex is missing in the request.");
+    updateTeacherFieldIfNull(teacher::getPwAnswer, teacher::setPwAnswer, requestDto.getPwAnswer(),
+        "Password answer is missing in the request.");
+    updateTeacherImageIdField(teacher::getImageId, teacher::setImageId, requestDto.getImageId(),
+        "Image ID is missing in the request.");
 
-    //requestDto에 imageId가 있으면 update
-    updateTeacherImageIdField(teacher::getImageId, teacher::setImageId, requestDto.getImageId(), "Image ID is missing in the request.");
     //requestDto에 loginPw가 있으면 update
-    updateTeacherLoginPwField(teacher::getLoginPw,teacher::setLoginPw,requestDto.getLoginPw(),"Login Pw is missing in the request.");
+    updateTeacherLoginPwField(teacher::getLoginPw, teacher::setLoginPw, requestDto.getLoginPw(),
+        "Login Pw is missing in the request.");
 
 
   }
 
-  private void updateTeacherLoginPwField(Supplier<String> getLoginPw, Consumer<String> setLoginPw, String loginPw, String errorMessage) {
-    if (loginPw != null) {
+  private void updateTeacherLoginPwField(Supplier<String> getLoginPw, Consumer<String> setLoginPw,
+      String loginPw, String errorMessage) {
+    if (loginPw != null) {//새로운 비밀번호가 loginPw에 담겨있음
       // 새로운 비밀번호가 제공된 경우 업데이트
       setLoginPw.accept(loginPw);
-    } else if (getLoginPw.get() == null) {
-      // 기존 비밀번호가 없고 새로운 비밀번호도 제공되지 않은 경우 예외 처리
-      throw new CustomException(errorMessage, HttpStatus.BAD_REQUEST);
     }
   }
 
 
-
-  private void updateTeacherImageIdField(Supplier<Image> getImageId, Consumer<Image> setImageId, Long imageId, String errorMessage) {
+  private void updateTeacherImageIdField(Supplier<Image> getImageId, Consumer<Image> setImageId,
+      Long imageId, String errorMessage) {
     if (imageId != null) {
       Image image = imageRepository.findById(imageId)
-          .orElseThrow(() -> new CustomException("Image not found with id: " + imageId, HttpStatus.NOT_FOUND));
+          .orElseThrow(() -> new CustomException("Image not found with id: " + imageId,
+              HttpStatus.NOT_FOUND));
       setImageId.accept(image);
     } else if (getImageId.get() == null) {
       throw new CustomException(errorMessage, HttpStatus.BAD_REQUEST);
@@ -230,7 +238,8 @@ public class TeacherService {
 
   }
 
-  private <T> void updateTeacherFieldIfNull(Supplier<T> getter, Consumer<T> setter, T value, String errorMessage) {
+  private <T> void updateTeacherFieldIfNull(Supplier<T> getter, Consumer<T> setter, T value,
+      String errorMessage) {
     if (getter.get() == null) {
       if (value == null) {
         throw new CustomException(errorMessage, HttpStatus.BAD_REQUEST);
@@ -244,6 +253,14 @@ public class TeacherService {
     Users teacher = teacherRepository.findByLoginId(loginId).orElseThrow(
         () -> new IllegalArgumentException("unvalid loginId")
     );
+
+    // 매핑된 이미지가 있는 경우 삭제
+    if (teacher.getImageId() != null) {
+      Long imageId = teacher.getImageId().getImageId();
+      logger.info("Deleting associated image with ID: {}", imageId);
+      imageService.deleteProfileImage(imageId);
+    }
+
     // 논리적 삭제 수행
     teacher.setStatus(Status.INACTIVE);
     // Dummy Data
@@ -257,5 +274,29 @@ public class TeacherService {
       return true;
     }
     return false;
+  }
+
+  //teacher의 담당 class 할당
+  public Users assignClass(String loginId, Long classId) {
+    // Find the teacher by loginId
+    Users teacher = teacherRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + loginId,
+            HttpStatus.NOT_FOUND));
+
+    // Find the class by classId
+    Classes assignedClass = classRepository.findById(classId)
+        .orElseThrow(
+            () -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
+
+    Hibernate.initialize(assignedClass.getNotice());
+
+    // Assign the class to the teacher
+    teacher.setClassId(assignedClass);
+
+    // Save the updated teacher entity
+    teacherRepository.save(teacher);
+
+    return teacher;
+
   }
 }

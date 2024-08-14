@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.model.dto.ClassDTO;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
@@ -32,6 +33,7 @@ import probono.gcc.school.service.TeacherService;
 @RestController
 @AllArgsConstructor
 public class TeacherController {
+
   private final TeacherService teacherService;
   private ModelMapper modelMapper;
   private static final Logger logger = LoggerFactory.getLogger(TeacherController.class);
@@ -40,16 +42,10 @@ public class TeacherController {
   @PostMapping("/teachers")
   public ResponseEntity<TeacherResponseDTO> createTeacher(
       @RequestBody TeacherRequestDTO requestDto) {
-    try {
-      TeacherResponseDTO teacher = teacherService.createTeacher(requestDto);
-      return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
-    } catch (CustomException ex) {
-      logger.error("[CustomException]Error occurred during teacher creation: {}", ex.getMessage());
-      return ResponseEntity.status(ex.getStatus()).body(null);
-    } catch (Exception ex) {
-      logger.error("[Exception]Unexpected error occurred: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+
+    TeacherResponseDTO teacher = teacherService.createTeacher(requestDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
+
   }
 
   // Retrieve all teachers
@@ -81,7 +77,7 @@ public class TeacherController {
 
   // Update a teacher
   @PutMapping("/teachers/{loginId}")
-  public ResponseEntity<TeacherResponseDTO> updateTeacher(
+  public ResponseEntity<?> updateTeacher(
       @PathVariable String loginId, @RequestBody TeacherRequestDTO requestDto) {
     try {
 
@@ -96,10 +92,10 @@ public class TeacherController {
       return ResponseEntity.ok(responseDto);
     } catch (CustomException ex) {
       logger.error("Error occurred during teacher update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     } catch (Exception ex) {
       logger.error("Unexpected error occurred during teacher update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
   }
 
@@ -144,9 +140,25 @@ public class TeacherController {
   }
 
   //담당하는 class 할당(담임선생님)
+  @PutMapping("/teachers/assignClass/{loginId}/{classId}")
+  public ResponseEntity<TeacherResponseDTO> assignClassToTeacher(
+      @PathVariable String loginId, @PathVariable Long classId) {
+    try {
+      // Assign the class to the teacher
+      Users updatedTeacher = teacherService.assignClass(loginId, classId);
+      // Convert the updated teacher entity to a DTO
+      TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
 
-
-
+      return ResponseEntity.ok(responseDto);
+    } catch (CustomException ex) {
+      logger.error("Error occurred while assigning class to teacher: {}", ex.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    } catch (Exception ex) {
+      logger.error("Unexpected error occurred while assigning class to teacher: {}",
+          ex.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+  }
 
 
 }
