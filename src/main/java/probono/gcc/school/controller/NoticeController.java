@@ -3,17 +3,20 @@ package probono.gcc.school.controller;
 import jakarta.validation.Valid;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import probono.gcc.school.model.dto.ClassResponse;
 import probono.gcc.school.model.dto.CreateClassRequest;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
@@ -22,30 +25,20 @@ import probono.gcc.school.model.dto.UpdateNoticeRequest;
 import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.enums.NoticeType;
 import probono.gcc.school.service.NoticeService;
+import probono.gcc.school.service.S3ImageService;
 
 @RestController
 @RequiredArgsConstructor
 public class NoticeController {
 
   private final NoticeService noticeService;
+  private final S3ImageService s3ImageService;
 
   @PostMapping("/notice")
   public ResponseEntity<NoticeResponse> createNotice(
-      @RequestBody @Valid CreateNoticeRequest request) {
-    Notice notice = new Notice();
-    notice.setTitle(request.getTitle());
-    notice.setContent(request.getContent());
-    notice.setType(request.getType());
-    notice.setCreatedChargeId(-1L);
+      @Valid @ModelAttribute CreateNoticeRequest request) {
 
-    LocalDateTime now = LocalDateTime.now();
-    Timestamp timestamp = Timestamp.valueOf(now);
-    notice.setUpdatedAt(timestamp);
-
-    Long classId = request.getClassId();
-    Long courseId = request.getCourseId();
-
-    NoticeResponse createdNotice = noticeService.create(notice, classId, courseId);
+    NoticeResponse createdNotice = noticeService.create(request);
     return ResponseEntity.ok(createdNotice);
   }
 
@@ -81,7 +74,7 @@ public class NoticeController {
 
   @PutMapping("/notice/{id}")
   public ResponseEntity<NoticeResponse> updateNotice(@PathVariable Long id,
-      @RequestBody @Valid UpdateNoticeRequest request) {
+      @Valid @ModelAttribute UpdateNoticeRequest request) {
     NoticeResponse updatedNotice = noticeService.updateNotice(id, request);
     return ResponseEntity.ok(updatedNotice);
   }

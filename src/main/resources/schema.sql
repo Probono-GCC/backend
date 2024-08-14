@@ -69,8 +69,8 @@ CREATE TABLE course (
                         updatedAt TIMESTAMP NOT NULL,
                         createdChargeId BIGINT NOT NULL,
                         updatedChargeId BIGINT NULL,
-                        subjectId BIGINT,
-                        classId BIGINT
+                        subjectId BIGINT NOT NULL,
+                        classId BIGINT NOT NULL
 );
 CREATE TABLE course_user (
                              cuId BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
