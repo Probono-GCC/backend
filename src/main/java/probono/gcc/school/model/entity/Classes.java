@@ -69,5 +69,8 @@ public class Classes {
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Notice> notice;
 
-  // Getters and Setters
+  @OneToMany(mappedBy = "loginId")
+  private List<Users> users;
+
+
 }

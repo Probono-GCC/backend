@@ -104,5 +104,5 @@ public class Users implements Persistable<String> {
     return this.getCreatedAt() == null;
   }
 
-  // Getters and Setters
+
 }
