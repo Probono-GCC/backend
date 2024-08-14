@@ -45,21 +45,34 @@ public class ImageService {
     return modelMapper.map(savedImage, ImageResponseDTO.class);
   }
 
-  public ImageResponseDTO saveNoticeImage(String imagePath, Long noticeId) {
+//  public ImageResponseDTO saveNoticeImage(String imagePath, Long noticeId) {
+//
+//    Image image = new Image();
+//    image.setImagePath(imagePath);
+//    image.setCreatedChargeId(1L);
+//
+//    Optional<Notice> findNotice = noticeRepository.findById(noticeId);
+//    if (findNotice.isEmpty()) {
+//      throw new IllegalArgumentException("NoticeId가 올바르지 않습니다.");
+//    }
+//    image.setNoticeId(findNotice.get());
+//
+//    Image savedImage = imageRepository.save(image);
+//
+//    return modelMapper.map(savedImage, ImageResponseDTO.class);
+//  }
+
+  public Image saveNoticeImage(String imagePath, Notice notice) {
 
     Image image = new Image();
     image.setImagePath(imagePath);
     image.setCreatedChargeId(1L);
 
-    Optional<Notice> findNotice = noticeRepository.findById(noticeId);
-    if (findNotice.isEmpty()) {
-      throw new IllegalArgumentException("NoticeId가 올바르지 않습니다.");
-    }
-    image.setNoticeId(findNotice.get());
+    image.setNoticeId(notice);
 
     Image savedImage = imageRepository.save(image);
 
-    return modelMapper.map(savedImage, ImageResponseDTO.class);
+    return savedImage;
   }
 
 
@@ -84,22 +97,22 @@ public class ImageService {
     return modelMapper.map(image, ImageResponseDTO.class);
   }
 
-  public Long deleteProfileImage(Long id) {
+  public void deleteProfileImage(Long id) {
     Image image = imageRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
 
     //s3에서 이미지 삭제 수행
-    //s3ImageService.deleteImageFromS3(image.getImagePath());
+    s3ImageService.deleteImageFromS3(image.getImagePath());
 
-    // 논리적 삭제 수행
-    image.setStatus(Status.INACTIVE);
-    // Dummy Data
-    image.setUpdatedChargeId(2L);
+//    // 논리적 삭제 수행
+//    image.setStatus(Status.INACTIVE);
+//    // Dummy Data
+//    image.setUpdatedChargeId(2L);
+//
+//    // 엔티티를 저장하여 변경 사항을 데이터베이스에 반영
+//    imageRepository.save(image);
+    imageRepository.deleteById(id);
 
-    // 엔티티를 저장하여 변경 사항을 데이터베이스에 반영
-    imageRepository.save(image);
-
-    return image.getImageId();
   }
 
   public Image findById(Long id) {

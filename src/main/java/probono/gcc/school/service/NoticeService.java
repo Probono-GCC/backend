@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import probono.gcc.school.model.dto.ClassResponse;
 import probono.gcc.school.model.dto.CreateClassRequest;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
@@ -42,23 +44,51 @@ public class NoticeService {
 
   private final S3ImageService s3ImageService;
 
-  @Transactional
-  public NoticeResponse create(Notice requestNotice, Long classId, Long courseId) {
 
-    if (requestNotice.getType().equals(NoticeType.CLASS)) {
+  @Transactional
+  public NoticeResponse create(CreateNoticeRequest request) {
+
+    Notice notice = new Notice();
+    notice.setTitle(request.getTitle());
+    notice.setContent(request.getContent());
+    notice.setType(request.getType());
+    notice.setCreatedChargeId(-1L);
+
+    List<String> imageUrls = new ArrayList<>();
+
+    for (MultipartFile imageFile : request.getImageList()) {
+      String url = s3ImageService.upload(imageFile);
+      imageUrls.add(url);
+    }
+
+    List<Image> imageList = new ArrayList<>();
+    for (String imageUrl : imageUrls) {
+      imageList.add(imageService.saveNoticeImage(imageUrl, notice));
+    }
+
+    notice.setImageList(imageList);
+
+    LocalDateTime now = LocalDateTime.now();
+    Timestamp timestamp = Timestamp.valueOf(now);
+    notice.setUpdatedAt(timestamp);
+
+    Long classId = request.getClassId();
+    Long courseId = request.getCourseId();
+
+    if (request.getType().equals(NoticeType.CLASS)) {
       Optional<Classes> findClass = classRepository.findById(classId);
       if (findClass.isEmpty()) {
         throw new IllegalArgumentException("ClassId가 올바르지 않습니다.");
       }
-      requestNotice.setClassId(findClass.get());
-    } else if (requestNotice.getType().equals(NoticeType.COURSE)) {
+      notice.setClassId(findClass.get());
+    } else if (request.getType().equals(NoticeType.COURSE)) {
       Course findCourse = courseRepository.findById(courseId)
           .filter(course -> Status.ACTIVE.equals(course.getStatus()))
           .orElseThrow(() -> new NoSuchElementException("courseId가 존재하지 않습니다."));
-      requestNotice.setCourseId(findCourse);
+      notice.setCourseId(findCourse);
     }
 
-    Notice savedNotice = noticeRepository.save(requestNotice);
+    Notice savedNotice = noticeRepository.save(notice);
     return mapToResponseDto(savedNotice);
   }
 
@@ -95,6 +125,28 @@ public class NoticeService {
     existingNotice.setTitle(request.getTitle());
     existingNotice.setContent(request.getContent());
 
+    List<String> imageUrls = new ArrayList<>();
+
+    for (MultipartFile imageFile : request.getImageList()) {
+      String url = s3ImageService.upload(imageFile);
+      imageUrls.add(url);
+    }
+
+    List<Image> imageList = new ArrayList<>();
+    for (String imageUrl : imageUrls) {
+      imageList.add(imageService.saveNoticeImage(imageUrl, existingNotice));
+    }
+
+//    List<Image> existingNoticeImageList = existingNotice.getImageList();
+//    for (Image image : existingNoticeImageList) {
+//      imageService.deleteProfileImage(image.getImageId());
+//      image.setNoticeId(null); // 연관관계 제거
+//    }
+
+    // 기존 이미지 리스트를 비우고 새로운 리스트를 설정합니다.
+    existingNotice.getImageList().clear();
+    existingNotice.getImageList().addAll(imageList);
+
     LocalDateTime now = LocalDateTime.now();
     Timestamp timestamp = Timestamp.valueOf(now);
     existingNotice.setUpdatedAt(timestamp);
@@ -124,12 +176,12 @@ public class NoticeService {
       imageService.deleteProfileImage(image.getImageId());
     }
 
-    LocalDateTime now = LocalDateTime.now();
-    Timestamp timestamp = Timestamp.valueOf(now);
-    existingNotice.setUpdatedAt(timestamp);
-    existingNotice.setUpdatedChargeId(-1L);
-
-    Notice savedNotice = noticeRepository.save(existingNotice);
+//    LocalDateTime now = LocalDateTime.now();
+//    Timestamp timestamp = Timestamp.valueOf(now);
+//    existingNotice.setUpdatedAt(timestamp);
+//    existingNotice.setUpdatedChargeId(-1L);
+//
+//    Notice savedNotice = noticeRepository.save(existingNotice);
   }
 
   @Transactional(readOnly = true)
@@ -231,6 +283,11 @@ public class NoticeService {
     responseDto.setCreatedChargeId(savedNotice.getCreatedChargeId());
     responseDto.setUpdatedAt(savedNotice.getUpdatedAt());
     responseDto.setUpdatedChargeId(savedNotice.getUpdatedChargeId());
+
+    List<ImageResponseDTO> collect = savedNotice.getImageList().stream()
+        .map(image -> new ImageResponseDTO(image.getImageId(), image.getImagePath(),
+            image.getCreatedChargeId())).collect(Collectors.toList());
+    responseDto.setImageList(collect);
     return responseDto;
   }
 }

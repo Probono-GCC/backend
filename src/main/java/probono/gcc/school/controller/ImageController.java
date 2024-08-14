@@ -49,18 +49,18 @@ public class ImageController {
     }
   }
 
-  @PostMapping("/notice/images")
-  public ResponseEntity<ImageResponseDTO> saveNoticeImage(
-      @RequestPart("image") MultipartFile image, Long noticeId) {
-    String imagePath = s3ImageService.upload(image);
-
-//    ImageRequestDTO requestDto = new ImageRequestDTO();
-//    requestDto.setImagePath(profileImageUrl);
-    // set other fields of requestDto as necessary
-
-    ImageResponseDTO imageResponse = imageService.saveNoticeImage(imagePath, noticeId);
-    return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
-  }
+//  @PostMapping("/notice/images")
+//  public ResponseEntity<ImageResponseDTO> saveNoticeImage(
+//      @RequestPart("image") MultipartFile image, Long noticeId) {
+//    String imagePath = s3ImageService.upload(image);
+//
+////    ImageRequestDTO requestDto = new ImageRequestDTO();
+////    requestDto.setImagePath(profileImageUrl);
+//    // set other fields of requestDto as necessary
+//
+//    ImageResponseDTO imageResponse = imageService.saveNoticeImage(imagePath, noticeId);
+//    return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
+//  }
 
   //이미지 생성
 //  @PostMapping("/profile/images")
@@ -94,26 +94,28 @@ public class ImageController {
       @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
   })
 
-  public ResponseEntity<?> deleteProfileImage(@PathVariable Long id) {
-    try {
-      // 삭제 시 이미지 정보 조회 및 삭제
-      Long deletedImageId = imageService.deleteProfileImage(id);
-      Image deletedImage = imageService.findById(deletedImageId);
-
-      // 이미지 삭제 후 S3에서 삭제
-      s3ImageService.deleteImageFromS3(deletedImage.getImagePath());
-
-      // Image 엔티티를 DTO로 변환하여 응답 반환
-      ImageResponseDTO responseDto = modelMapper.map(deletedImage, ImageResponseDTO.class);
-      return ResponseEntity.ok(responseDto);
-    } catch (IllegalArgumentException ex) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
-    } catch (S3Exception ex) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body("Failed to delete image from S3: " + ex.getMessage());
-    } catch (Exception ex) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image");
-    }
+  public ResponseEntity<Void> deleteProfileImage(@PathVariable Long id) {
+    imageService.deleteProfileImage(id);
+//    try {
+//      // 삭제 시 이미지 정보 조회 및 삭제
+//      Long deletedImageId = imageService.deleteProfileImage(id);
+//      Image deletedImage = imageService.findById(deletedImageId);
+//
+//      // 이미지 삭제 후 S3에서 삭제
+//      s3ImageService.deleteImageFromS3(deletedImage.getImagePath());
+//
+//      // Image 엔티티를 DTO로 변환하여 응답 반환
+//      ImageResponseDTO responseDto = modelMapper.map(deletedImage, ImageResponseDTO.class);
+//      return ResponseEntity.ok(responseDto);
+//    } catch (IllegalArgumentException ex) {
+//      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
+//    } catch (S3Exception ex) {
+//      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//          .body("Failed to delete image from S3: " + ex.getMessage());
+//    } catch (Exception ex) {
+//      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image");
+//    }
+    return ResponseEntity.noContent().build();
   }
 
   //notice crud 작업한 뒤 수정할 것
