@@ -39,7 +39,7 @@ public class TeacherController {
   private static final Logger logger = LoggerFactory.getLogger(TeacherController.class);
 
   //teacher 생성
-  @PostMapping("/teachers")
+  @PostMapping("/teachers/join")
   public ResponseEntity<TeacherResponseDTO> createTeacher(
       @RequestBody TeacherRequestDTO requestDto) {
 
@@ -61,10 +61,10 @@ public class TeacherController {
   }
 
   // Retrieve a single teacher by ID
-  @GetMapping("/teachers/{loginId}")
-  public ResponseEntity<TeacherResponseDTO> getOneTeacher(@PathVariable String loginId) {
+  @GetMapping("/teachers/{username}")
+  public ResponseEntity<TeacherResponseDTO> getOneTeacher(@PathVariable String username) {
     try {
-      TeacherResponseDTO teacher = teacherService.findOneTeacher(loginId);
+      TeacherResponseDTO teacher = teacherService.findOneTeacher(username);
       return ResponseEntity.ok(teacher);
     } catch (CustomException ex) {
       logger.error("Teacher not found: {}", ex.getMessage());
@@ -76,12 +76,12 @@ public class TeacherController {
   }
 
   // Update a teacher
-  @PutMapping("/teachers/{loginId}")
+  @PutMapping("/teachers/{username}")
   public ResponseEntity<?> updateTeacher(
-      @PathVariable String loginId, @RequestBody TeacherRequestDTO requestDto) {
+      @PathVariable String username, @RequestBody TeacherRequestDTO requestDto) {
     try {
 
-      String updatedTeacherId = teacherService.updateTeacher(loginId, requestDto);
+      String updatedTeacherId = teacherService.updateTeacher(username, requestDto);
       Users updatedTeacher = teacherService.findById(updatedTeacherId);
 
 //      logger.info("updatedTeacher.getCreatedAt() : {}",updatedTeacher.getCreatedAt());
@@ -100,17 +100,17 @@ public class TeacherController {
   }
 
   //Delete a teacher
-  @DeleteMapping("/teachers/{loginId}")
+  @DeleteMapping("/teachers/{username}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Teacher deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SubjectResponseDTO.class))),
       @ApiResponse(responseCode = "404", description = "Teacher not found", content = @Content(mediaType = "application/json")),
       @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
   })
-  public ResponseEntity<?> deleteTeacher(@PathVariable String loginId) {
+  public ResponseEntity<?> deleteTeacher(@PathVariable String username) {
     try {
       // Perform delete operation using service
-      teacherService.deleteTeacher(loginId);
-      Users deletedTeacher = teacherService.findById(loginId);
+      teacherService.deleteTeacher(username);
+      Users deletedTeacher = teacherService.findById(username);
       // Teacher 엔티티를 DTO로 변환
       TeacherResponseDTO responseDto = modelMapper.map(deletedTeacher, TeacherResponseDTO.class);
       // Return success response
@@ -126,10 +126,10 @@ public class TeacherController {
     }
   }
 
-  //loginId 중복 체크 endpoint
-  @GetMapping("/teachers/checkLoginId/{loginId}")
-  public ResponseEntity<?> checkLoginId(@PathVariable String loginId) {
-    boolean exists = teacherService.isLoginIdExists(loginId);
+  //username 중복 체크 endpoint
+  @GetMapping("/teachers/checkusername/{username}")
+  public ResponseEntity<?> checkusername(@PathVariable String username) {
+    boolean exists = teacherService.isusernameExists(username);
     if (exists) {
       // 로그인 ID가 이미 존재하는 경우
       return ResponseEntity.status(HttpStatus.CONFLICT).body("Login ID already exists.");
@@ -140,12 +140,12 @@ public class TeacherController {
   }
 
   //담당하는 class 할당(담임선생님)
-  @PutMapping("/teachers/assignClass/{loginId}/{classId}")
+  @PutMapping("/teachers/assignClass/{username}/{classId}")
   public ResponseEntity<TeacherResponseDTO> assignClassToTeacher(
-      @PathVariable String loginId, @PathVariable Long classId) {
+      @PathVariable String username, @PathVariable Long classId) {
     try {
       // Assign the class to the teacher
-      Users updatedTeacher = teacherService.assignClass(loginId, classId);
+      Users updatedTeacher = teacherService.assignClass(username, classId);
       // Convert the updated teacher entity to a DTO
       TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
 

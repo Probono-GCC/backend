@@ -10,7 +10,7 @@ import probono.gcc.school.model.enums.Sex;
 @Data
 public class UserResponse {
 
-  private String loginId;
+  private String username;
   private String name;
   private int serialNumber;
   private Grades grade;

@@ -1,7 +1,7 @@
 package probono.gcc.school.model.enums;
 
 public enum Role {
-  ADMIN,
-  TEACHER,
-  STUDENT
+  ROLE_ADMIN,
+  ROLE_TEACHER,
+  ROLE_STUDENT
 }

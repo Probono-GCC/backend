@@ -58,8 +58,8 @@ public class CourseUser {
   private Course courseId;
 
   @ManyToOne
-  @JoinColumn(name = "loginId")
-  private Users loginId;
+  @JoinColumn(name = "username")
+  private Users username;
 
   // Getters and Setters
 

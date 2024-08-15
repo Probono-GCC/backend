@@ -12,7 +12,7 @@ import probono.gcc.school.model.entity.Users;
 @Repository
 public interface CourseUserRepository extends JpaRepository<CourseUser, Long> {
 
-  boolean existsByCourseIdAndLoginId(Course course, Users user);
+  boolean existsByCourseIdAndUsername(Course course, Users user);
 
   List<CourseUser> findByCourseId(Course course);
 }

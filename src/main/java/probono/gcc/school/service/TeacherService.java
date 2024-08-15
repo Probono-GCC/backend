@@ -51,29 +51,29 @@ public class TeacherService {
         throw new CustomException("Name is required.", HttpStatus.BAD_REQUEST);
       }
 
-      if (requestDto.getLoginId() == null || requestDto.getLoginId().trim().isEmpty()) {
-        logger.info("LoginId is required.");
+      if (requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()) {
+        logger.info("username is required.");
         throw new CustomException("Login ID is required.", HttpStatus.BAD_REQUEST);
       }
 
-      if (requestDto.getLoginPw() == null || requestDto.getLoginPw().trim().isEmpty()) {
-        logger.info("LoginPw is required.");
+      if (requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()) {
+        logger.info("password is required.");
         throw new CustomException("Login Password is required.", HttpStatus.BAD_REQUEST);
       }
 
-      //loginId 중복 확인 체크
-      if (teacherRepository.existsByLoginId(requestDto.getLoginId())) {
+      //username 중복 확인 체크
+      if (teacherRepository.existsByusername(requestDto.getUsername())) {
         throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
       }
 
       // Create a new Users entity for the teacher
       Users teacher = new Users();
       teacher.setName(requestDto.getName());
-      teacher.setLoginId(requestDto.getLoginId());
-      teacher.setLoginPw(requestDto.getLoginPw());
+      teacher.setUsername(requestDto.getUsername());
+      teacher.setPassword(requestDto.getPassword());
       teacher.setStatus(ACTIVE);
       teacher.setCreatedChargeId(1L); // Set the createdChargeId
-      teacher.setRole(Role.TEACHER);
+      teacher.setRole(Role.ROLE_TEACHER);
       teacher.setSerialNumber(null);
 
       // Save the teacher entity to the database
@@ -100,7 +100,8 @@ public class TeacherService {
   // Retrieve all teachers
   public List<TeacherResponseDTO> findAllTeachers() {
     try {
-      List<Users> teacherList = teacherRepository.findByStatusAndRole(Status.ACTIVE, Role.TEACHER);
+      List<Users> teacherList = teacherRepository.findByStatusAndRole(Status.ACTIVE,
+          Role.ROLE_TEACHER);
       // Use stream and ModelMapper to convert entity list to DTO list
       return teacherList.stream()
           .map(teacher -> modelMapper.map(teacher, TeacherResponseDTO.class))
@@ -113,10 +114,10 @@ public class TeacherService {
   }
 
   // Retrieve a single teacher by ID
-  public TeacherResponseDTO findOneTeacher(String loginId) {
+  public TeacherResponseDTO findOneTeacher(String username) {
 
-    Users teacher = teacherRepository.findByLoginIdAndStatus(loginId, ACTIVE).orElseThrow(
-        () -> new IllegalArgumentException("Teacher not found with ID: " + loginId)
+    Users teacher = teacherRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
+        () -> new IllegalArgumentException("Teacher not found with ID: " + username)
     );
     // Convert the found entity to a DTO
     return modelMapper.map(teacher, TeacherResponseDTO.class);
@@ -124,14 +125,14 @@ public class TeacherService {
   }
 
   @Transactional
-  public String updateTeacher(String loginId, TeacherRequestDTO requestDto) {
+  public String updateTeacher(String username, TeacherRequestDTO requestDto) {
     logger.info("enter into updateTeacher");
     // birth , sex , pwAnswer null
-    //loginId로 DB 조회했을 때 birth, sex , pwAnswer가 null이라면 requestDto에서 해당값 get해서 update하기
+    //username로 DB 조회했을 때 birth, sex , pwAnswer가 null이라면 requestDto에서 해당값 get해서 update하기
     // 세 값 하나라도 빠지면 예외처리
-    // DB에서 loginId로 교사 정보 조회
-    Users teacher = teacherRepository.findByLoginIdAndStatus(loginId, ACTIVE).orElseThrow(
-        () -> new CustomException("Teacher with loginId " + loginId + " not found.",
+    // DB에서 username로 교사 정보 조회
+    Users teacher = teacherRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
+        () -> new CustomException("Teacher with username " + username + " not found.",
             HttpStatus.NOT_FOUND)
     );
     if (teacher.getBirth() == null && teacher.getSex() == null && teacher.getPwAnswer() == null
@@ -144,7 +145,7 @@ public class TeacherService {
 
     teacherRepository.save(teacher);
 
-    return teacher.getLoginId();
+    return teacher.getUsername();
 
   }
 
@@ -155,7 +156,7 @@ public class TeacherService {
       throw new CustomException("Cannot update pwAnswer anymore", HttpStatus.BAD_REQUEST);
     }
 
-    //name,birth,phoneNum,loginPw,imageId
+    //name,birth,phoneNum,password,imageId
     if (requestDto.getName() != null) {
       teacher.setName(requestDto.getName());
     }
@@ -165,8 +166,8 @@ public class TeacherService {
     if (requestDto.getPhoneNum() != null) {
       teacher.setPhoneNum(requestDto.getPhoneNum());
     }
-    if (requestDto.getLoginPw() != null) {
-      teacher.setLoginPw(requestDto.getLoginPw());
+    if (requestDto.getPassword() != null) {
+      teacher.setPassword(requestDto.getPassword());
     }
     if (requestDto.getImageId() != null) {
       Image image = imageRepository.findById(requestDto.getImageId())
@@ -195,18 +196,19 @@ public class TeacherService {
     updateTeacherImageIdField(teacher::getImageId, teacher::setImageId, requestDto.getImageId(),
         "Image ID is missing in the request.");
 
-    //requestDto에 loginPw가 있으면 update
-    updateTeacherLoginPwField(teacher::getLoginPw, teacher::setLoginPw, requestDto.getLoginPw(),
+    //requestDto에 password가 있으면 update
+    updateTeacherpasswordField(teacher::getPassword, teacher::setPassword, requestDto.getPassword(),
         "Login Pw is missing in the request.");
 
 
   }
 
-  private void updateTeacherLoginPwField(Supplier<String> getLoginPw, Consumer<String> setLoginPw,
-      String loginPw, String errorMessage) {
-    if (loginPw != null) {//새로운 비밀번호가 loginPw에 담겨있음
+  private void updateTeacherpasswordField(Supplier<String> getpassword,
+      Consumer<String> setpassword,
+      String password, String errorMessage) {
+    if (password != null) {//새로운 비밀번호가 password에 담겨있음
       // 새로운 비밀번호가 제공된 경우 업데이트
-      setLoginPw.accept(loginPw);
+      setpassword.accept(password);
     }
   }
 
@@ -225,9 +227,9 @@ public class TeacherService {
   }
 
 
-  public Users findById(String loginId) {
+  public Users findById(String username) {
 
-    Users teacher = teacherRepository.findByLoginId(loginId).orElseThrow(
+    Users teacher = teacherRepository.findByUsername(username).orElseThrow(
         () -> new IllegalArgumentException("unvalid id")
     );
     return teacher;
@@ -245,9 +247,9 @@ public class TeacherService {
   }
 
   @Transactional
-  public String deleteTeacher(String loginId) {
-    Users teacher = teacherRepository.findByLoginId(loginId).orElseThrow(
-        () -> new IllegalArgumentException("unvalid loginId")
+  public String deleteTeacher(String username) {
+    Users teacher = teacherRepository.findByUsername(username).orElseThrow(
+        () -> new IllegalArgumentException("unvalid username")
     );
 
     // 매핑된 이미지가 있는 경우 삭제
@@ -267,29 +269,31 @@ public class TeacherService {
     teacher.setStatus(Status.INACTIVE);
     // Dummy Data
     teacher.setUpdatedChargeId(2L);
-    return teacher.getLoginId();
+    return teacher.getUsername();
   }
 
 
-  public boolean isLoginIdExists(String loginId) {
-    if (teacherRepository.existsByLoginId(loginId)) {
+  public boolean isusernameExists(String username) {
+    if (teacherRepository.existsByusername(username)) {
       return true;
     }
     return false;
   }
 
   //teacher의 담당 class 할당
-  public Users assignClass(String loginId, Long classId) {
-    // Find the teacher by loginId
-    Users teacher = teacherRepository.findByLoginId(loginId)
-        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + loginId, HttpStatus.NOT_FOUND));
+  public Users assignClass(String username, Long classId) {
+    // Find the teacher by username
+    Users teacher = teacherRepository.findByUsername(username)
+        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + username,
+            HttpStatus.NOT_FOUND));
 
     // Find the class by classId
     Classes assignedClass = classRepository.findById(classId)
-        .orElseThrow(() -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
+        .orElseThrow(
+            () -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
 
     // Debugging logs
-    logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, loginId);
+    logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, username);
 
     // Initialize associated notices
     Hibernate.initialize(assignedClass.getNotice());
@@ -298,10 +302,10 @@ public class TeacherService {
     // 양방향 관계 매핑
     teacher.addClass(assignedClass);
 
-
     // Save the updated teacher entity
     Users updatedTeacher = teacherRepository.save(teacher);
-    logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId, loginId);
+    logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId,
+        username);
 
     return updatedTeacher;
   }

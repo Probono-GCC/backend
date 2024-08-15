@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Sex;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -17,7 +18,7 @@ import probono.gcc.school.model.enums.Sex;
 public class StudentUpdateRequestDTO {
 
 
-  private String loginPw;//항상 바꿀 수 있음
+  private String password;//항상 바꿀 수 있음
   private String name;//항상 바꿀 수 있음
   private int serialNumber;//항상 바꿀 수 있음
   private Grades grade; //항상 바꿀 수 있음
