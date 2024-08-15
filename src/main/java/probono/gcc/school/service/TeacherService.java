@@ -2,6 +2,7 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
+import jakarta.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.users.AssignTeacherResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
@@ -104,7 +106,7 @@ public class TeacherService {
   // Retrieve all teachers
   public List<TeacherResponseDTO> findAllTeachers() {
     try {
-      List<Users> teacherList = teacherRepository.findByStatus(ACTIVE);
+      List<Users> teacherList = teacherRepository.findByStatusAndRole(Status.ACTIVE, Role.TEACHER);
       // Use stream and ModelMapper to convert entity list to DTO list
       return teacherList.stream()
           .map(teacher -> modelMapper.map(teacher, TeacherResponseDTO.class))
@@ -261,6 +263,12 @@ public class TeacherService {
       imageService.deleteProfileImage(imageId);
     }
 
+    //매핑된 class가 있는 경우 삭제
+    if (teacher.getClassId() != null) {
+      logger.info("Unmapping associated class with ID: {}", teacher.getClassId().getClassId());
+      teacher.setClassId(null); // 클래스와의 연관 관계 해제
+    }
+
     // 논리적 삭제 수행
     teacher.setStatus(Status.INACTIVE);
     // Dummy Data
@@ -280,23 +288,28 @@ public class TeacherService {
   public Users assignClass(String loginId, Long classId) {
     // Find the teacher by loginId
     Users teacher = teacherRepository.findByLoginId(loginId)
-        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + loginId,
-            HttpStatus.NOT_FOUND));
+        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + loginId, HttpStatus.NOT_FOUND));
 
     // Find the class by classId
     Classes assignedClass = classRepository.findById(classId)
-        .orElseThrow(
-            () -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
+        .orElseThrow(() -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
 
+    // Debugging logs
+    logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, loginId);
+
+    // Initialize associated notices
     Hibernate.initialize(assignedClass.getNotice());
+    //logger.info("Initialized notices for class ID: {}", classId);
 
-    // Assign the class to the teacher
-    teacher.setClassId(assignedClass);
+    // 양방향 관계 매핑
+    teacher.addClass(assignedClass);
+
 
     // Save the updated teacher entity
-    teacherRepository.save(teacher);
+    Users updatedTeacher = teacherRepository.save(teacher);
+    logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId, loginId);
 
-    return teacher;
-
+    return updatedTeacher;
   }
+
 }
