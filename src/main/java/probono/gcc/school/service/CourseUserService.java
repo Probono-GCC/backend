@@ -37,7 +37,7 @@ public class CourseUserService {
   public CourseUserResponse create(CreateCourseUserRequest request) {
     Course findCourse = courseRepository.findById(request.getCourseId())
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 courseId 입니다."));
-    Users findUser = userRepository.findByLoginId(request.getLoginId())
+    Users findUser = userRepository.findByUsername(request.getUsername())
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 userId 입니다."));
 
     if (findCourse.getStatus() == Status.INACTIVE
@@ -50,13 +50,13 @@ public class CourseUserService {
     CourseUser courseUser = new CourseUser();
 
     courseUser.setCourseId(findCourse);
-    courseUser.setLoginId(findUser);
+    courseUser.setUsername(findUser);
     courseUser.setCreatedChargeId(-1l);
 
-    if (Role.STUDENT.equals(findUser.getRole())) {
-      courseUser.setRole(Role.STUDENT);
-    } else if (Role.STUDENT.equals(findUser.getRole())) {
-      courseUser.setRole(Role.TEACHER);
+    if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
+      courseUser.setRole(Role.ROLE_STUDENT);
+    } else if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
+      courseUser.setRole(Role.ROLE_TEACHER);
     } else {
       throw new IllegalArgumentException("course에 할당할 수 없는 유저입니다.");
     }
@@ -81,11 +81,11 @@ public class CourseUserService {
       throw new NoSuchElementException("Course not found with id: " + request.getCourseId());
     }
 
-    Users findUser = userRepository.findByLoginId(request.getLoginId()).orElseThrow(
-        () -> new NoSuchElementException("User not found with LoginId " + request.getLoginId()));
+    Users findUser = userRepository.findByUsername(request.getUsername()).orElseThrow(
+        () -> new NoSuchElementException("User not found with username " + request.getUsername()));
 
     existingCourseUser.setCourseId(findCourse);
-    existingCourseUser.setLoginId(findUser);
+    existingCourseUser.setUsername(findUser);
     existingCourseUser.setUpdatedChargeId(-1l);
 
     CourseUser savedCourseUser = courseUserRepository.save(existingCourseUser);
@@ -112,7 +112,7 @@ public class CourseUserService {
   }
 
   private void validateDuplicateCourseUser(Course findCourse, Users findUser) {
-    if (courseUserRepository.existsByCourseIdAndLoginId(findCourse, findUser)) {
+    if (courseUserRepository.existsByCourseIdAndUsername(findCourse, findUser)) {
       throw new DuplicateEntityException("이미 존재하는 CourseUser 입니다.");
     }
   }
@@ -124,7 +124,7 @@ public class CourseUserService {
 
     CourseResponse savedCourse = modelMapper.map(savedCourseUser.getCourseId(),
         CourseResponse.class);
-    UserResponse savedUser = modelMapper.map(savedCourseUser.getLoginId(),
+    UserResponse savedUser = modelMapper.map(savedCourseUser.getUsername(),
         UserResponse.class);
     ClassResponse savedClass = modelMapper.map(savedCourseUser.getCourseId().getClassId(),
         ClassResponse.class);

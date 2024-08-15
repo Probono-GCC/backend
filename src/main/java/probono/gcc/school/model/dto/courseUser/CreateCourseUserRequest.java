@@ -10,5 +10,5 @@ public class CreateCourseUserRequest {
   private long courseId;
 
   @NotNull
-  private String loginId;
+  private String username;
 }

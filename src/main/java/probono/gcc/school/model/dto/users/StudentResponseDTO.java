@@ -19,8 +19,9 @@ import probono.gcc.school.model.enums.Status;
 @Data
 @Builder
 public class StudentResponseDTO {
-  private String loginId;
-  private String loginPw;
+
+  private String username;
+  private String password;
   private String name;
   private int serialNumber;
   private Grades grade;

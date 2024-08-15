@@ -9,13 +9,13 @@ import probono.gcc.school.model.enums.Status;
 
 public interface UserRepository extends JpaRepository<Users, Long> {
 
-  boolean existsByLoginId(String loginId);
+  boolean existsByusername(String username);
 
-  Optional<Users> findByLoginId(String loginId);
+  Optional<Users> findByUsername(String username);
 
   List<Users> findByStatus(Status status);
 
-  Optional<Users> findByLoginIdAndStatus(String loginId,Status status);
+  Optional<Users> findByUsernameAndStatus(String username, Status status);
 
   List<Users> findByStatusAndRole(Status status, Role role);
 }

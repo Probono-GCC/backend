@@ -10,11 +10,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Date;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.Persistable;
 import probono.gcc.school.model.enums.Grades;
@@ -29,10 +26,10 @@ public class Users implements Persistable<String> {
 
   @Id
   @Column(length = 20)
-  private String loginId;
+  private String username;
 
   @Column(nullable = false, length = 255)
-  private String loginPw;
+  private String password;
 
   @Column(nullable = false, length = 40)
   private String name;
@@ -96,7 +93,7 @@ public class Users implements Persistable<String> {
 
   @Override
   public String getId() {
-    return this.loginId;
+    return this.username;
   }
 
   @Override
