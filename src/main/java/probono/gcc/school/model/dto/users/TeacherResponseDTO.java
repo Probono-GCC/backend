@@ -18,7 +18,6 @@ import probono.gcc.school.model.enums.Status;
 @Builder
 public class TeacherResponseDTO {
   private String loginId;
-  private String loginPw;
   private Role role;
   private String name;
   private LocalDate birth;

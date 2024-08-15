@@ -20,7 +20,6 @@ import probono.gcc.school.model.enums.Status;
 @Builder
 public class StudentResponseDTO {
   private String loginId;
-  private String loginPw;
   private String name;
   private int serialNumber;
   private Grades grade;

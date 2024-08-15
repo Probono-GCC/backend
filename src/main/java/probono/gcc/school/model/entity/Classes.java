@@ -72,7 +72,6 @@ public class Classes {
   @OneToMany(mappedBy = "loginId")
   private List<Users> users;
 
-
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Course> courseList;
 

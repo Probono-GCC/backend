@@ -258,9 +258,11 @@ public class TeacherService {
     }
 
     //매핑된 class가 있는 경우 삭제
-    if (teacher.getClassId() != null) {
-      logger.info("Unmapping associated class with ID: {}", teacher.getClassId().getClassId());
-      teacher.setClassId(null); // 클래스와의 연관 관계 해제
+    // 2. teacher가 속한 class의 users 리스트에서 해당 teacher를 제거한다
+    Classes assignedClass = teacher.getClassId();
+    if (assignedClass != null) {
+      assignedClass.getUsers().remove(teacher); // 양방향 관계에서 제거
+      teacher.setClassId(null);
     }
 
     // 논리적 삭제 수행
