@@ -73,7 +73,7 @@ public class StudentService {
   // Retrieve all students
   public List<StudentResponseDTO> findAllStudents() {
     try {
-      List<Users> studentList = studentRepository.findByStatus(ACTIVE);
+      List<Users> studentList = studentRepository.findByStatusAndRole(Status.ACTIVE, Role.STUDENT);
       // Use stream and ModelMapper to convert entity list to DTO list
       return studentList.stream()
           .map(student -> modelMapper.map(student, StudentResponseDTO.class))

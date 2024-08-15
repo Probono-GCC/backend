@@ -105,4 +105,8 @@ public class Users implements Persistable<String> {
   }
 
 
+  public void addClass(Classes assignedClass) {
+    this.setClassId(assignedClass);
+    assignedClass.getUsers().add(this);
+  }
 }
