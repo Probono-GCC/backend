@@ -2,8 +2,6 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
-import jakarta.annotation.PostConstruct;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -19,16 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
-import probono.gcc.school.model.dto.ImageResponseDTO;
-import probono.gcc.school.model.dto.users.AssignTeacherResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Image;
-import probono.gcc.school.model.entity.Subject;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
-import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.ImageRepository;
