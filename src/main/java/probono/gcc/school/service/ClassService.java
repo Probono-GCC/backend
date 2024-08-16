@@ -138,7 +138,7 @@ public class ClassService {
   @Transactional
   public AssignClassResponseDTO assignTeacher(Long classId, String loginId) {
     // Find the teacher by loginId
-    Users teacher = userRepository.findByLoginId(loginId)
+    Users teacher = userRepository.findByUsername(loginId)
         .orElseThrow(() -> new NoSuchElementException("Teacher not found with ID: " + loginId));
 
     // Find the class by classId
@@ -155,7 +155,7 @@ public class ClassService {
     Users updatedTeacher = userRepository.save(teacher);
 
     // Retrieve the list of all teachers
-    List<Users> allTeachers = userRepository.findByClassIdAndRoleAndStatus(assignedClass, Role.TEACHER,Status.ACTIVE);
+    List<Users> allTeachers = userRepository.findByClassIdAndRoleAndStatus(assignedClass, Role.ROLE_TEACHER,Status.ACTIVE);
 
     // Create the response DTO
     AssignClassResponseDTO assignedTeacherDTO = mapToAssignResponseDTO(assignedClass,allTeachers);

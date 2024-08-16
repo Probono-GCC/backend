@@ -127,7 +127,7 @@ public class CourseUserService {
     List<CourseUser> courseUsers = courseUserRepository.findByCourseId(findCourse);
 
     List<CourseUser> studentCourseUsers = courseUsers.stream()
-        .filter(courseUser -> Role.STUDENT.equals(courseUser.getRole()))
+        .filter(courseUser -> Role.ROLE_STUDENT.equals(courseUser.getRole()))
         .toList();
 
     return studentCourseUsers.stream()
