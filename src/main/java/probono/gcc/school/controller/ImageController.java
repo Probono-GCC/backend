@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ public class ImageController {
   private S3ImageService s3ImageService;
 
   @PostMapping("/profile/images")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<?> createProfileImage(@RequestPart("image") MultipartFile image) {
     try {
       String profileImageUrl = s3ImageService.upload(image);
@@ -73,6 +75,7 @@ public class ImageController {
 
   //프로필 이미지 목록 조회
   @GetMapping("/profile/images")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<List<ImageResponseDTO>> getAllProfileImages() {
     List<ImageResponseDTO> images = imageService.findAllProfileImages();
     return ResponseEntity.ok(images);
@@ -81,6 +84,7 @@ public class ImageController {
 
   // 이미지 한 장 조회
   @GetMapping("profile/images/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<ImageResponseDTO> getOneProfileImage(@PathVariable Long id) {
     ImageResponseDTO image = imageService.findOneImage(id);
     return ResponseEntity.ok(image);
@@ -88,6 +92,7 @@ public class ImageController {
 
   // 이미지 삭제
   @DeleteMapping("profile/images/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Image deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ImageResponseDTO.class))),
       @ApiResponse(responseCode = "404", description = "Image not found", content = @Content(mediaType = "application/json")),

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +42,7 @@ public class StudentController {
 
   //student 생성
   @PostMapping("/students/join")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<StudentResponseDTO> createStudent(
       @RequestBody @Valid StudentCreateRequestDTO requestDto) {
     StudentResponseDTO student = studentService.createStudent(requestDto);
@@ -49,6 +51,7 @@ public class StudentController {
 
   // 모든 Students 조회
   @GetMapping("/students")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
     try {
       List<StudentResponseDTO> students = studentService.findAllStudents();
@@ -62,6 +65,7 @@ public class StudentController {
 
   // 특정 Student 조회 (username로 조회)
   @GetMapping("/students/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<StudentResponseDTO> getOneStudent(@PathVariable String username) {
 
     StudentResponseDTO student = studentService.findOneStudent(username);
@@ -70,6 +74,7 @@ public class StudentController {
   }
 
   @PutMapping("/students/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> updateStudent(
       @PathVariable String username, @RequestBody @Valid StudentUpdateRequestDTO requestDto) {
     try {
@@ -94,6 +99,7 @@ public class StudentController {
 
   // Delete a student
   @DeleteMapping("/students/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Student deleted", content = @Content(mediaType = "application/json")),
       @ApiResponse(responseCode = "404", description = "Student not found", content = @Content(mediaType = "application/json")),

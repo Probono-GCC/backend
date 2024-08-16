@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +35,7 @@ public class SubjectController {
 
   //과목 생성
   @PostMapping("/subjects")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<SubjectResponseDTO> createSubject(
       @RequestBody SubjectRequestDTO requestDto) {
 
@@ -49,6 +51,7 @@ public class SubjectController {
 
   //과목 목록 조회
   @GetMapping("/subjects")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<List<SubjectResponseDTO>> getAllSubjects() {
     List<SubjectResponseDTO> subjects = subjectService.findAllSubject();
     return ResponseEntity.ok(subjects);
@@ -57,6 +60,7 @@ public class SubjectController {
 
   // 과목 한 명 조회
   @GetMapping("/subjects/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<SubjectResponseDTO> getOneSubject(@PathVariable Long id) {
     SubjectResponseDTO subject = subjectService.findOneSubject(id);
     return ResponseEntity.ok(subject);
@@ -64,6 +68,7 @@ public class SubjectController {
 
   // 과목 수정
   @PutMapping("/subjects/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<SubjectResponseDTO> updateSubject(@PathVariable Long id,
       @RequestBody SubjectRequestDTO requestDto) {
     try {
@@ -83,6 +88,7 @@ public class SubjectController {
 
   //과목 삭제
   @DeleteMapping("/subjects/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Teacher deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SubjectResponseDTO.class))),
       @ApiResponse(responseCode = "404", description = "Teacher not found", content = @Content(mediaType = "application/json")),

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
@@ -41,6 +42,8 @@ public class TeacherService {
   private ImageService imageService;
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
 
   public TeacherResponseDTO createTeacher(TeacherRequestDTO requestDto) {
 
@@ -62,7 +65,7 @@ public class TeacherService {
       }
 
       //username 중복 확인 체크
-      if (teacherRepository.existsByusername(requestDto.getUsername())) {
+      if (teacherRepository.existsByUsername(requestDto.getUsername())) {
         throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
       }
 
@@ -70,7 +73,7 @@ public class TeacherService {
       Users teacher = new Users();
       teacher.setName(requestDto.getName());
       teacher.setUsername(requestDto.getUsername());
-      teacher.setPassword(requestDto.getPassword());
+      teacher.setPassword(bCryptPasswordEncoder.encode(requestDto.getPassword()));
       teacher.setStatus(ACTIVE);
       teacher.setCreatedChargeId(1L); // Set the createdChargeId
       teacher.setRole(Role.ROLE_TEACHER);
@@ -274,7 +277,7 @@ public class TeacherService {
 
 
   public boolean isusernameExists(String username) {
-    if (teacherRepository.existsByusername(username)) {
+    if (teacherRepository.existsByUsername(username)) {
       return true;
     }
     return false;

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +41,7 @@ public class TeacherController {
 
   //teacher 생성
   @PostMapping("/teachers/join")
+  @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<TeacherResponseDTO> createTeacher(
       @RequestBody TeacherRequestDTO requestDto) {
 
@@ -50,6 +52,7 @@ public class TeacherController {
 
   // Retrieve all teachers
   @GetMapping("/teachers")
+  @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<List<TeacherResponseDTO>> getAllTeachers() {
     try {
       List<TeacherResponseDTO> teachers = teacherService.findAllTeachers();
@@ -62,6 +65,7 @@ public class TeacherController {
 
   // Retrieve a single teacher by ID
   @GetMapping("/teachers/{username}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<TeacherResponseDTO> getOneTeacher(@PathVariable String username) {
     try {
       TeacherResponseDTO teacher = teacherService.findOneTeacher(username);
@@ -77,6 +81,7 @@ public class TeacherController {
 
   // Update a teacher
   @PutMapping("/teachers/{username}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<?> updateTeacher(
       @PathVariable String username, @RequestBody TeacherRequestDTO requestDto) {
     try {
@@ -101,6 +106,7 @@ public class TeacherController {
 
   //Delete a teacher
   @DeleteMapping("/teachers/{username}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Teacher deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SubjectResponseDTO.class))),
       @ApiResponse(responseCode = "404", description = "Teacher not found", content = @Content(mediaType = "application/json")),
@@ -128,6 +134,7 @@ public class TeacherController {
 
   //username 중복 체크 endpoint
   @GetMapping("/teachers/checkusername/{username}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<?> checkusername(@PathVariable String username) {
     boolean exists = teacherService.isusernameExists(username);
     if (exists) {
@@ -141,6 +148,7 @@ public class TeacherController {
 
   //담당하는 class 할당(담임선생님)
   @PutMapping("/teachers/assignClass/{username}/{classId}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<TeacherResponseDTO> assignClassToTeacher(
       @PathVariable String username, @PathVariable Long classId) {
     try {
