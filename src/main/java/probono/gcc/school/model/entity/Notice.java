@@ -71,8 +71,8 @@ public class Notice {
   private Classes classId;
 
   @ManyToOne
-  @JoinColumn(name = "loginId")
-  private Users loginId;
+  @JoinColumn(name = "username")
+  private Users username;
 
   @ManyToOne
   @JoinColumn(name = "courseId")

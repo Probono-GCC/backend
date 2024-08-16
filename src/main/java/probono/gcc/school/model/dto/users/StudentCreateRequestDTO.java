@@ -15,10 +15,11 @@ import probono.gcc.school.model.enums.Sex;
 @Data
 @Builder
 public class StudentCreateRequestDTO {
+
   @NotNull
-  private String loginId;
+  private String username;
   @NotNull
-  private String loginPw;
+  private String password;
   @NotNull
   private String name;
   @NotNull

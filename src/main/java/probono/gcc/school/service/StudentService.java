@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
@@ -36,27 +37,28 @@ public class StudentService {
   private ImageService imageService;
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   public StudentResponseDTO createStudent(StudentCreateRequestDTO requestDto) {
 
     try {
-      //loginId 중복 확인 체크
-      if (studentRepository.existsByLoginId(requestDto.getLoginId())) {
+      //username 중복 확인 체크
+      if (studentRepository.existsByUsername(requestDto.getUsername())) {
         throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
       }
 
       // Create a new Users entity for the student
       Users student = new Users();
-      student.setLoginId(requestDto.getLoginId());
+      student.setUsername(requestDto.getUsername());
       student.setSerialNumber(requestDto.getSerialNumber());
       logger.info("requestDto.getSerialNumber() : {}", requestDto.getSerialNumber());
       logger.info("student.getSerialNumber() : {}", student.getSerialNumber());
       student.setName(requestDto.getName());
-      student.setLoginPw(requestDto.getLoginPw());
+      student.setPassword(bCryptPasswordEncoder.encode(requestDto.getPassword()));
       student.setGrade(requestDto.getGrade());
       student.setStatus(ACTIVE);
       student.setCreatedChargeId(1L); // Set the createdChargeId
-      student.setRole(Role.STUDENT);
+      student.setRole(Role.ROLE_STUDENT);
 
       Users studentCreated = studentRepository.save(student);
       return modelMapper.map(studentCreated, StudentResponseDTO.class);
@@ -73,7 +75,8 @@ public class StudentService {
   // Retrieve all students
   public List<StudentResponseDTO> findAllStudents() {
     try {
-      List<Users> studentList = studentRepository.findByStatusAndRole(Status.ACTIVE, Role.STUDENT);
+      List<Users> studentList = studentRepository.findByStatusAndRole(Status.ACTIVE,
+          Role.ROLE_STUDENT);
       // Use stream and ModelMapper to convert entity list to DTO list
       return studentList.stream()
           .map(student -> modelMapper.map(student, StudentResponseDTO.class))
@@ -86,10 +89,10 @@ public class StudentService {
   }
 
   // Retrieve a single student by ID
-  public StudentResponseDTO findOneStudent(String loginId) {
+  public StudentResponseDTO findOneStudent(String username) {
     try {
-      Users student = studentRepository.findByLoginIdAndStatus(loginId, ACTIVE).orElseThrow(
-          () -> new CustomException("Student not found with ID: " + loginId, HttpStatus.NOT_FOUND)
+      Users student = studentRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
+          () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
       // Convert the found entity to a DTO
       return modelMapper.map(student, StudentResponseDTO.class);
@@ -103,10 +106,10 @@ public class StudentService {
   }
 
 
-  public String updateStudent(String loginId, StudentUpdateRequestDTO requestDto) {
+  public String updateStudent(String username, StudentUpdateRequestDTO requestDto) {
     try {
-      Users student = studentRepository.findByLoginIdAndStatus(loginId, ACTIVE).orElseThrow(
-          () -> new CustomException("Student not found with ID: " + loginId, HttpStatus.NOT_FOUND)
+      Users student = studentRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
+          () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
 
       // Check if it's the first update (i.e., if birth, sex, or pwAnswer are null)
@@ -137,8 +140,8 @@ public class StudentService {
       }
 
       // Update fields that can always be updated
-      if (requestDto.getLoginPw() != null) {
-        student.setLoginPw(requestDto.getLoginPw());
+      if (requestDto.getPassword() != null) {
+        student.setPassword(requestDto.getPassword());
       }
       if (requestDto.getName() != null) {
         student.setName(requestDto.getName());
@@ -169,7 +172,7 @@ public class StudentService {
 
       // Save the updated student entity
       studentRepository.save(student);
-      return student.getLoginId();
+      return student.getUsername();
 
     } catch (CustomException e) {
       logger.error("Error updating student: {}", e.getMessage());
@@ -177,10 +180,10 @@ public class StudentService {
     }
   }
 
-  public Users findById(String loginId) {
+  public Users findById(String username) {
     try {
-      return studentRepository.findByLoginId(loginId).orElseThrow(
-          () -> new CustomException("Student not found with ID: " + loginId, HttpStatus.NOT_FOUND)
+      return studentRepository.findByUsername(username).orElseThrow(
+          () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
     } catch (CustomException e) {
       logger.error("Student not found: {}", e.getMessage());
@@ -191,10 +194,10 @@ public class StudentService {
     }
   }
 
-  public String deleteStudent(String loginId) {
+  public String deleteStudent(String username) {
 
-    Users student = studentRepository.findByLoginId(loginId).orElseThrow(
-        () -> new CustomException("Student not found with ID: " + loginId, HttpStatus.NOT_FOUND)
+    Users student = studentRepository.findByUsername(username).orElseThrow(
+        () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
     );
 
     // 매핑된 이미지가 있는 경우 삭제
@@ -207,11 +210,11 @@ public class StudentService {
     student.setStatus(Status.INACTIVE);
     // Dummy Data
     student.setUpdatedChargeId(2L);
-    return student.getLoginId();
+    return student.getUsername();
   }
 
-  public boolean isLoginIdExists(String loginId) {
-    if (studentRepository.existsByLoginId(loginId)) {
+  public boolean isusernameExists(String username) {
+    if (studentRepository.existsByUsername(username)) {
       return true;
     }
     return false;

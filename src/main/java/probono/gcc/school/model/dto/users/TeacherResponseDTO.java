@@ -11,12 +11,16 @@ import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 public class TeacherResponseDTO {
-  private String loginId;
+
+
+  private String username;
+  private String password;
   private Role role;
   private String name;
   private LocalDate birth;

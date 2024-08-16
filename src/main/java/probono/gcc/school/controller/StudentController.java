@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +41,8 @@ public class StudentController {
   private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
 
   //student 생성
-  @PostMapping("/students")
+  @PostMapping("/students/join")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<StudentResponseDTO> createStudent(
       @RequestBody @Valid StudentCreateRequestDTO requestDto) {
     StudentResponseDTO student = studentService.createStudent(requestDto);
@@ -49,6 +51,7 @@ public class StudentController {
 
   // 모든 Students 조회
   @GetMapping("/students")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
     try {
       List<StudentResponseDTO> students = studentService.findAllStudents();
@@ -60,21 +63,23 @@ public class StudentController {
     }
   }
 
-  // 특정 Student 조회 (loginId로 조회)
-  @GetMapping("/students/{loginId}")
-  public ResponseEntity<StudentResponseDTO> getOneStudent(@PathVariable String loginId) {
+  // 특정 Student 조회 (username로 조회)
+  @GetMapping("/students/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<StudentResponseDTO> getOneStudent(@PathVariable String username) {
 
-    StudentResponseDTO student = studentService.findOneStudent(loginId);
+    StudentResponseDTO student = studentService.findOneStudent(username);
     return ResponseEntity.ok(student);
 
   }
 
-  @PutMapping("/students/{loginId}")
+  @PutMapping("/students/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> updateStudent(
-      @PathVariable String loginId, @RequestBody @Valid StudentUpdateRequestDTO requestDto) {
+      @PathVariable String username, @RequestBody @Valid StudentUpdateRequestDTO requestDto) {
     try {
 
-      String updatedTeacherId = studentService.updateStudent(loginId, requestDto);
+      String updatedTeacherId = studentService.updateStudent(username, requestDto);
       Users updatedTeacher = studentService.findById(updatedTeacherId);
 
 //      logger.info("updatedTeacher.getCreatedAt() : {}",updatedTeacher.getCreatedAt());
@@ -93,18 +98,19 @@ public class StudentController {
   }
 
   // Delete a student
-  @DeleteMapping("/students/{loginId}")
+  @DeleteMapping("/students/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Student deleted", content = @Content(mediaType = "application/json")),
       @ApiResponse(responseCode = "404", description = "Student not found", content = @Content(mediaType = "application/json")),
       @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
   })
-  public ResponseEntity<?> deleteStudent(@PathVariable String loginId) {
+  public ResponseEntity<?> deleteStudent(@PathVariable String username) {
     try {
 
       // Perform delete operation using service
-      studentService.deleteStudent(loginId);
-      Users deletedStudent = studentService.findById(loginId);
+      studentService.deleteStudent(username);
+      Users deletedStudent = studentService.findById(username);
 
       // Teacher 엔티티를 DTO로 변환
 
@@ -122,10 +128,10 @@ public class StudentController {
     }
   }
 
-  // Check if loginId is already taken
-  @GetMapping("/students/checkLoginId/{loginId}")
-  public ResponseEntity<?> checkLoginId(@PathVariable String loginId) {
-    boolean exists = studentService.isLoginIdExists(loginId);
+  // Check if username is already taken
+  @GetMapping("/students/checkusername/{username}")
+  public ResponseEntity<?> checkusername(@PathVariable String username) {
+    boolean exists = studentService.isusernameExists(username);
     if (exists) {
       // 로그인 ID가 이미 존재하는 경우
       return ResponseEntity.status(HttpStatus.CONFLICT).body("Login ID already exists.");
