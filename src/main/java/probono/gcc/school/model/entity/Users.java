@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -87,7 +88,7 @@ public class Users implements Persistable<String> {
   @JoinColumn(name = "classId")
   private Classes classId;
 
-  @ManyToOne
+  @OneToOne
   @JoinColumn(name = "imageId")
   private Image imageId;
 

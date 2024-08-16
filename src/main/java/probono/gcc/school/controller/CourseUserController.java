@@ -61,7 +61,6 @@ public class CourseUserController {
   }
 
   //해당 course를 듣는 학생리스트 조회
-
   @GetMapping("/courseUser/course/{courseId}")
   public ResponseEntity<List<CourseUserResponse>> getStudentsByCourse(@PathVariable long courseId) {
     List<CourseUserResponse> studentsList = courseUserService.getStudentsByCourseId(courseId);
@@ -69,5 +68,6 @@ public class CourseUserController {
   }
 
   //해당 course의 선생님 조회
+
   //선생님이 담당하는 course리스트 조회
 }
