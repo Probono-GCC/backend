@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,6 +36,7 @@ public class NoticeController {
   private final S3ImageService s3ImageService;
 
   @PostMapping("/notice")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<NoticeResponse> createNotice(
       @Valid @ModelAttribute CreateNoticeRequest request) {
 
@@ -43,36 +45,42 @@ public class NoticeController {
   }
 
   @GetMapping("/notice/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<NoticeResponse> getNotice(@PathVariable Long id) {
     NoticeResponse noticeResponse = noticeService.getNotice(id);
     return ResponseEntity.ok(noticeResponse);
   }
 
   @GetMapping("/notice/classNoticeList/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<List<NoticeResponse>> getClassNoticeList(@PathVariable Long id) {
     List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.CLASS);
     return ResponseEntity.ok(noticeList);
   }
 
   @GetMapping("/notice/classAndCourseNoticeList/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<List<NoticeResponse>> getClassAndCourseNoticeList(@PathVariable Long id) {
     List<NoticeResponse> noticeList = noticeService.getClassAndCourseNoticeList(id);
     return ResponseEntity.ok(noticeList);
   }
 
   @GetMapping("/notice/courseNoticeList/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<List<NoticeResponse>> getCourseNoticeList(@PathVariable Long id) {
     List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.COURSE);
     return ResponseEntity.ok(noticeList);
   }
 
-  @GetMapping("/notice/schoolNoticeList/{id}")
-  public ResponseEntity<List<NoticeResponse>> getSchoolNoticeList(@PathVariable Long id) {
-    List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.SCHOOL);
+  @GetMapping("/notice/schoolNoticeList")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
+  public ResponseEntity<List<NoticeResponse>> getSchoolNoticeList() {
+    List<NoticeResponse> noticeList = noticeService.getNoticeList(-1l, NoticeType.SCHOOL);
     return ResponseEntity.ok(noticeList);
   }
 
   @PutMapping("/notice/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<NoticeResponse> updateNotice(@PathVariable Long id,
       @Valid @ModelAttribute UpdateNoticeRequest request) {
     NoticeResponse updatedNotice = noticeService.updateNotice(id, request);
@@ -81,6 +89,7 @@ public class NoticeController {
 
   //
   @DeleteMapping("/notice/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Void> deleteNotice(@PathVariable Long id) {
     noticeService.deleteNotice(id);
     return ResponseEntity.noContent().build();

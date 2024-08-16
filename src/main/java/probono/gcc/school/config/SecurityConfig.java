@@ -1,5 +1,7 @@
 package probono.gcc.school.config;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +13,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import probono.gcc.school.jwt.JWTFilter;
 import probono.gcc.school.jwt.JWTUtil;
 import probono.gcc.school.jwt.LoginFilter;
@@ -43,6 +47,26 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+    http
+        .cors((cors) -> cors
+            .configurationSource(new CorsConfigurationSource() {
+              @Override
+              public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                CorsConfiguration configuration = new CorsConfiguration();
+
+                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                configuration.setAllowedMethods(Collections.singletonList("*"));
+                configuration.setAllowCredentials(true);
+                configuration.setAllowedHeaders(Collections.singletonList("*"));
+                configuration.setMaxAge(3600L);
+
+                configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                return configuration;
+              }
+            })
+        );
+
     //csrf disable
     http
         .csrf((auth) -> auth.disable());
@@ -57,10 +81,10 @@ public class SecurityConfig {
     //경로별 인가 작업
     http
         .authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/login", "/", "/join", "/students/join", "/teachers/join").permitAll()
-            .requestMatchers("/admin").hasRole("ADMIN")
-            .requestMatchers("/teachers").hasRole("TEACHER")
-            .requestMatchers("/students").hasRole("STUDENT")
+            .requestMatchers("/login", "/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+//            .requestMatchers("/admin").hasRole("ADMIN")
+//            .requestMatchers("/teachers").hasAnyRole("TEACHER", "ADMIN")
+//            .requestMatchers("/students").hasRole("STUDENT")
             .anyRequest().authenticated());
 
     //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요

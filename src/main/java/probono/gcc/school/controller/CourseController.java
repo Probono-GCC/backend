@@ -3,6 +3,7 @@ package probono.gcc.school.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ public class CourseController {
   private final CourseService courseService;
 
   @PostMapping("/course")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<CourseResponse> createCourse(
       @RequestBody @Valid CreateCourseRequest request) {
     CourseResponse createdCourse = courseService.create(request.getClassId(),
@@ -34,12 +36,14 @@ public class CourseController {
   }
 
   @GetMapping("/course/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN', 'STUDENT')")
   public ResponseEntity<CourseResponse> getCourse(@PathVariable long id) {
     CourseResponse findCourse = courseService.getCourse(id);
     return ResponseEntity.ok(findCourse);
   }
 
   @PutMapping("/course/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<CourseResponse> updateCourse(@PathVariable long id,
       @RequestBody @Valid CreateCourseRequest request) {
     CourseResponse updateCourse = courseService.updateCourse(id, request);
@@ -47,6 +51,7 @@ public class CourseController {
   }
 
   @DeleteMapping("/course/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Void> deleteCourse(@PathVariable long id) {
     courseService.deleteCourse(id);
     return ResponseEntity.noContent().build();

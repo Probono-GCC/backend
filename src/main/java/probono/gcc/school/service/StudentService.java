@@ -43,7 +43,7 @@ public class StudentService {
 
     try {
       //username 중복 확인 체크
-      if (studentRepository.existsByusername(requestDto.getUsername())) {
+      if (studentRepository.existsByUsername(requestDto.getUsername())) {
         throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
       }
 
@@ -214,7 +214,7 @@ public class StudentService {
   }
 
   public boolean isusernameExists(String username) {
-    if (studentRepository.existsByusername(username)) {
+    if (studentRepository.existsByUsername(username)) {
       return true;
     }
     return false;

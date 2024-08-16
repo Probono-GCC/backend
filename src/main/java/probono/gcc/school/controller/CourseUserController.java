@@ -3,6 +3,7 @@ package probono.gcc.school.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ public class CourseUserController {
   private final CourseUserService courseUserService;
 
   @PostMapping("/courseUser")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<CourseUserResponse> createCourseUser(
       @RequestBody @Valid CreateCourseUserRequest request) {
     CourseUserResponse createdCourseUser = courseUserService.create(request);
@@ -30,12 +32,14 @@ public class CourseUserController {
   }
 
   @GetMapping("/courseUser/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN', 'STUDENT')")
   public ResponseEntity<CourseUserResponse> getCourseUser(@PathVariable long id) {
     CourseUserResponse findCourseUser = courseUserService.getCourseUser(id);
     return ResponseEntity.ok(findCourseUser);
   }
 
   @PutMapping("/courseUser/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<CourseUserResponse> updateCourseUser(@PathVariable long id,
       @RequestBody @Valid CreateCourseUserRequest request) {
     CourseUserResponse updatedCourseUser = courseUserService.updateCourseUser(id, request);
@@ -43,6 +47,7 @@ public class CourseUserController {
   }
 
   @DeleteMapping("/courseUser/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Void> deleteCourseUser(@PathVariable long id) {
     courseUserService.deleteCourseUser(id);
     return ResponseEntity.noContent().build();

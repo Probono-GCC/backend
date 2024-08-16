@@ -9,7 +9,7 @@ import probono.gcc.school.model.enums.Status;
 
 public interface UserRepository extends JpaRepository<Users, Long> {
 
-  boolean existsByusername(String username);
+  boolean existsByUsername(String username);
 
   Optional<Users> findByUsername(String username);
 

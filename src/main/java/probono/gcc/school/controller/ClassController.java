@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ public class ClassController {
   private final ClassService classService;
 
   @PostMapping("/class")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<ClassResponse> createStudent(
       @RequestBody @Valid CreateClassRequest request) {
     Classes classes = new Classes();
@@ -39,18 +41,21 @@ public class ClassController {
   }
 
   @GetMapping("/class/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<ClassResponse> getClass(@PathVariable Long id) {
     ClassResponse classResponse = classService.getClass(id);
     return ResponseEntity.ok(classResponse);
   }
 
   @GetMapping("/classList")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<List<ClassResponse>> getClassList(@RequestParam int year) {
     List<ClassResponse> classList = classService.getClassList(year);
     return ResponseEntity.ok(classList);
   }
 
   @PutMapping("/class/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<ClassResponse> updateClass(@PathVariable Long id,
       @RequestBody @Valid CreateClassRequest request) {
     ClassResponse updatedClass = classService.updateClass(id, request);
@@ -58,12 +63,14 @@ public class ClassController {
   }
 
   @DeleteMapping("/class/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Void> deleteClass(@PathVariable Long id) {
     classService.deleteClass(id);
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/classNoticeList/{id}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<List<NoticeResponse>> getClassNoticeList(@PathVariable Long id) {
     List<NoticeResponse> noticeList = classService.getClassNoticeList(id);
     return ResponseEntity.ok(noticeList);
