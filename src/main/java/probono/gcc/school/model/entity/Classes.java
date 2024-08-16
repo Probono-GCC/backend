@@ -69,7 +69,7 @@ public class Classes {
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Notice> notice;
 
-  @OneToMany(mappedBy = "loginId")
+  @OneToMany(mappedBy = "classId")
   private List<Users> users;
 
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)

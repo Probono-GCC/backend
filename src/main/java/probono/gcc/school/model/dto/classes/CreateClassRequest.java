@@ -1,4 +1,4 @@
-package probono.gcc.school.model.dto;
+package probono.gcc.school.model.dto.classes;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

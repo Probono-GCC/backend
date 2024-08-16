@@ -2,14 +2,13 @@ package probono.gcc.school.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
-import probono.gcc.school.model.dto.ClassResponse;
-import probono.gcc.school.model.dto.CreateClassRequest;
+import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.course.CreateCourseRequest;
@@ -129,6 +128,22 @@ public class CourseService {
     return findCourse;
   }
 
+  @Transactional(readOnly = true)
+  public List<CourseResponse> getAllCourses() {
+    List<Course> courseList = courseRepository.findByStatus(Status.ACTIVE);;
+
+    if (courseList.isEmpty()) {
+      throw new NoSuchElementException("No courses found.");
+    }
+
+    // Mapping each Course entity to a CourseResponse DTO
+    List<CourseResponse> responseList = courseList.stream()
+        .map(this::mapToResponseDto)
+        .collect(Collectors.toList());
+
+    return responseList;
+  }
+
   private CourseResponse mapToResponseDto(Course savedCourse) {
     CourseResponse responseDto = new CourseResponse();
     responseDto.setCourseId(savedCourse.getCourseId());
@@ -141,4 +156,7 @@ public class CourseService {
     responseDto.setSubjectResponseDTO((savedSubject));
     return responseDto;
   }
+
+
+
 }

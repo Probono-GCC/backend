@@ -2,6 +2,7 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -10,13 +11,16 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.model.dto.classes.ClassResponse;
+import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
@@ -41,59 +45,71 @@ public class TeacherService {
   private ImageService imageService;
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
+//  @PostConstruct
+//  public void configureModelMapper() {
+//    modelMapper.createTypeMap(Users.class, TeacherResponseDTO.class)
+//        .addMappings(mapper -> mapper.map(src -> src.getClassId().getClassId(), TeacherResponseDTO::setClassId));
+//       // .addMappings(mapper -> mapper.skip(TeacherResponseDTO::setImageId));  // 예시로 ImageId는 매핑하지 않음
+//  }
 
-  public TeacherResponseDTO createTeacher(TeacherRequestDTO requestDto) {
+  @PostConstruct
+  public void setupMapper() {
+    // Create TypeMap for Users to TeacherResponseDTO conversion
+    TypeMap<Users, TeacherResponseDTO> typeMap = modelMapper.createTypeMap(Users.class,
+        TeacherResponseDTO.class);
 
-    try {
-      // 필수 필드 null 체크
-      if (requestDto.getName() == null || requestDto.getName().trim().isEmpty()) {
-        logger.info("Name is required.");
-        throw new CustomException("Name is required.", HttpStatus.BAD_REQUEST);
-      }
+    // Custom mapping for Classes (classId) to ClassResponse
+    typeMap.addMappings(mapper ->
+        mapper.map(
+            user -> user.getClassId(), // Source field: classId of type Classes
+            TeacherResponseDTO::setClassId // Destination field: classId of type ClassResponse
+        )
+    );
 
-      if (requestDto.getLoginId() == null || requestDto.getLoginId().trim().isEmpty()) {
-        logger.info("LoginId is required.");
-        throw new CustomException("Login ID is required.", HttpStatus.BAD_REQUEST);
-      }
+    // Add conversion from Classes to ClassResponse
+    modelMapper.createTypeMap(Classes.class, ClassResponse.class);
+  }
 
-      if (requestDto.getLoginPw() == null || requestDto.getLoginPw().trim().isEmpty()) {
-        logger.info("LoginPw is required.");
-        throw new CustomException("Login Password is required.", HttpStatus.BAD_REQUEST);
-      }
 
-      //loginId 중복 확인 체크
-      if (teacherRepository.existsByLoginId(requestDto.getLoginId())) {
-        throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
-      }
+  public TeacherResponseDTO createTeacher(TeacherCreateRequestDTO requestDto) {
 
-      // Create a new Users entity for the teacher
-      Users teacher = new Users();
-      teacher.setName(requestDto.getName());
-      teacher.setLoginId(requestDto.getLoginId());
-      teacher.setLoginPw(requestDto.getLoginPw());
-      teacher.setStatus(ACTIVE);
-      teacher.setCreatedChargeId(1L); // Set the createdChargeId
-      teacher.setRole(Role.TEACHER);
-      teacher.setSerialNumber(null);
-
-      // Save the teacher entity to the database
-      Users teacherCreated = teacherRepository.save(teacher);
-
-      // Convert and return the saved entity to a DTO
-      return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
-
-    } catch (DataIntegrityViolationException ex) {
-      // Handle database-related exceptions (including SQL constraint violations)
-      logger.error("Database integrity violation: {}", ex.getMessage());
-      throw new CustomException("Teacher creation failed due to conflict with existing data.",
-          HttpStatus.CONFLICT);
-
+    // 필수 필드 null 체크
+    if (requestDto.getName() == null || requestDto.getName().trim().isEmpty()) {
+      logger.info("Name is required.");
+      throw new CustomException("Name is required.", HttpStatus.BAD_REQUEST);
     }
-//    catch (Exception ex) {
-//      // Handle any other unforeseen exceptions
-//      logger.error("Unexpected error during teacher creation: {}", ex.getMessage());
-//      throw new CustomException("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+
+    if (requestDto.getLoginId() == null || requestDto.getLoginId().trim().isEmpty()) {
+      logger.info("LoginId is required.");
+      throw new CustomException("Login ID is required.", HttpStatus.BAD_REQUEST);
+    }
+
+    if (requestDto.getLoginPw() == null || requestDto.getLoginPw().trim().isEmpty()) {
+      logger.info("LoginPw is required.");
+      throw new CustomException("Login Password is required.", HttpStatus.BAD_REQUEST);
+    }
+
+    //loginId 중복 확인 체크
+    if (teacherRepository.existsByLoginId(requestDto.getLoginId())) {
+      throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
+    }
+
+    // Create a new Users entity for the teacher
+    Users teacher = new Users();
+    teacher.setName(requestDto.getName());
+    teacher.setLoginId(requestDto.getLoginId());
+    teacher.setLoginPw(requestDto.getLoginPw());
+    teacher.setStatus(ACTIVE);
+    teacher.setCreatedChargeId(1L); // Set the createdChargeId
+    teacher.setRole(Role.TEACHER);
+    teacher.setSerialNumber(null);
+
+    // Save the teacher entity to the database
+    Users teacherCreated = teacherRepository.save(teacher);
+
+    // Convert and return the saved entity to a DTO
+    return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
+
 
   }
 
@@ -281,31 +297,69 @@ public class TeacherService {
   }
 
   //teacher의 담당 class 할당
-  public Users assignClass(String loginId, Long classId) {
+  public TeacherResponseDTO assignClass(String loginId, Long classId) {
     // Find the teacher by loginId
     Users teacher = teacherRepository.findByLoginId(loginId)
-        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + loginId, HttpStatus.NOT_FOUND));
+        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + loginId,
+            HttpStatus.NOT_FOUND));
 
     // Find the class by classId
     Classes assignedClass = classRepository.findById(classId)
-        .orElseThrow(() -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
+        .orElseThrow(
+            () -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
 
     // Debugging logs
     logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, loginId);
 
     // Initialize associated notices
     Hibernate.initialize(assignedClass.getNotice());
-    //logger.info("Initialized notices for class ID: {}", classId);
 
     // 양방향 관계 매핑
     teacher.addClass(assignedClass);
 
-
     // Save the updated teacher entity
     Users updatedTeacher = teacherRepository.save(teacher);
-    logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId, loginId);
+    logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId,
+        loginId);
 
-    return updatedTeacher;
+    TeacherResponseDTO teacherResponseDTO = mapToResponseDTO(updatedTeacher);
+
+    return teacherResponseDTO;
   }
+
+  public TeacherResponseDTO mapToResponseDTO(Users savedTeacher) {
+    // Create a new TeacherResponseDTO instance
+    TeacherResponseDTO responseDto = new TeacherResponseDTO();
+
+    // Set fields directly from the savedTeacher entity
+    responseDto.setLoginId(savedTeacher.getLoginId());
+    responseDto.setRole(savedTeacher.getRole());
+    responseDto.setName(savedTeacher.getName());
+    responseDto.setBirth(savedTeacher.getBirth());
+    responseDto.setSex(savedTeacher.getSex());
+    responseDto.setPhoneNum(savedTeacher.getPhoneNum());
+    responseDto.setPwAnswer(savedTeacher.getPwAnswer());
+    responseDto.setStatus(savedTeacher.getStatus());
+    responseDto.setCreatedAt(savedTeacher.getCreatedAt());
+    responseDto.setUpdatedAt(savedTeacher.getUpdatedAt());
+    responseDto.setCreatedChargeId(savedTeacher.getCreatedChargeId());
+    responseDto.setUpdatedChargeId(savedTeacher.getUpdatedChargeId());
+
+    // Map the class entity (Classes) to ClassResponse if the class is assigned
+    if (savedTeacher.getClassId() != null) {
+      ClassResponse classResponse = modelMapper.map(savedTeacher.getClassId(), ClassResponse.class);
+      responseDto.setClassId(classResponse);
+    }
+
+    // Map the image entity (Image) to ImageResponseDTO if the image is assigned
+    if (savedTeacher.getImageId() != null) {
+      ImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
+          ImageResponseDTO.class);
+      responseDto.setImageId(imageResponse);
+    }
+
+    return responseDto;
+  }
+
 
 }

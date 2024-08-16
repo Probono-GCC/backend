@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
+import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Users;
@@ -40,7 +42,7 @@ public class TeacherController {
   //teacher 생성
   @PostMapping("/teachers")
   public ResponseEntity<TeacherResponseDTO> createTeacher(
-      @RequestBody TeacherRequestDTO requestDto) {
+       @RequestBody @Valid TeacherCreateRequestDTO requestDto) {
 
     TeacherResponseDTO teacher = teacherService.createTeacher(requestDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
@@ -138,21 +140,14 @@ public class TeacherController {
     }
   }
 
+  //teacher를 class에 할당
   //담당하는 class 할당(담임선생님)
-  @PutMapping("/teachers/assignClass/{loginId}/{classId}")
+  @PutMapping("/teachers/{loginId}/assignClass/{classId}")
   public ResponseEntity<?> assignClassToTeacher(
       @PathVariable String loginId, @PathVariable Long classId) {
 
-    // Assign the class to the teacher
-    Users updatedTeacher = teacherService.assignClass(loginId, classId);
-    // Convert the updated teacher entity to a DTO
-    logger.info("before mapping");
-    TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
-    logger.info("after mapping");
-
-
-    //return ResponseEntity.ok(null);
-    return ResponseEntity.ok(responseDto);
+    TeacherResponseDTO updatedTeacher = teacherService.assignClass(loginId, classId);
+    return ResponseEntity.ok(updatedTeacher);
 
   }
 

@@ -1,9 +1,9 @@
 package probono.gcc.school.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,12 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import probono.gcc.school.model.dto.ClassResponse;
-import probono.gcc.school.model.dto.CreateClassRequest;
 import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.course.CreateCourseRequest;
-import probono.gcc.school.model.entity.Classes;
-import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.service.CourseService;
 
 @RestController
@@ -51,4 +47,14 @@ public class CourseController {
     courseService.deleteCourse(id);
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/course")
+  public ResponseEntity<List<CourseResponse>> getAllCourse() {
+    List<CourseResponse> courses = courseService.getAllCourses();
+    return ResponseEntity.ok(courses);
+  }
 }
+
+
+
+

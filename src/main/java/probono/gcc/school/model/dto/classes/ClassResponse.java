@@ -1,4 +1,4 @@
-package probono.gcc.school.model.dto;
+package probono.gcc.school.model.dto.classes;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -20,8 +20,6 @@ public class ClassResponse {
 
   private long classId;
   private int year;
-
   private Grades grade;
-
   private Sections section;
 }
