@@ -53,14 +53,9 @@ public class StudentController {
   @GetMapping("/students")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
-    try {
-      List<StudentResponseDTO> students = studentService.findAllStudents();
+    List<StudentResponseDTO> students = studentService.findAllStudents();
+    return ResponseEntity.ok(students);
 
-      return ResponseEntity.ok(students);
-    } catch (Exception ex) {
-      logger.error("Unexpected error occurred while fetching students: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
   }
 
   // 특정 Student 조회 (username로 조회)
@@ -77,24 +72,17 @@ public class StudentController {
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> updateStudent(
       @PathVariable String username, @RequestBody @Valid StudentUpdateRequestDTO requestDto) {
-    try {
 
-      String updatedTeacherId = studentService.updateStudent(username, requestDto);
-      Users updatedTeacher = studentService.findById(updatedTeacherId);
+    String updatedTeacherId = studentService.updateStudent(username, requestDto);
+    Users updatedTeacher = studentService.findById(updatedTeacherId);
 
 //      logger.info("updatedTeacher.getCreatedAt() : {}",updatedTeacher.getCreatedAt());
 //      logger.info("updatedTeacher.getUpdatedAt() : {}",updatedTeacher.getUpdatedAt());
 
-      TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
+    TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
 
-      return ResponseEntity.ok(responseDto);
-    } catch (CustomException ex) {
-      logger.error("Error occurred during student update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-    } catch (Exception ex) {
-      logger.error("Unexpected error occurred during student update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-    }
+    return ResponseEntity.ok(responseDto);
+
   }
 
   // Delete a student
@@ -106,26 +94,17 @@ public class StudentController {
       @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
   })
   public ResponseEntity<?> deleteStudent(@PathVariable String username) {
-    try {
 
-      // Perform delete operation using service
-      studentService.deleteStudent(username);
-      Users deletedStudent = studentService.findById(username);
+    // Perform delete operation using service
+    studentService.deleteStudent(username);
+    Users deletedStudent = studentService.findById(username);
 
-      // Teacher 엔티티를 DTO로 변환
+    // Teacher 엔티티를 DTO로 변환
 
-      StudentResponseDTO responseDTO = modelMapper.map(deletedStudent, StudentResponseDTO.class);
-      // Return success response
-      return ResponseEntity.ok(responseDTO);
-    } catch (CustomException ex) {
-      // Handle specific exception and return appropriate response
-      logger.error("Error occurred during student deletion: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    } catch (Exception ex) {
-      // Handle any other unforeseen exceptions
-      logger.error("Unexpected error occurred during student deletion: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+    StudentResponseDTO responseDTO = modelMapper.map(deletedStudent, StudentResponseDTO.class);
+    // Return success response
+    return ResponseEntity.ok(responseDTO);
+
   }
 
   // Check if username is already taken
@@ -140,6 +119,9 @@ public class StudentController {
       return ResponseEntity.ok("Login ID is available.");
     }
   }
+
+  // Student에 class 할당
+
 
 
 }

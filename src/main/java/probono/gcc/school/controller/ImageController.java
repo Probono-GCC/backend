@@ -34,15 +34,14 @@ public class ImageController {
 
   private S3ImageService s3ImageService;
 
-  @PostMapping("/profile/images")
+  @PostMapping("/profile/images/{username}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-  public ResponseEntity<?> createProfileImage(@RequestPart("image") MultipartFile image) {
+  public ResponseEntity<?> createProfileImage(@RequestPart("image") MultipartFile image,@PathVariable String username) {
     try {
       String profileImageUrl = s3ImageService.upload(image);
       ImageRequestDTO requestDto = new ImageRequestDTO();
       requestDto.setImagePath(profileImageUrl);
-      // set other fields of requestDto as necessary
-
+      requestDto.setUsername(username);
       ImageResponseDTO imageResponse = imageService.createProfileImage(requestDto);
       return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
     } catch (S3Exception e) {

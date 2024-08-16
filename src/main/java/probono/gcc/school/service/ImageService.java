@@ -14,10 +14,12 @@ import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Notice;
+import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ImageRepository;
 import probono.gcc.school.repository.NoticeRepository;
 import probono.gcc.school.repository.SubjectRepository;
+import probono.gcc.school.repository.UserRepository;
 
 @Service
 @AllArgsConstructor
@@ -29,6 +31,8 @@ public class ImageService {
   private S3ImageService s3ImageService;
 
   private NoticeRepository noticeRepository;
+  
+  private UserRepository userRepository;
 
   private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
@@ -39,10 +43,30 @@ public class ImageService {
     image.setCreatedChargeId(1L);
     image.setImagePath(requestDto.getImagePath());
 
-    Image savedImage = imageRepository.save(image);
-    logger.info("Image createdAt from savedImage: {}", savedImage.getCreatedAt());
 
-    return modelMapper.map(savedImage, ImageResponseDTO.class);
+    imageRepository.save(image);
+
+    String username = requestDto.getUsername();
+    Optional<Users> usersOptional = userRepository.findByUsername(username);
+    Users user=null;
+    if (usersOptional.isPresent()) {
+      user = usersOptional.get();
+      user.setImageId(image);
+    }
+
+    return mapToImageResponseDTO(image,username);
+  }
+
+  private ImageResponseDTO mapToImageResponseDTO(Image image, String username) {
+
+    ImageResponseDTO imageResponseDTO = new ImageResponseDTO();
+    imageResponseDTO.setImageId(image.getImageId());
+    imageResponseDTO.setImagePath(image.getImagePath());
+    imageResponseDTO.setCreatedChargeId(image.getCreatedChargeId());
+    imageResponseDTO.setUsername(username);
+
+    return imageResponseDTO;
+
   }
 
 //  public ImageResponseDTO saveNoticeImage(String imagePath, Long noticeId) {
