@@ -69,9 +69,9 @@ public class Classes {
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Notice> notice;
 
+
   @OneToMany(mappedBy = "username")
   private List<Users> users;
-
 
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Course> courseList;

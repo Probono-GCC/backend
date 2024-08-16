@@ -2,13 +2,12 @@ package probono.gcc.school.model.dto.users;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import probono.gcc.school.model.entity.Classes;
-import probono.gcc.school.model.entity.Image;
+import probono.gcc.school.model.dto.classes.ClassResponse;
+import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
@@ -19,6 +18,7 @@ import probono.gcc.school.model.enums.Status;
 @Builder
 public class TeacherResponseDTO {
 
+
   private String username;
   private String password;
   private Role role;
@@ -27,8 +27,8 @@ public class TeacherResponseDTO {
   private Sex sex;
   private String phoneNum;
   private String pwAnswer;
-  private Classes classId;
-  private Image imageId;
+  private ClassResponse classId; //ClassResponse로 type 바꿈
+  private ImageResponseDTO imageId;
   private Status status;
   private Timestamp createdAt;
   private Timestamp updatedAt;

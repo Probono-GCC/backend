@@ -1,12 +1,13 @@
 package probono.gcc.school.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
-import probono.gcc.school.model.dto.ClassResponse;
+import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.courseUser.CourseUserResponse;
@@ -116,6 +117,24 @@ public class CourseUserService {
       throw new DuplicateEntityException("이미 존재하는 CourseUser 입니다.");
     }
   }
+
+
+  public List<CourseUserResponse> getStudentsByCourseId(long courseId) {
+
+    Course findCourse = courseRepository.findById(courseId)
+        .orElseThrow(() -> new NoSuchElementException("Course not found with id: " + courseId));
+
+    List<CourseUser> courseUsers = courseUserRepository.findByCourseId(findCourse);
+
+    List<CourseUser> studentCourseUsers = courseUsers.stream()
+        .filter(courseUser -> Role.ROLE_STUDENT.equals(courseUser.getRole()))
+        .toList();
+
+    return studentCourseUsers.stream()
+        .map(courseUser -> mapToResponseDto(courseUser))  // Explicitly passing courseUser as parameter
+        .toList();
+  }
+
 
   private CourseUserResponse mapToResponseDto(CourseUser savedCourseUser) {
     CourseUserResponse responseDto = new CourseUserResponse();

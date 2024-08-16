@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,14 +20,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
-import probono.gcc.school.model.dto.ClassDTO;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
+import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
-import probono.gcc.school.model.entity.Subject;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.service.TeacherService;
 
@@ -36,14 +35,16 @@ import probono.gcc.school.service.TeacherService;
 public class TeacherController {
 
   private final TeacherService teacherService;
+  private final String number = "500";
   private ModelMapper modelMapper;
   private static final Logger logger = LoggerFactory.getLogger(TeacherController.class);
+
 
   //teacher 생성
   @PostMapping("/teachers/join")
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<TeacherResponseDTO> createTeacher(
-      @RequestBody TeacherRequestDTO requestDto) {
+       @RequestBody @Valid TeacherCreateRequestDTO requestDto) {
 
     TeacherResponseDTO teacher = teacherService.createTeacher(requestDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
@@ -146,26 +147,16 @@ public class TeacherController {
     }
   }
 
+  //teacher를 class에 할당
   //담당하는 class 할당(담임선생님)
-  @PutMapping("/teachers/assignClass/{username}/{classId}")
+  @PutMapping("/teachers/{loginId}/assignClass/{classId}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<TeacherResponseDTO> assignClassToTeacher(
+  public ResponseEntity<?> assignClassToTeacher(
       @PathVariable String username, @PathVariable Long classId) {
-    try {
-      // Assign the class to the teacher
-      Users updatedTeacher = teacherService.assignClass(username, classId);
-      // Convert the updated teacher entity to a DTO
-      TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
 
-      return ResponseEntity.ok(responseDto);
-    } catch (CustomException ex) {
-      logger.error("Error occurred while assigning class to teacher: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    } catch (Exception ex) {
-      logger.error("Unexpected error occurred while assigning class to teacher: {}",
-          ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+    TeacherResponseDTO updatedTeacher = teacherService.assignClass(username, classId);
+    return ResponseEntity.ok(updatedTeacher);
+
   }
 
 

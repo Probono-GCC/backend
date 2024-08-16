@@ -69,6 +69,7 @@ CREATE TABLE subject
     createdChargeId BIGINT      NOT NULL,
     updatedChargeId BIGINT NULL
 );
+
 CREATE TABLE course
 (
     courseId        BIGINT    NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -79,6 +80,7 @@ CREATE TABLE course
     updatedChargeId BIGINT NULL,
     subjectId       BIGINT    NOT NULL,
     classId         BIGINT    NOT NULL
+
 );
 CREATE TABLE course_user
 (

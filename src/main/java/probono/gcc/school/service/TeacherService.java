@@ -2,6 +2,7 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -10,14 +11,17 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.model.dto.classes.ClassResponse;
+import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
@@ -42,63 +46,65 @@ public class TeacherService {
   private ImageService imageService;
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
+
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-  public TeacherResponseDTO createTeacher(TeacherRequestDTO requestDto) {
+  @PostConstruct
+  public void setupMapper() {
+    // Create TypeMap for Users to TeacherResponseDTO conversion
+    TypeMap<Users, TeacherResponseDTO> typeMap = modelMapper.createTypeMap(Users.class,
+        TeacherResponseDTO.class);
 
-    try {
-      // 필수 필드 null 체크
-      if (requestDto.getName() == null || requestDto.getName().trim().isEmpty()) {
-        logger.info("Name is required.");
-        throw new CustomException("Name is required.", HttpStatus.BAD_REQUEST);
-      }
+    // Custom mapping for Classes (classId) to ClassResponse
+    typeMap.addMappings(mapper ->
+        mapper.map(
+            user -> user.getClassId(), // Source field: classId of type Classes
+            TeacherResponseDTO::setClassId // Destination field: classId of type ClassResponse
+        )
+    );
 
-      if (requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()) {
-        logger.info("username is required.");
-        throw new CustomException("Login ID is required.", HttpStatus.BAD_REQUEST);
-      }
+    // Add conversion from Classes to ClassResponse
+    modelMapper.createTypeMap(Classes.class, ClassResponse.class);
+  }
 
-      if (requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()) {
-        logger.info("password is required.");
-        throw new CustomException("Login Password is required.", HttpStatus.BAD_REQUEST);
-      }
 
-      //username 중복 확인 체크
-      if (teacherRepository.existsByUsername(requestDto.getUsername())) {
-        throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
-      }
+  public TeacherResponseDTO createTeacher(TeacherCreateRequestDTO requestDto) {
 
-      // Create a new Users entity for the teacher
-      Users teacher = new Users();
-      teacher.setName(requestDto.getName());
-      teacher.setUsername(requestDto.getUsername());
-      teacher.setPassword(bCryptPasswordEncoder.encode(requestDto.getPassword()));
-      teacher.setStatus(ACTIVE);
-      teacher.setCreatedChargeId(1L); // Set the createdChargeId
-      teacher.setRole(Role.ROLE_TEACHER);
-      teacher.setSerialNumber(null);
-
-      // Save the teacher entity to the database
-      Users teacherCreated = teacherRepository.save(teacher);
-
-      // Convert and return the saved entity to a DTO
-      return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
-
-    } catch (DataIntegrityViolationException ex) {
-      // Handle database-related exceptions (including SQL constraint violations)
-      logger.error("Database integrity violation: {}", ex.getMessage());
-      throw new CustomException("Teacher creation failed due to conflict with existing data.",
-          HttpStatus.CONFLICT);
-
+    if (requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()) {
+      logger.info("username is required.");
+      throw new CustomException("Login ID is required.", HttpStatus.BAD_REQUEST);
     }
-//    catch (Exception ex) {
-//      // Handle any other unforeseen exceptions
-//      logger.error("Unexpected error during teacher creation: {}", ex.getMessage());
-//      throw new CustomException("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+
+    if (requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()) {
+      logger.info("password is required.");
+      throw new CustomException("Login Password is required.", HttpStatus.BAD_REQUEST);
+    }
+
+    //username 중복 확인 체크
+    if (teacherRepository.existsByUsername(requestDto.getUsername())) {
+      throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
+    }
+
+    // Create a new Users entity for the teacher
+    Users teacher = new Users();
+    teacher.setName(requestDto.getName());
+    teacher.setUsername(requestDto.getUsername());
+    teacher.setPassword(bCryptPasswordEncoder.encode(requestDto.getPassword()));
+    teacher.setStatus(ACTIVE);
+    teacher.setCreatedChargeId(1L); // Set the createdChargeId
+    teacher.setRole(Role.ROLE_TEACHER);
+    teacher.setSerialNumber(null);
+
+    // Save the teacher entity to the database
+    Users teacherCreated = teacherRepository.save(teacher);
+
+    // Convert and return the saved entity to a DTO
+    return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
 
   }
+  // 필수 필드 null 체크
+
 
   // Retrieve all teachers
   public List<TeacherResponseDTO> findAllTeachers() {
@@ -263,9 +269,11 @@ public class TeacherService {
     }
 
     //매핑된 class가 있는 경우 삭제
-    if (teacher.getClassId() != null) {
-      logger.info("Unmapping associated class with ID: {}", teacher.getClassId().getClassId());
-      teacher.setClassId(null); // 클래스와의 연관 관계 해제
+    // 2. teacher가 속한 class의 users 리스트에서 해당 teacher를 제거한다
+    Classes assignedClass = teacher.getClassId();
+    if (assignedClass != null) {
+      assignedClass.getUsers().remove(teacher); // 양방향 관계에서 제거
+      teacher.setClassId(null);
     }
 
     // 논리적 삭제 수행
@@ -284,33 +292,72 @@ public class TeacherService {
   }
 
   //teacher의 담당 class 할당
-  public Users assignClass(String username, Long classId) {
-    // Find the teacher by username
+  public TeacherResponseDTO assignClass(String username, Long classId) {
+    // Find the teacher by loginId
     Users teacher = teacherRepository.findByUsername(username)
         .orElseThrow(() -> new CustomException("Teacher not found with ID: " + username,
             HttpStatus.NOT_FOUND));
 
-    // Find the class by classId
-    Classes assignedClass = classRepository.findById(classId)
-        .orElseThrow(
-            () -> new CustomException("Class not found with ID: " + classId, HttpStatus.NOT_FOUND));
+      // Find the class by classId
+      Classes assignedClass = classRepository.findById(classId)
+          .orElseThrow(
+              () -> new CustomException("Class not found with ID: " + classId,
+                  HttpStatus.NOT_FOUND));
 
-    // Debugging logs
-    logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, username);
+      // Debugging logs
+      logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, username);
 
-    // Initialize associated notices
-    Hibernate.initialize(assignedClass.getNotice());
-    //logger.info("Initialized notices for class ID: {}", classId);
+      // Initialize associated notices
+      Hibernate.initialize(assignedClass.getNotice());
 
-    // 양방향 관계 매핑
-    teacher.addClass(assignedClass);
+      // 양방향 관계 매핑
+      teacher.addClass(assignedClass);
 
-    // Save the updated teacher entity
-    Users updatedTeacher = teacherRepository.save(teacher);
-    logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId,
-        username);
+      // Save the updated teacher entity
+      Users updatedTeacher = teacherRepository.save(teacher);
+      logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId,
+      username);
 
-    return updatedTeacher;
+
+      TeacherResponseDTO teacherResponseDTO = mapToResponseDTO(updatedTeacher);
+
+      return teacherResponseDTO;
+    }
+
+    public TeacherResponseDTO mapToResponseDTO (Users savedTeacher){
+      // Create a new TeacherResponseDTO instance
+      TeacherResponseDTO responseDto = new TeacherResponseDTO();
+
+      // Set fields directly from the savedTeacher entity
+      responseDto.setUsername(savedTeacher.getUsername());
+      responseDto.setRole(savedTeacher.getRole());
+      responseDto.setName(savedTeacher.getName());
+      responseDto.setBirth(savedTeacher.getBirth());
+      responseDto.setSex(savedTeacher.getSex());
+      responseDto.setPhoneNum(savedTeacher.getPhoneNum());
+      responseDto.setPwAnswer(savedTeacher.getPwAnswer());
+      responseDto.setStatus(savedTeacher.getStatus());
+      responseDto.setCreatedAt(savedTeacher.getCreatedAt());
+      responseDto.setUpdatedAt(savedTeacher.getUpdatedAt());
+      responseDto.setCreatedChargeId(savedTeacher.getCreatedChargeId());
+      responseDto.setUpdatedChargeId(savedTeacher.getUpdatedChargeId());
+
+      // Map the class entity (Classes) to ClassResponse if the class is assigned
+      if (savedTeacher.getClassId() != null) {
+        ClassResponse classResponse = modelMapper.map(savedTeacher.getClassId(),
+            ClassResponse.class);
+        responseDto.setClassId(classResponse);
+      }
+
+      // Map the image entity (Image) to ImageResponseDTO if the image is assigned
+      if (savedTeacher.getImageId() != null) {
+        ImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
+            ImageResponseDTO.class);
+        responseDto.setImageId(imageResponse);
+      }
+
+      return responseDto;
+    }
+
+
   }
-
-}

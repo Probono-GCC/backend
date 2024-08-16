@@ -1,6 +1,12 @@
+
+
+//해당 course의 선생님 조회
+
+//선생님의 담당 course 조회
 package probono.gcc.school.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +37,7 @@ public class CourseUserController {
     return ResponseEntity.ok(createdCourseUser);
   }
 
+
   @GetMapping("/courseUser/{id}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN', 'STUDENT')")
   public ResponseEntity<CourseUserResponse> getCourseUser(@PathVariable long id) {
@@ -52,4 +59,15 @@ public class CourseUserController {
     courseUserService.deleteCourseUser(id);
     return ResponseEntity.noContent().build();
   }
+
+  //해당 course를 듣는 학생리스트 조회
+
+  @GetMapping("/courseUser/course/{courseId}")
+  public ResponseEntity<List<CourseUserResponse>> getStudentsByCourse(@PathVariable long courseId) {
+    List<CourseUserResponse> studentsList = courseUserService.getStudentsByCourseId(courseId);
+    return ResponseEntity.ok(studentsList);
+  }
+
+  //해당 course의 선생님 조회
+  //선생님이 담당하는 course리스트 조회
 }

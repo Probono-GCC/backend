@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.dto.SubjectRequestDTO;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
+import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Subject;
 import org.modelmapper.ModelMapper;
 import probono.gcc.school.model.enums.Status;
+import probono.gcc.school.repository.CourseRepository;
 import probono.gcc.school.repository.SubjectRepository;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
@@ -21,6 +23,8 @@ import static probono.gcc.school.model.enums.Status.ACTIVE;
 public class SubjectService {
     private ModelMapper modelMapper;
     private SubjectRepository subjectRepository;
+    private CourseRepository courseRepository;
+    private CourseService courseService;
 
     public SubjectResponseDTO createSubject(SubjectRequestDTO requestDto) {
         Optional<Subject> existingSubject = subjectRepository.findByName(requestDto.getName());
@@ -45,7 +49,7 @@ public class SubjectService {
 
     public List<SubjectResponseDTO> findAllSubject() {
         try {
-            List<Subject> subjectList= subjectRepository.findAll();
+            List<Subject> subjectList= subjectRepository.findAllByStatus(ACTIVE);
             // stream과 mapper를 사용하여 리스트 변환
             return subjectList.stream()
                 .map(teacher -> modelMapper.map(teacher, SubjectResponseDTO.class))
@@ -98,6 +102,15 @@ public class SubjectService {
         Subject subject = subjectRepository.findById(id).orElseThrow(
             () -> new IllegalArgumentException("unvalid id")
         );
+
+        // 2. subject에 할당된 course들을 가져와 논리적 삭제 수행
+        List<Course> courses = subject.getCourseList();
+        if (courses != null) {
+            for (Course course : courses) {
+                courseService.deleteCourse(course.getCourseId());
+            }
+        }
+
         // 논리적 삭제 수행
         subject.setStatus(Status.INACTIVE);
         // Dummy Data

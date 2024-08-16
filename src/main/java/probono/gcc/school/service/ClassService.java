@@ -5,22 +5,27 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
+import org.springframework.expression.spel.ast.Assign;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
-import probono.gcc.school.model.dto.ClassResponse;
-import probono.gcc.school.model.dto.CreateClassRequest;
+import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
+import probono.gcc.school.model.dto.classes.ClassResponse;
+import probono.gcc.school.model.dto.classes.CreateClassRequest;
 import probono.gcc.school.model.dto.ImageResponseDTO;
 import probono.gcc.school.model.dto.NoticeResponse;
-import probono.gcc.school.model.dto.course.CourseResponse;
+import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Notice;
+import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.CourseRepository;
-import probono.gcc.school.repository.CourseUserRepository;
+import probono.gcc.school.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,9 @@ public class ClassService {
 
   private final CourseRepository courseRepository;
 
+  private final UserRepository userRepository;
+
+  private final TeacherService teacherService;
 
   /**
    * 클래스 생성
@@ -127,6 +135,57 @@ public class ClassService {
     return collect;
   }
 
+  @Transactional
+  public AssignClassResponseDTO assignTeacher(Long classId, String loginId) {
+    // Find the teacher by loginId
+    Users teacher = userRepository.findByUsername(loginId)
+        .orElseThrow(() -> new NoSuchElementException("Teacher not found with ID: " + loginId));
+
+    // Find the class by classId
+    Classes assignedClass = classRepository.findById(classId)
+        .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + classId));
+
+    // Initialize associated notices (if needed for any reason)
+    Hibernate.initialize(assignedClass.getNotice());
+
+    // Assign the class to the teacher
+    teacher.addClass(assignedClass);
+
+    // Save the updated teacher entity
+    Users updatedTeacher = userRepository.save(teacher);
+
+    // Retrieve the list of all teachers
+    List<Users> allTeachers = userRepository.findByClassIdAndRoleAndStatus(assignedClass, Role.ROLE_TEACHER,Status.ACTIVE);
+
+    // Create the response DTO
+    AssignClassResponseDTO assignedTeacherDTO = mapToAssignResponseDTO(assignedClass,allTeachers);
+
+    return assignedTeacherDTO;
+  }
+
+  // Helper method to map Users to TeacherResponseDTO
+  private AssignClassResponseDTO mapToAssignResponseDTO(Classes classes,List<Users> teacherList) {
+    AssignClassResponseDTO assignClassResponseDTO = new AssignClassResponseDTO();
+    assignClassResponseDTO.setClassId(classes.getClassId());
+    assignClassResponseDTO.setYear(classes.getYear());
+    assignClassResponseDTO.setGrade(classes.getGrade());
+    assignClassResponseDTO.setSection(classes.getSection());
+
+    // Users 리스트를 TeacherResponseDTO 리스트로 변환 (람다식 사용)
+    List<TeacherResponseDTO> allTeachersDTO = teacherList.stream()
+        .map(user -> teacherService.mapToResponseDTO(user)) // 각 Users 객체를 TeacherResponseDTO로 변환
+        .collect(Collectors.toList());
+
+    //학생 Users 리스트를 StudentrResponseDTO 리스트로 변환 (람다식 사용)
+    //추가 구현
+
+    assignClassResponseDTO.setTeachers(allTeachersDTO);
+
+    return assignClassResponseDTO;
+
+
+
+  }
   private ClassResponse mapToResponseDto(Classes savedClass) {
     ClassResponse responseDto = new ClassResponse();
     responseDto.setClassId(savedClass.getClassId());
@@ -135,4 +194,6 @@ public class ClassService {
     responseDto.setSection(savedClass.getSection());
     return responseDto;
   }
+
+
 }

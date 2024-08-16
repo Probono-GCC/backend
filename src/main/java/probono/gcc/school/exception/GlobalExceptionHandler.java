@@ -1,8 +1,11 @@
 package probono.gcc.school.exception;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -36,6 +39,17 @@ public class GlobalExceptionHandler {
         .status(HttpStatus.BAD_REQUEST) // 400 Bad Request
         .body(ex.getMessage()); // 예외 메시지 반환
   }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    Map<String, String> errors = new HashMap<>();
+
+    ex.getBindingResult().getFieldErrors().forEach(error ->
+        errors.put(error.getField(), error.getDefaultMessage())
+    );
+    return ResponseEntity.badRequest().body(errors);
+  }
+
 //
 //  @ExceptionHandler(EntityNotFoundException.class)
 //  public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {

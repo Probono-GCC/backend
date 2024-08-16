@@ -1,9 +1,6 @@
 package probono.gcc.school.controller;
 
 import jakarta.validation.Valid;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +11,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import probono.gcc.school.model.dto.ClassResponse;
-import probono.gcc.school.model.dto.CreateClassRequest;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
 import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.dto.UpdateNoticeRequest;
-import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.enums.NoticeType;
 import probono.gcc.school.service.NoticeService;
 import probono.gcc.school.service.S3ImageService;

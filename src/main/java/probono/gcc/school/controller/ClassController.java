@@ -2,7 +2,6 @@ package probono.gcc.school.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,17 +13,21 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import probono.gcc.school.model.dto.ClassResponse;
-import probono.gcc.school.model.dto.CreateClassRequest;
+import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
+import probono.gcc.school.model.dto.classes.ClassResponse;
+import probono.gcc.school.model.dto.classes.CreateClassRequest;
 import probono.gcc.school.model.dto.NoticeResponse;
+import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.service.ClassService;
+import probono.gcc.school.service.TeacherService;
 
 @RestController
 @RequiredArgsConstructor
 public class ClassController {
 
   private final ClassService classService;
+  private final TeacherService teacherService;
 
   @PostMapping("/class")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
@@ -75,4 +78,15 @@ public class ClassController {
     List<NoticeResponse> noticeList = classService.getClassNoticeList(id);
     return ResponseEntity.ok(noticeList);
   }
+
+  //class에 teacher를 할당 (담임선생님)
+  // Assign a teacher to a class
+  @PutMapping("/class/{classId}/assignTeacher/{loginId}")
+  public ResponseEntity<?> assignTeacherToClass(@PathVariable Long classId,
+      @PathVariable String loginId) {
+    AssignClassResponseDTO assignClassResponseDTO = classService.assignTeacher(classId,loginId);
+    return ResponseEntity.ok(assignClassResponseDTO);
+
+  }
+
 }

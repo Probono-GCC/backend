@@ -1,4 +1,4 @@
-package probono.gcc.school.model.dto;
+package probono.gcc.school.model.dto.classes;
 
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Sections;
