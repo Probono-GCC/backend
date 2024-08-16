@@ -25,6 +25,12 @@ public class AdminAccountInitializer implements CommandLineRunner {
   @Value("${admin.password}")
   private String adminPassword;
 
+  private String studentName = "testStudent";
+  private String studenPassword = "1234";
+
+  private String teacherName = "testTeacher";
+  private String teacherPassword = "1234";
+
   public AdminAccountInitializer(UserRepository userRepository,
       BCryptPasswordEncoder bCryptPasswordEncoder) {
     this.userRepository = userRepository;
@@ -47,6 +53,36 @@ public class AdminAccountInitializer implements CommandLineRunner {
       admin.setUpdatedAt(timestamp);
       admin.setCreatedChargeId(1l);
       userRepository.save(admin);
+    }
+
+    if (userRepository.findByUsername(studentName).isEmpty()) {
+      Users student = new Users();
+      student.setUsername(studentName);
+      student.setPassword(bCryptPasswordEncoder.encode(studenPassword));
+      student.setRole(Role.ROLE_STUDENT);
+      student.setName("testStudent");
+      student.setStatus(Status.ACTIVE);
+      LocalDateTime now = LocalDateTime.now();
+      Timestamp timestamp = Timestamp.valueOf(now);
+      student.setCreatedAt(timestamp);
+      student.setUpdatedAt(timestamp);
+      student.setCreatedChargeId(1l);
+      userRepository.save(student);
+    }
+
+    if (userRepository.findByUsername(teacherName).isEmpty()) {
+      Users teacher = new Users();
+      teacher.setUsername(teacherName);
+      teacher.setPassword(bCryptPasswordEncoder.encode(teacherPassword));
+      teacher.setRole(Role.ROLE_TEACHER);
+      teacher.setName("testTeacher");
+      teacher.setStatus(Status.ACTIVE);
+      LocalDateTime now = LocalDateTime.now();
+      Timestamp timestamp = Timestamp.valueOf(now);
+      teacher.setCreatedAt(timestamp);
+      teacher.setUpdatedAt(timestamp);
+      teacher.setCreatedChargeId(1l);
+      userRepository.save(teacher);
     }
   }
 }
