@@ -16,5 +16,6 @@ public class ImageRequestDTO {
 
   private Long noticeId;
   private String imagePath;
+  private String username;
 
 }

@@ -50,23 +50,22 @@ public class TeacherService {
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-  @PostConstruct
-  public void setupMapper() {
-    // Create TypeMap for Users to TeacherResponseDTO conversion
-    TypeMap<Users, TeacherResponseDTO> typeMap = modelMapper.createTypeMap(Users.class,
-        TeacherResponseDTO.class);
-
-    // Custom mapping for Classes (classId) to ClassResponse
-    typeMap.addMappings(mapper ->
-        mapper.map(
-            user -> user.getClassId(), // Source field: classId of type Classes
-            TeacherResponseDTO::setClassId // Destination field: classId of type ClassResponse
-        )
-    );
-
-    // Add conversion from Classes to ClassResponse
-    modelMapper.createTypeMap(Classes.class, ClassResponse.class);
-  }
+//  @PostConstruct
+//  public void setupMapper() {
+//    // Create TypeMap for Users to TeacherResponseDTO conversion
+//    TypeMap<Users, TeacherResponseDTO> typeMap = modelMapper.createTypeMap(Users.class,
+//        TeacherResponseDTO.class);
+//
+//    // Custom mapping for Classes (classId) to ClassResponse
+//    typeMap.addMappings(mapper ->
+//        mapper.map(
+//            user -> user.getClassId(), // Source field: classId of type Classes
+//            TeacherResponseDTO::setClassId // Destination field: classId of type ClassResponse
+//        )
+//    );
+//    // Add conversion from Classes to ClassResponse
+//    modelMapper.createTypeMap(Classes.class, ClassResponse.class);
+//  }
 
 
   public TeacherResponseDTO createTeacher(TeacherCreateRequestDTO requestDto) {
@@ -100,7 +99,8 @@ public class TeacherService {
     Users teacherCreated = teacherRepository.save(teacher);
 
     // Convert and return the saved entity to a DTO
-    return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
+    return mapToResponseDTO(teacherCreated);
+//    return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
 
   }
   // 필수 필드 null 체크
@@ -113,7 +113,7 @@ public class TeacherService {
           Role.ROLE_TEACHER);
       // Use stream and ModelMapper to convert entity list to DTO list
       return teacherList.stream()
-          .map(teacher -> modelMapper.map(teacher, TeacherResponseDTO.class))
+          .map(teacher -> mapToResponseDTO(teacher))
           .collect(Collectors.toList());
     } catch (Exception e) {
       // Handle any exceptions that occur during the fetching process
@@ -129,7 +129,7 @@ public class TeacherService {
         () -> new IllegalArgumentException("Teacher not found with ID: " + username)
     );
     // Convert the found entity to a DTO
-    return modelMapper.map(teacher, TeacherResponseDTO.class);
+    return mapToResponseDTO(teacher);
 
   }
 
