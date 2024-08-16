@@ -25,6 +25,9 @@ public class AdminAccountInitializer implements CommandLineRunner {
   @Value("${admin.password}")
   private String adminPassword;
 
+
+  private String adUsername = "testAdmin";
+  private String adPassword = "1234";
   private String studentName = "testStudent";
   private String studenPassword = "1234";
 
@@ -39,7 +42,6 @@ public class AdminAccountInitializer implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    System.out.println("here!!!");
     if (userRepository.findByUsername(adminUsername).isEmpty()) {
       Users admin = new Users();
       admin.setUsername(adminUsername);
@@ -53,6 +55,21 @@ public class AdminAccountInitializer implements CommandLineRunner {
       admin.setUpdatedAt(timestamp);
       admin.setCreatedChargeId(1l);
       userRepository.save(admin);
+    }
+
+    if (userRepository.findByUsername(adUsername).isEmpty()) {
+      Users tAdmin = new Users();
+      tAdmin.setUsername(adUsername);
+      tAdmin.setPassword(bCryptPasswordEncoder.encode(adPassword));
+      tAdmin.setRole(Role.ROLE_ADMIN);
+      tAdmin.setName("testAdmin");
+      tAdmin.setStatus(Status.ACTIVE);
+      LocalDateTime now = LocalDateTime.now();
+      Timestamp timestamp = Timestamp.valueOf(now);
+      tAdmin.setCreatedAt(timestamp);
+      tAdmin.setUpdatedAt(timestamp);
+      tAdmin.setCreatedChargeId(1l);
+      userRepository.save(tAdmin);
     }
 
     if (userRepository.findByUsername(studentName).isEmpty()) {
