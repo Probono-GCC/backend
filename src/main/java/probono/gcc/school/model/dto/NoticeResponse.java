@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
@@ -36,13 +37,25 @@ public class NoticeResponse {
 
   private Timestamp updatedAt;
 
-  private Long createdChargeId;
+  private long createdChargeId;
 
-  private Long updatedChargeId;
+  private long updatedChargeId;
 
   private int views;
 
   //private CourseResponse courseResponse;
 
   private List<ImageResponseDTO> imageList;
+
+  public NoticeResponse(long noticeId, String title, String content, Timestamp createdAt,
+      Timestamp updatedAt, long createdChargeId, long updatedChargeId, int views) {
+    this.noticeId = noticeId;
+    this.title = title;
+    this.content = content;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.createdChargeId = createdChargeId;
+    this.updatedChargeId = updatedChargeId;
+    this.views = views;
+  }
 }

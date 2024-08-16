@@ -3,6 +3,7 @@ package probono.gcc.school.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
 import probono.gcc.school.model.dto.NoticeResponse;
@@ -42,10 +44,18 @@ public class NoticeController {
     return ResponseEntity.ok(noticeResponse);
   }
 
-  @GetMapping("/notice/classNoticeList/{id}")
+  //  @GetMapping("/notice/classNoticeList/{id}")
+//  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
+//  public ResponseEntity<List<NoticeResponse>> getClassNoticeList(@PathVariable Long id) {
+//    List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.CLASS);
+//    return ResponseEntity.ok(noticeList);
+//  }
+  @GetMapping("/notice/classNoticeList")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-  public ResponseEntity<List<NoticeResponse>> getClassNoticeList(@PathVariable Long id) {
-    List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.CLASS);
+  public ResponseEntity<Page<NoticeResponse>> getClassNoticeList(@RequestParam Long id,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<NoticeResponse> noticeList = noticeService.getNoticeList(id, page, size, NoticeType.CLASS);
     return ResponseEntity.ok(noticeList);
   }
 
@@ -56,17 +66,23 @@ public class NoticeController {
     return ResponseEntity.ok(noticeList);
   }
 
-  @GetMapping("/notice/courseNoticeList/{id}")
+  @GetMapping("/notice/courseNoticeList")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-  public ResponseEntity<List<NoticeResponse>> getCourseNoticeList(@PathVariable Long id) {
-    List<NoticeResponse> noticeList = noticeService.getNoticeList(id, NoticeType.COURSE);
+  public ResponseEntity<Page<NoticeResponse>> getCourseNoticeList(@RequestParam Long id,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<NoticeResponse> noticeList = noticeService.getNoticeList(id, page, size,
+        NoticeType.COURSE);
     return ResponseEntity.ok(noticeList);
   }
 
   @GetMapping("/notice/schoolNoticeList")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-  public ResponseEntity<List<NoticeResponse>> getSchoolNoticeList() {
-    List<NoticeResponse> noticeList = noticeService.getNoticeList(-1l, NoticeType.SCHOOL);
+  public ResponseEntity<Page<NoticeResponse>> getSchoolNoticeList(
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<NoticeResponse> noticeList = noticeService.getNoticeList(-1l, page, size,
+        NoticeType.SCHOOL);
     return ResponseEntity.ok(noticeList);
   }
 

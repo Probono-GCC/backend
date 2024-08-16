@@ -37,7 +37,7 @@ public class S3ImageService {
   private String bucketName;
 
   public String upload(MultipartFile image) {
-    if(image.isEmpty() || Objects.isNull(image.getOriginalFilename())){
+    if (image.isEmpty() || Objects.isNull(image.getOriginalFilename())) {
       throw new S3Exception(ErrorCode.EMPTY_FILE_EXCEPTION);
     }
     return this.uploadImage(image);
@@ -80,14 +80,14 @@ public class S3ImageService {
     metadata.setContentLength(bytes.length);
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
 
-    try{
+    try {
       PutObjectRequest putObjectRequest =
           new PutObjectRequest(bucketName, s3FileName, byteArrayInputStream, metadata)
               .withCannedAcl(CannedAccessControlList.PublicRead);
       amazonS3.putObject(putObjectRequest); // put image to S3
-    }catch (Exception e){
+    } catch (Exception e) {
       throw new S3Exception(ErrorCode.PUT_OBJECT_EXCEPTION);
-    }finally {
+    } finally {
       byteArrayInputStream.close();
       is.close();
     }
@@ -95,21 +95,21 @@ public class S3ImageService {
     return amazonS3.getUrl(bucketName, s3FileName).toString();
   }
 
-  public void deleteImageFromS3(String imageAddress){
+  public void deleteImageFromS3(String imageAddress) {
     String key = getKeyFromImageAddress(imageAddress);
-    try{
+    try {
       amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
-    }catch (Exception e){
+    } catch (Exception e) {
       throw new S3Exception(ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
     }
   }
 
-  private String getKeyFromImageAddress(String imageAddress){
-    try{
+  private String getKeyFromImageAddress(String imageAddress) {
+    try {
       URL url = new URL(imageAddress);
       String decodingKey = URLDecoder.decode(url.getPath(), "UTF-8");
       return decodingKey.substring(1); // 맨 앞의 '/' 제거
-    }catch (MalformedURLException | UnsupportedEncodingException e){
+    } catch (MalformedURLException | UnsupportedEncodingException e) {
       throw new S3Exception(ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
     }
   }
