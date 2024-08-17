@@ -162,6 +162,32 @@ public class CourseUserService {
     return response;
   }
 
+  public Page<CourseUserResponse> getTeachersByCourse(long courseId, int page, int size) {
+    Course findCourse = courseRepository.findById(courseId)
+        .orElseThrow(() -> new NoSuchElementException("Course not found with id: " + courseId));
+
+    //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
+    PageRequest pageRequest = PageRequest.of(page, size,
+        Sort.by(Sort.Order.asc("cuId")));
+
+    //조회
+    Page<CourseUser> findList = courseUserRepository.findByStatusAndRoleAndCourseId(Status.ACTIVE,
+        Role.ROLE_TEACHER, findCourse,
+        pageRequest);
+
+    if (findList.isEmpty()) {
+      throw new NoSuchElementException("Teacher not found with courseId : " + courseId);
+    }
+
+    //DTO변환
+    Page<CourseUserResponse> response = findList.map(
+        courseUser -> new CourseUserResponse(courseUser.getCuId(),
+            modelMapper.map(courseUser.getUsername(), UserResponse.class),
+            modelMapper.map(findCourse,
+                CourseResponse.class)));
+    return response;
+  }
+
 
   private CourseUserResponse mapToResponseDto(CourseUser savedCourseUser) {
     CourseUserResponse responseDto = new CourseUserResponse();
