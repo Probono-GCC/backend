@@ -7,7 +7,14 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
+
 import org.springframework.context.annotation.Lazy;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.expression.spel.ast.Assign;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
@@ -106,42 +113,70 @@ public class ClassService {
     return findClass.get();
   }
 
-  public List<ClassResponse> getClassList(int year) {
-    List<Classes> findClass = classRepository.findByStatusAndYear(Status.ACTIVE, year);
+  public Page<ClassResponse> getClassList(int page, int size, int year) {
 
-    if (findClass.isEmpty()) {
+    //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
+    PageRequest pageRequest = PageRequest.of(page, size,
+        Sort.by(Sort.Order.asc("grade"), Sort.Order.asc("section")));
+
+    //조회
+    Page<Classes> findClassList = classRepository.findByStatusAndYear(Status.ACTIVE, year,
+        pageRequest);
+    if (findClassList.isEmpty()) {
       throw new NoSuchElementException("Class not found with year: " + year);
     }
 
-    List<ClassResponse> collect = findClass.stream()
-        .map(m -> new ClassResponse(m.getClassId(), m.getYear(), m.getGrade(), m.getSection()))
-        .collect(
-            Collectors.toList());
-    return collect;
+    //DTO변환
+    Page<ClassResponse> classResponse = findClassList.map(
+        classes -> new ClassResponse(classes.getClassId(), classes.getYear(), classes.getGrade(),
+            classes.getSection()));
+    return classResponse;
   }
 
-  @Transactional
-  public List<NoticeResponse> getClassNoticeList(Long id) {
-    Classes findClass = getClassById(id);
-    List<Notice> notice = findClass.getNotice();
+//  @Transactional
+//  public List<NoticeResponse> getClassNoticeList(Long id) {
+//    Classes findClass = getClassById(id);
+//    List<Notice> notice = findClass.getNotice();
+//
+//    List<NoticeResponse> collect = notice.stream()
+//        .filter(n -> n.getStatus() == Status.ACTIVE)
+//        .map(
+//            m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
+//                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
+//                m.getImageList().stream()
+//                    .map(image -> modelMapper.map(image, ImageResponseDTO.class))
+//                    .collect(Collectors.toList())
+//            ))
+//        .collect(
+//            Collectors.toList());
+//    return collect;
+//  }
 
-    List<NoticeResponse> collect = notice.stream()
-        .filter(n -> n.getStatus() == Status.ACTIVE)
-        .map(
-            m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
-                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
-                m.getImageList().stream()
-                    .map(image -> modelMapper.map(image, CreateImageResponseDTO.class))
-                    .collect(Collectors.toList())
-            ))
-        .collect(
-            Collectors.toList());
-    return collect;
-  }
+
+//  @Transactional
+//  public Page<NoticeResponse> getClassNoticeList(Long id, int page, int size) {
+//    //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
+//    PageRequest pageRequest = PageRequest.of(page, size,
+//        Sort.by(Sort.Order.asc("createdAt")));
+//
+//    //조회
+//    Page<Classes> findClassNoticeList = classRepository.findByStatusAndYear(Status.ACTIVE, year,
+//        pageRequest);
+//    if (findClassList.isEmpty()) {
+//      throw new NoSuchElementException("Class not found with year: " + year);
+//    }
+//
+//    //DTO변환
+//    Page<ClassResponse> classResponse = findClassList.map(
+//        classes -> new ClassResponse(classes.getClassId(), classes.getYear(), classes.getGrade(),
+//            classes.getSection()));
+//    return collect;
+//  }
 
 
 
-  public ClassResponse mapToResponseDto(Classes savedClass) {
+
+  private ClassResponse mapToResponseDto(Classes savedClass) {
     ClassResponse responseDto = new ClassResponse();
     responseDto.setClassId(savedClass.getClassId());
     responseDto.setGrade(savedClass.getGrade());
