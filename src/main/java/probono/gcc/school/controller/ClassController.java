@@ -76,29 +76,13 @@ public class ClassController {
     return ResponseEntity.noContent().build();
   }
 
-  //  @GetMapping("/classNoticeList/{id}")
-//  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-//  public ResponseEntity<List<NoticeResponse>> getClassNoticeList(@PathVariable Long id) {
-//    List<NoticeResponse> noticeList = classService.getClassNoticeList(id);
-//    return ResponseEntity.ok(noticeList);
-//  }
-//  @GetMapping("/classNoticeList/{id}")
-//  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-//  public ResponseEntity<Page<NoticeResponse>> getClassNoticeList(@PathVariable Long id,
-//      @RequestParam(value = "page", defaultValue = "0") int page,
-//      @RequestParam(value = "size", defaultValue = "10") int size) {
-//    Page<NoticeResponse> noticeList = classService.getClassNoticeList(id, page, size);
-//    return ResponseEntity.ok(noticeList);
-//  }
-
   //class에 teacher를 할당 (담임선생님)
   // Assign a teacher to a class
   @PutMapping("/class/{classId}/assignTeacher/{loginId}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> assignTeacherToClass(@PathVariable Long classId,
       @PathVariable String loginId) {
     AssignClassResponseDTO assignClassResponseDTO = classService.assignTeacher(classId, loginId);
     return ResponseEntity.ok(assignClassResponseDTO);
-
   }
-
 }

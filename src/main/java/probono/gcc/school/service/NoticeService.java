@@ -237,7 +237,8 @@ public class NoticeService {
           Status.ACTIVE, findClass,
           pageRequest);
       if (findClassNoticeList.isEmpty()) {
-        throw new NoSuchElementException("Class Notice not found with classId : " + id);
+        throw new NoSuchElementException(
+            "Class Notice not found with classId : " + id + " or page number is too big");
       }
       //DTO변환
       Page<NoticeResponse> noticeResponse = findClassNoticeList.map(
@@ -261,7 +262,8 @@ public class NoticeService {
           Status.ACTIVE, findCourse,
           pageRequest);
       if (findCourseNoticeList.isEmpty()) {
-        throw new NoSuchElementException("Course Notice not found with courseId : " + id);
+        throw new NoSuchElementException(
+            "Course Notice not found with courseId : " + id + " or page number is too big");
       }
 
       //DTO변환
@@ -278,11 +280,11 @@ public class NoticeService {
           ));
       return noticeResponse;
     } else {
-      Page<Notice> findSchoolNoticeList = noticeRepository.findByClassIdIsNullAndCourseIdIsNull(
+      Page<Notice> findSchoolNoticeList = noticeRepository.findByTypeAndStatus(type,
           Status.ACTIVE,
           pageRequest);
       if (findSchoolNoticeList.isEmpty()) {
-        throw new NoSuchElementException("School Notice not found");
+        throw new NoSuchElementException("School Notice not found" + " or page number is too big");
       }
       //DTO변환
       Page<NoticeResponse> noticeResponse = findSchoolNoticeList.map(
@@ -300,43 +302,71 @@ public class NoticeService {
     }
   }
 
-  @Transactional(readOnly = true)
-  public List<NoticeResponse> getClassAndCourseNoticeList(long id) {
-    List<Notice> findNoticeList = new ArrayList<Notice>();
-
-    Classes findClass = classRepository.findById(id)
-        .filter(classes -> Status.ACTIVE.equals(classes.getStatus()))
-        .orElseThrow(() -> new NoSuchElementException("class not foudn with id " + id));
-
-    List<Course> classCourseList = courseRepository.findByClassId(findClass);
-
-    List<Notice> classNoticeList = noticeRepository.findByClassId(findClass);
-
-    findNoticeList.addAll(classNoticeList);
-
-    for (Course classCourse : classCourseList) {
-      List<Notice> courseNoticeList = noticeRepository.findByCourseId(classCourse);
-      findNoticeList.addAll(courseNoticeList);
-    }
-
-    /**
-     * dto로 변환과정 추가
-     */
-    List<NoticeResponse> noticeList = findNoticeList.stream()
-        .filter(n -> n.getStatus() == Status.ACTIVE)
-        .sorted(Comparator.comparing(Notice::getCreatedAt).reversed())
-        .map(
-            m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
-                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
-                m.getImageList().stream()
-                    .map(image -> modelMapper.map(image, ImageResponseDTO.class))
-                    .collect(Collectors.toList())
-            ))
-        .collect(
-            Collectors.toList());
-
-    return noticeList;
-  }
+//  @Transactional(readOnly = true)
+//  public List<NoticeResponse> getClassAndCourseNoticeList(long classId, int page, int size) {
+//    Classes findClass = classRepository.findById(classId)
+//        .filter(classes -> Status.ACTIVE.equals(classes.getStatus()))
+//        .orElseThrow(() -> new NoSuchElementException("class not found with id " + classId));
+//
+//    List<Course> classCourseList = courseRepository.findByClassId(findClass);
+//
+//
+//    //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
+//    PageRequest pageRequest = PageRequest.of(page, size,
+//        Sort.by(Sort.Order.asc("createdAt")));
+//
+//    //조회
+//    Page<Notice> findNoticeList = noticeRepository.findByStatusAndClassId(Status.ACTIVE, findClass,
+//        pageRequest);
+//    for (Course classCourse : classCourseList) {
+//      Page<Notice> courseNoticeList = noticeRepository.findByStatusAndCourseId(Status.ACTIVE,classCourse,pageRequest);
+//      findNoticeList.
+//    }
+//    if (findClassList.isEmpty()) {
+//      throw new NoSuchElementException("Class not found with year: " + year);
+//    }
+//
+//    //DTO변환
+//    Page<ClassResponse> classResponse = findClassList.map(
+//        classes -> new ClassResponse(classes.getClassId(), classes.getYear(), classes.getGrade(),
+//            classes.getSection()));
+//    return classResponse;
+//
+//    List<Notice> findNoticeList = new ArrayList<Notice>();
+//
+//    Classes findClass = classRepository.findById(id)
+//        .filter(classes -> Status.ACTIVE.equals(classes.getStatus()))
+//        .orElseThrow(() -> new NoSuchElementException("class not foudn with id " + id));
+//
+//    List<Course> classCourseList = courseRepository.findByClassId(findClass);
+//
+//    List<Notice> classNoticeList = noticeRepository.findByClassId(findClass);
+//
+//    findNoticeList.addAll(classNoticeList);
+//
+//    for (Course classCourse : classCourseList) {
+//      List<Notice> courseNoticeList = noticeRepository.findByCourseId(classCourse);
+//      findNoticeList.addAll(courseNoticeList);
+//    }
+//
+//    /**
+//     * dto로 변환과정 추가
+//     */
+//    List<NoticeResponse> noticeList = findNoticeList.stream()
+//        .filter(n -> n.getStatus() == Status.ACTIVE)
+//        .sorted(Comparator.comparing(Notice::getCreatedAt).reversed())
+//        .map(
+//            m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
+//                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
+//                m.getImageList().stream()
+//                    .map(image -> modelMapper.map(image, ImageResponseDTO.class))
+//                    .collect(Collectors.toList())
+//            ))
+//        .collect(
+//            Collectors.toList());
+//
+//    return noticeList;
+//  }
 
 //  public List<NoticeResponse> getNoticeList(Long id) {
 //    List<Notice> findNotice = noticeRepository.findByClassId(id);
