@@ -62,6 +62,7 @@ public class CourseUserController {
     return ResponseEntity.noContent().build();
   }
 
+
   //해당 course를 듣는 학생리스트 조회
   @GetMapping("/courseUser/course/{courseId}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
@@ -73,7 +74,26 @@ public class CourseUserController {
     return ResponseEntity.ok(studentsList);
   }
 
-  //해당 course의 선생님 조회
 
-  //선생님이 담당하는 course리스트 조회
+  //해당 course의 선생님 조회
+  @GetMapping("/courseUser/course/{courseId}/teacher")
+  @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+  public ResponseEntity<CourseUserResponse> getTeacherByCourse(@PathVariable Long courseId) {
+    CourseUserResponse courseUserTeacher = courseUserService.getTeacherByCourseId(courseId);
+
+    return ResponseEntity.ok(courseUserTeacher);
+  }
+
+
+  //선생님이 담당하는 courseList 조회
+  @GetMapping("/courseUser/teacher/{username}/courses")
+  @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+  public ResponseEntity<List<CourseUserResponse>> getCoursesByTeacher(@RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size,@PathVariable String username) {
+    List<CourseUserResponse> coursesList = courseUserService.getCoursesByTeacherUsername(username);
+    return ResponseEntity.ok(coursesList);
+  }
+
+
+
 }

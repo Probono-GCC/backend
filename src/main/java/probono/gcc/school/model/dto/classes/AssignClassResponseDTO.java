@@ -21,7 +21,7 @@ public class AssignClassResponseDTO {
   private int year;
   private Grades grade;
   private Sections section;
-  private List<TeacherResponseDTO> teachers;
-  private List<StudentResponseDTO> students;
+  private TeacherResponseDTO teacher;
+  private StudentResponseDTO student;
 
 }

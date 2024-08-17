@@ -3,25 +3,34 @@ package probono.gcc.school.service;
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.model.dto.classes.ClassResponse;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
+import probono.gcc.school.model.dto.image.ImageResponseDTO;
 import probono.gcc.school.model.dto.users.StudentCreateRequestDTO;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
+import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
+import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.ImageRepository;
 import probono.gcc.school.repository.UserRepository;
 
@@ -35,12 +44,18 @@ public class StudentService {
   private UserRepository studentRepository;
   private ImageRepository imageRepository;
   private ImageService imageService;
+
+  @Lazy
+  private ClassService classService;
+  private ClassRepository classRepository;
+
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   public StudentResponseDTO createStudent(StudentCreateRequestDTO requestDto) {
 
+    //serialNumber 같은 거 예외처리
     try {
       //username 중복 확인 체크
       if (studentRepository.existsByUsername(requestDto.getUsername())) {
@@ -220,5 +235,71 @@ public class StudentService {
     return false;
   }
 
+
+  public StudentResponseDTO assignClass(String username, Long classId) {
+    Users student = studentRepository.findByUsername(username)
+        .orElseThrow(() -> new NoSuchElementException("Teacher not found with ID: " + username));
+
+    // Find the class by classId
+    Classes assignedClass = classRepository.findById(classId)
+        .orElseThrow(
+            () -> new NoSuchElementException("Class not found with ID: " + classId));
+
+    // Debugging logs
+    logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, username);
+
+    // Initialize associated notices
+    Hibernate.initialize(assignedClass.getNotice());
+
+    // 양방향 관계 매핑
+    student.addClass(assignedClass);
+
+    // Save the updated teacher entity
+    Users updatedTeacher = studentRepository.save(student);
+    logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId,
+        username);
+
+    StudentResponseDTO studentResponseDTO = mapToResponseDTO(updatedTeacher);
+
+    return studentResponseDTO;
+  }
+
+  public StudentResponseDTO mapToResponseDTO(Users student) {
+    // Create a new StudentResponseDTO instance
+    StudentResponseDTO responseDto = new StudentResponseDTO();
+
+    // Set fields directly from the student entity
+    responseDto.setUsername(student.getUsername());
+    responseDto.setName(student.getName());
+    responseDto.setSerialNumber(student.getSerialNumber());
+    responseDto.setGrade(student.getGrade());
+    responseDto.setBirth(student.getBirth());
+    responseDto.setSex(student.getSex());
+    responseDto.setPhoneNum(student.getPhoneNum());
+    responseDto.setFatherPhoneNum(student.getFatherPhoneNum());
+    responseDto.setMotherPhoneNum(student.getMotherPhoneNum());
+    responseDto.setGuardiansPhoneNum(student.getGuardiansPhoneNum());
+    responseDto.setPwAnswer(student.getPwAnswer());
+    responseDto.setRole(student.getRole());
+    responseDto.setStatus(student.getStatus());
+    responseDto.setCreatedAt(student.getCreatedAt());
+    responseDto.setUpdatedAt(student.getUpdatedAt());
+    responseDto.setCreatedChargeId(student.getCreatedChargeId());
+    responseDto.setUpdatedChargeId(student.getUpdatedChargeId());
+
+    // Map the class entity (Classes) to ClassResponse if the class is assigned
+    if (student.getClassId() != null) {
+      ClassResponse classResponse = modelMapper.map(student.getClassId(), ClassResponse.class);
+      responseDto.setClassResponse(classResponse);
+    }
+
+    // Map the image entity (Image) to ImageResponseDTO if the image is assigned
+    if (student.getImageId() != null) {
+      CreateImageResponseDTO imageResponse = modelMapper.map(student.getImageId(), CreateImageResponseDTO.class);
+      responseDto.setImageResponseDTO(imageResponse);
+    }
+
+    return responseDto;
+  }
 
 }

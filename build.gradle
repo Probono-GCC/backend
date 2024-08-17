@@ -35,6 +35,12 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+//    //swagger
+//    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
+//    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
+//    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.7.0'
+
 }
 
 tasks.named('bootBuildImage') {

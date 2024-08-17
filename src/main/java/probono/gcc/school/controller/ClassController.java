@@ -20,6 +20,7 @@ import probono.gcc.school.model.dto.classes.CreateClassRequest;
 import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
+import probono.gcc.school.service.AssignClassService;
 import probono.gcc.school.service.ClassService;
 import probono.gcc.school.service.TeacherService;
 
@@ -27,8 +28,9 @@ import probono.gcc.school.service.TeacherService;
 @RequiredArgsConstructor
 public class ClassController {
 
+
   private final ClassService classService;
-  private final TeacherService teacherService;
+  private final AssignClassService assignClassService;
 
   @PostMapping("/class")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
@@ -78,11 +80,13 @@ public class ClassController {
 
   //class에 teacher를 할당 (담임선생님)
   // Assign a teacher to a class
-  @PutMapping("/class/{classId}/assignTeacher/{loginId}")
+  @PutMapping("/class/{classId}/assignUser/{username}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> assignTeacherToClass(@PathVariable Long classId,
-      @PathVariable String loginId) {
-    AssignClassResponseDTO assignClassResponseDTO = classService.assignTeacher(classId, loginId);
+      @PathVariable String username) {
+    AssignClassResponseDTO assignClassResponseDTO = assignClassService.assignUser(classId,username);
     return ResponseEntity.ok(assignClassResponseDTO);
   }
+
+
 }
