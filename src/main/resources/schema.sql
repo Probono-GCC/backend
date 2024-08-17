@@ -85,7 +85,7 @@ CREATE TABLE course
 CREATE TABLE course_user
 (
     cuId            BIGINT    NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    role            ENUM('STUDENT', 'TEACHER', 'ADMIN') NOT NULL,
+    role            ENUM('ROLE_STUDENT', 'ROLE_TEACHER', 'ROLE_ADMIN') NOT NULL,
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     createdAt       TIMESTAMP NOT NULL,
     updatedAt       TIMESTAMP NOT NULL,

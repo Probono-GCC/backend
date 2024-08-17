@@ -1,9 +1,11 @@
 package probono.gcc.school.service;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
@@ -56,7 +58,7 @@ public class CourseUserService {
 
     if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
       courseUser.setRole(Role.ROLE_STUDENT);
-    } else if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
+    } else if (Role.ROLE_TEACHER.equals(findUser.getRole())) {
       courseUser.setRole(Role.ROLE_TEACHER);
     } else {
       throw new IllegalArgumentException("course에 할당할 수 없는 유저입니다.");
@@ -119,20 +121,45 @@ public class CourseUserService {
   }
 
 
-  public List<CourseUserResponse> getStudentsByCourseId(long courseId) {
-
+  //  public <CourseUserResponse> getStudentsByCourseId(long courseId) {
+//
+//    Course findCourse = courseRepository.findById(courseId)
+//        .orElseThrow(() -> new NoSuchElementException("Course not found with id: " + courseId));
+//
+//    List<CourseUser> courseUsers = courseUserRepository.findByCourseId(findCourse);
+//
+//    List<CourseUser> studentCourseUsers = courseUsers.stream()
+//        .filter(courseUser -> Role.ROLE_STUDENT.equals(courseUser.getRole()))
+//        .toList();
+//
+//    return studentCourseUsers.stream()
+//        .map(courseUser -> mapToResponseDto(courseUser))  // Explicitly passing courseUser as parameter
+//        .toList();
+//  }
+  public Page<CourseUserResponse> getStudentsByCourseId(long courseId, int page, int size) {
     Course findCourse = courseRepository.findById(courseId)
         .orElseThrow(() -> new NoSuchElementException("Course not found with id: " + courseId));
 
-    List<CourseUser> courseUsers = courseUserRepository.findByCourseId(findCourse);
+    //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
+    PageRequest pageRequest = PageRequest.of(page, size,
+        Sort.by(Sort.Order.asc("cuId")));
 
-    List<CourseUser> studentCourseUsers = courseUsers.stream()
-        .filter(courseUser -> Role.ROLE_STUDENT.equals(courseUser.getRole()))
-        .toList();
+    //조회
+    Page<CourseUser> findList = courseUserRepository.findByStatusAndRoleAndCourseId(Status.ACTIVE,
+        Role.ROLE_STUDENT, findCourse,
+        pageRequest);
 
-    return studentCourseUsers.stream()
-        .map(courseUser -> mapToResponseDto(courseUser))  // Explicitly passing courseUser as parameter
-        .toList();
+    if (findList.isEmpty()) {
+      throw new NoSuchElementException("Student not found with courseId : " + courseId);
+    }
+
+    //DTO변환
+    Page<CourseUserResponse> response = findList.map(
+        courseUser -> new CourseUserResponse(courseUser.getCuId(),
+            modelMapper.map(courseUser.getUsername(), UserResponse.class),
+            modelMapper.map(findCourse,
+                CourseResponse.class)));
+    return response;
   }
 
 
@@ -143,18 +170,19 @@ public class CourseUserService {
 
     CourseResponse savedCourse = modelMapper.map(savedCourseUser.getCourseId(),
         CourseResponse.class);
-    UserResponse savedUser = modelMapper.map(savedCourseUser.getUsername(),
-        UserResponse.class);
     ClassResponse savedClass = modelMapper.map(savedCourseUser.getCourseId().getClassId(),
         ClassResponse.class);
     SubjectResponseDTO savedSubject = modelMapper.map(savedCourseUser.getCourseId().getSubjectId(),
         SubjectResponseDTO.class);
 
+    UserResponse savedUser = modelMapper.map(savedCourseUser.getUsername(),
+        UserResponse.class);
+
     responseDto.setCourse(savedCourse);
     responseDto.getCourse().setClassResponse(savedClass);
     responseDto.getCourse().setSubjectResponseDTO(savedSubject);
 
-    responseDto.setUser(savedUser);
+    responseDto.setUserResponse(savedUser);
     return responseDto;
   }
 }
