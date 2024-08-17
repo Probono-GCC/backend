@@ -2,7 +2,6 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -11,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.classes.ClassResponse;
-import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
@@ -351,8 +349,8 @@ public class TeacherService {
 
       // Map the image entity (Image) to ImageResponseDTO if the image is assigned
       if (savedTeacher.getImageId() != null) {
-        ImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
-            ImageResponseDTO.class);
+        CreateImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
+            CreateImageResponseDTO.class);
         responseDto.setImageId(imageResponse);
       }
 

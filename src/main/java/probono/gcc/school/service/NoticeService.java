@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
-import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.dto.UpdateNoticeRequest;
 import probono.gcc.school.model.entity.Classes;
@@ -206,7 +206,7 @@ public class NoticeService {
             m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
                 m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
                 m.getImageList().stream()
-                    .map(image -> modelMapper.map(image, ImageResponseDTO.class))
+                    .map(image -> modelMapper.map(image, CreateImageResponseDTO.class))
                     .collect(Collectors.toList())
             ))
         .collect(
@@ -244,7 +244,7 @@ public class NoticeService {
             m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
                 m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
                 m.getImageList().stream()
-                    .map(image -> modelMapper.map(image, ImageResponseDTO.class))
+                    .map(image -> modelMapper.map(image, CreateImageResponseDTO.class))
                     .collect(Collectors.toList())
             ))
         .collect(
@@ -280,8 +280,8 @@ public class NoticeService {
     responseDto.setUpdatedAt(savedNotice.getUpdatedAt());
     responseDto.setUpdatedChargeId(savedNotice.getUpdatedChargeId());
 
-    List<ImageResponseDTO> collect = savedNotice.getImageList().stream()
-        .map(image -> new ImageResponseDTO(image.getImageId(), image.getImagePath(),
+    List<CreateImageResponseDTO> collect = savedNotice.getImageList().stream()
+        .map(image -> new CreateImageResponseDTO(image.getImageId(), image.getImagePath(),
             image.getCreatedChargeId())).collect(Collectors.toList());
     responseDto.setImageList(collect);
     return responseDto;

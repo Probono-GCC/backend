@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import probono.gcc.school.model.dto.classes.ClassResponse;
-import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
@@ -28,7 +28,7 @@ public class TeacherResponseDTO {
   private String phoneNum;
   private String pwAnswer;
   private ClassResponse classId; //ClassResponse로 type 바꿈
-  private ImageResponseDTO imageId;
+  private CreateImageResponseDTO imageId;
   private Status status;
   private Timestamp createdAt;
   private Timestamp updatedAt;

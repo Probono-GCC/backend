@@ -14,14 +14,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import probono.gcc.school.exception.S3Exception;
-import probono.gcc.school.model.dto.ImageRequestDTO;
-import probono.gcc.school.model.dto.ImageResponseDTO;
-import probono.gcc.school.model.entity.Image;
+import probono.gcc.school.model.dto.image.ImageRequestDTO;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.service.ImageService;
 import probono.gcc.school.service.S3ImageService;
 
@@ -42,7 +40,7 @@ public class ImageController {
       ImageRequestDTO requestDto = new ImageRequestDTO();
       requestDto.setImagePath(profileImageUrl);
       requestDto.setUsername(username);
-      ImageResponseDTO imageResponse = imageService.createProfileImage(requestDto);
+      CreateImageResponseDTO imageResponse = imageService.createProfileImage(requestDto);
       return ResponseEntity.status(HttpStatus.CREATED).body(imageResponse);
     } catch (S3Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -75,8 +73,8 @@ public class ImageController {
   //프로필 이미지 목록 조회
   @GetMapping("/profile/images")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<List<ImageResponseDTO>> getAllProfileImages() {
-    List<ImageResponseDTO> images = imageService.findAllProfileImages();
+  public ResponseEntity<List<CreateImageResponseDTO>> getAllProfileImages() {
+    List<CreateImageResponseDTO> images = imageService.findAllProfileImages();
     return ResponseEntity.ok(images);
   }
 
@@ -84,8 +82,8 @@ public class ImageController {
   // 이미지 한 장 조회
   @GetMapping("profile/images/{id}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-  public ResponseEntity<ImageResponseDTO> getOneProfileImage(@PathVariable Long id) {
-    ImageResponseDTO image = imageService.findOneImage(id);
+  public ResponseEntity<CreateImageResponseDTO> getOneProfileImage(@PathVariable Long id) {
+    CreateImageResponseDTO image = imageService.findOneImage(id);
     return ResponseEntity.ok(image);
   }
 
@@ -93,7 +91,7 @@ public class ImageController {
   @DeleteMapping("profile/images/{id}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Image deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ImageResponseDTO.class))),
+      @ApiResponse(responseCode = "200", description = "Image deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CreateImageResponseDTO.class))),
       @ApiResponse(responseCode = "404", description = "Image not found", content = @Content(mediaType = "application/json")),
       @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
   })

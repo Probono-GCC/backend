@@ -67,7 +67,39 @@ public class CourseUserController {
     return ResponseEntity.ok(studentsList);
   }
 
-  //해당 course의 선생님 조회
 
   //선생님이 담당하는 course리스트 조회
+
+  // Assign teacher to course
+  @PutMapping("/courseUser/assignTeacher/{courseId}/{teacherUsername}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  public ResponseEntity<CourseUserResponse> assignTeacherToCourse(
+      @PathVariable Long courseId, @PathVariable String teacherUsername) {
+    CourseUserResponse response = courseUserService.assignTeacherToCourse(courseId, teacherUsername);
+    return ResponseEntity.ok(response);
+  }
+
+  // Assign student to course
+  @PutMapping("/courseUser/assignStudent/{courseId}/{studentUsername}")
+  @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+  public ResponseEntity<CourseUserResponse> assignStudentToCourse(
+      @PathVariable Long courseId, @PathVariable String studentUsername) {
+    CourseUserResponse response = courseUserService.assignStudentToCourse(courseId, studentUsername);
+    return ResponseEntity.ok(response);
+  }
+
+  // Get all students in a specific course
+  @GetMapping("/courseUser/course/{courseId}/students")
+  public ResponseEntity<List<CourseUserResponse>> getStudentsByCourse(@PathVariable Long courseId) {
+    List<CourseUserResponse> studentsList = courseUserService.getStudentsByCourseId(courseId);
+    return ResponseEntity.ok(studentsList);
+  }
+
+  // Get all teachers in a specific course
+  @GetMapping("/courseUser/course/{courseId}/teachers")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<List<CourseUserResponse>> getTeachersByCourse(@PathVariable Long courseId) {
+    List<CourseUserResponse> teachersList = courseUserService.getTeachersByCourseId(courseId);
+    return ResponseEntity.ok(teachersList);
+  }
 }

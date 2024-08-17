@@ -1,4 +1,4 @@
-package probono.gcc.school.model.dto;
+package probono.gcc.school.model.dto.image;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;

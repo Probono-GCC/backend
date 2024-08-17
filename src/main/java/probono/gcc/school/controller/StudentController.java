@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +37,7 @@ import probono.gcc.school.service.StudentService;
 @AllArgsConstructor
 public class StudentController {
 
+  @Lazy
   private final StudentService studentService;
   private ModelMapper modelMapper;
   private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
@@ -121,6 +123,15 @@ public class StudentController {
   }
 
   // Student에 class 할당
+  @PutMapping("/students/{username}/assignClass/{classId}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<?> assignClassToStudent(
+      @PathVariable String username, @PathVariable Long classId) {
+
+    StudentResponseDTO assignedStudent = studentService.assignClass(username, classId);
+    return ResponseEntity.ok(assignedStudent);
+
+  }
 
 
 

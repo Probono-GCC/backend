@@ -1,5 +1,8 @@
 package probono.gcc.school.service;
 
+import static probono.gcc.school.model.enums.Role.ROLE_STUDENT;
+import static probono.gcc.school.model.enums.Role.ROLE_TEACHER;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +60,7 @@ public class CourseUserService {
     if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
       courseUser.setRole(Role.ROLE_STUDENT);
     } else if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
-      courseUser.setRole(Role.ROLE_TEACHER);
+      courseUser.setRole(ROLE_TEACHER);
     } else {
       throw new IllegalArgumentException("course에 할당할 수 없는 유저입니다.");
     }
@@ -136,6 +139,65 @@ public class CourseUserService {
   }
 
 
+  public List<CourseUserResponse> getTeachersByCourseId(Long courseId) {
+    Course findCourse = courseRepository.findById(courseId)
+        .orElseThrow(() -> new NoSuchElementException("Course not found with id: " + courseId));
+
+    List<CourseUser> courseUsers = courseUserRepository.findByCourseId(findCourse);
+
+    List<CourseUser> studentCourseUsers = courseUsers.stream()
+        .filter(courseUser -> Role.ROLE_TEACHER.equals(courseUser.getRole()))
+        .toList();
+
+    return studentCourseUsers.stream()
+        .map(courseUser -> mapToResponseDto(courseUser))  // Explicitly passing courseUser as parameter
+        .toList();
+
+  }
+
+  public CourseUserResponse assignTeacherToCourse(Long courseId, String teacherUsername) {
+    Course course = courseRepository.findById(courseId)
+        .orElseThrow(() -> new NoSuchElementException("Course not found"));
+    Users teacher = userRepository.findByUsername(teacherUsername)
+        .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
+
+    // Check if user is a teacher
+    if (teacher.getRole()!=ROLE_TEACHER) {
+      throw new IllegalArgumentException("User is not a teacher");
+    }
+
+    // Assign the teacher to the course
+    CourseUser courseUser = new CourseUser();
+    courseUser.setCourseId(course);
+    courseUser.setUsername(teacher);
+    courseUser.setRole(ROLE_TEACHER);
+    courseUserRepository.save(courseUser);
+
+    return mapToResponseDto(courseUser);
+
+  }
+
+  public CourseUserResponse assignStudentToCourse(Long courseId, String studentUsername) {
+    Course course = courseRepository.findById(courseId)
+        .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+    Users student = userRepository.findByUsername(studentUsername)
+        .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+    if (student.getRole()!=ROLE_STUDENT) {
+      throw new IllegalArgumentException("User is not a student");
+    }
+
+    // Assign the student to the course
+    CourseUser courseUser = new CourseUser();
+    courseUser.setCourseId(course);
+    courseUser.setUsername(student);
+    courseUser.setRole(ROLE_STUDENT);  // Optionally set the role here
+    courseUserRepository.save(courseUser);
+
+    return mapToResponseDto(courseUser);
+
+  }
+
   private CourseUserResponse mapToResponseDto(CourseUser savedCourseUser) {
     CourseUserResponse responseDto = new CourseUserResponse();
 
@@ -153,7 +215,6 @@ public class CourseUserService {
     responseDto.setCourse(savedCourse);
     responseDto.getCourse().setClassResponse(savedClass);
     responseDto.getCourse().setSubjectResponseDTO(savedSubject);
-
     responseDto.setUser(savedUser);
     return responseDto;
   }
