@@ -1,6 +1,7 @@
 package probono.gcc.school.model.dto;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,5 +24,5 @@ public class CreateNoticeRequest {
 
   private Long courseId;
 
-  private List<MultipartFile> imageList;
+  private List<MultipartFile> imageList = new ArrayList<>();
 }
