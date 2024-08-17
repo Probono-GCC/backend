@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
 import probono.gcc.school.model.dto.NoticeResponse;
@@ -31,7 +32,7 @@ public class NoticeController {
   @PostMapping("/notice")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<NoticeResponse> createNotice(
-      @Valid @ModelAttribute CreateNoticeRequest request) {
+      @Valid CreateNoticeRequest request) {
 
     NoticeResponse createdNotice = noticeService.create(request);
     return ResponseEntity.ok(createdNotice);
