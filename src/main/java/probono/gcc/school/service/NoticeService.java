@@ -54,9 +54,9 @@ public class NoticeService {
     notice.setContent(request.getContent());
     notice.setType(request.getType());
     notice.setCreatedChargeId(-1L);
-
+    
     // 저장할 이미지가 존재하는 경우 S3에 저장 후 notice와 연결
-    if (!request.getImageList().get(0).isEmpty()) {
+    if (request.getImageList().isEmpty() || !request.getImageList().get(0).isEmpty()) {
       List<String> imageUrls = new ArrayList<>();
       for (MultipartFile imageFile : request.getImageList()) {
         String url = s3ImageService.upload(imageFile);

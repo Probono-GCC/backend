@@ -8,6 +8,7 @@ package probono.gcc.school.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,6 +60,18 @@ public class CourseUserController {
   public ResponseEntity<Void> deleteCourseUser(@PathVariable long id) {
     courseUserService.deleteCourseUser(id);
     return ResponseEntity.noContent().build();
+  }
+
+
+  //해당 course를 듣는 학생리스트 조회
+  @GetMapping("/courseUser/course/{courseId}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<Page<CourseUserResponse>> getStudentsByCourse(@PathVariable long courseId,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<CourseUserResponse> studentsList = courseUserService.getStudentsByCourseId(courseId, page,
+        size);
+    return ResponseEntity.ok(studentsList);
   }
 
 
