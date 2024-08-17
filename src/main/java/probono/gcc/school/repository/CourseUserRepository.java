@@ -1,9 +1,7 @@
 package probono.gcc.school.repository;
 
 import java.util.List;
-<<<<<<< HEAD
 import java.util.Optional;
-=======
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

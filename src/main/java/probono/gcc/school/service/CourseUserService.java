@@ -1,12 +1,8 @@
 package probono.gcc.school.service;
 
-<<<<<<< HEAD
 import static probono.gcc.school.model.enums.Role.ROLE_STUDENT;
 import static probono.gcc.school.model.enums.Role.ROLE_TEACHER;
-
 import java.util.List;
-=======
->>>>>>> e9eec190a5be4bcfa91a3dfb9ddb3ae166444188
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
