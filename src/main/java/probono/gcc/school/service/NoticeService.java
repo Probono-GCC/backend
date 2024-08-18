@@ -11,12 +11,15 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
+import probono.gcc.school.model.dto.course.CourseResponse;
+import probono.gcc.school.model.dto.courseUser.CourseUserResponse;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.dto.UpdateNoticeRequest;
@@ -54,7 +57,7 @@ public class NoticeService {
     notice.setContent(request.getContent());
     notice.setType(request.getType());
     notice.setCreatedChargeId(-1L);
-    
+
     // 저장할 이미지가 존재하는 경우 S3에 저장 후 notice와 연결
     if (request.getImageList().isEmpty() || !request.getImageList().get(0).isEmpty()) {
       List<String> imageUrls = new ArrayList<>();
@@ -304,88 +307,36 @@ public class NoticeService {
 
   }
 
-//  @Transactional(readOnly = true)
-//  public List<NoticeResponse> getClassAndCourseNoticeList(long classId, int page, int size) {
-//    Classes findClass = classRepository.findById(classId)
-//        .filter(classes -> Status.ACTIVE.equals(classes.getStatus()))
-//        .orElseThrow(() -> new NoSuchElementException("class not found with id " + classId));
-//
-//    List<Course> classCourseList = courseRepository.findByClassId(findClass);
-//
-//
-//    //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
-//    PageRequest pageRequest = PageRequest.of(page, size,
-//        Sort.by(Sort.Order.asc("createdAt")));
-//
-//    //조회
-//    Page<Notice> findNoticeList = noticeRepository.findByStatusAndClassId(Status.ACTIVE, findClass,
-//        pageRequest);
-//    for (Course classCourse : classCourseList) {
-//      Page<Notice> courseNoticeList = noticeRepository.findByStatusAndCourseId(Status.ACTIVE,classCourse,pageRequest);
-//      findNoticeList.
-//    }
-//    if (findClassList.isEmpty()) {
-//      throw new NoSuchElementException("Class not found with year: " + year);
-//    }
-//
-//    //DTO변환
-//    Page<ClassResponse> classResponse = findClassList.map(
-//        classes -> new ClassResponse(classes.getClassId(), classes.getYear(), classes.getGrade(),
-//            classes.getSection()));
-//    return classResponse;
-//
-//    List<Notice> findNoticeList = new ArrayList<Notice>();
-//
-//    Classes findClass = classRepository.findById(id)
-//        .filter(classes -> Status.ACTIVE.equals(classes.getStatus()))
-//        .orElseThrow(() -> new NoSuchElementException("class not foudn with id " + id));
-//
-//    List<Course> classCourseList = courseRepository.findByClassId(findClass);
-//
-//    List<Notice> classNoticeList = noticeRepository.findByClassId(findClass);
-//
-//    findNoticeList.addAll(classNoticeList);
-//
-//    for (Course classCourse : classCourseList) {
-//      List<Notice> courseNoticeList = noticeRepository.findByCourseId(classCourse);
-//      findNoticeList.addAll(courseNoticeList);
-//    }
-//
-//    /**
-//     * dto로 변환과정 추가
-//     */
-//    List<NoticeResponse> noticeList = findNoticeList.stream()
-//        .filter(n -> n.getStatus() == Status.ACTIVE)
-//        .sorted(Comparator.comparing(Notice::getCreatedAt).reversed())
-//        .map(
-//            m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
-//                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews(),
-//                m.getImageList().stream()
-//                    .map(image -> modelMapper.map(image, ImageResponseDTO.class))
-//                    .collect(Collectors.toList())
-//            ))
-//        .collect(
-//            Collectors.toList());
-//
-//    return noticeList;
-//  }
+  @Transactional(readOnly = true)
+  public Page<NoticeResponse> getClassAndCourseNoticeList(long classId, int page, int size) {
+    Classes findClass = classRepository.findById(classId)
+        .filter(classes -> Status.ACTIVE.equals(classes.getStatus()))
+        .orElseThrow(() -> new NoSuchElementException("class not found with id " + classId));
 
+    List<Course> classCourseList = courseRepository.findByClassId(findClass);
 
-//  public List<NoticeResponse> getNoticeList(Long id) {
-//    List<Notice> findNotice = noticeRepository.findByClassId(id);
-//
-//    if (findNotice.isEmpty()) {
-//      throw new NoSuchElementException("Class Notice not found with");
-//    }
-//
-//    List<NoticeResponse> collect = findNotice.stream()
-//        .map(
-//            m -> new NoticeResponse(m.getNoticeId(), m.getTitle(), m.getContent(), m.getCreatedAt(),
-//                m.getUpdatedAt(), m.getCreatedChargeId(), m.getUpdatedChargeId(), m.getViews()))
-//        .collect(
-//            Collectors.toList());
-//    return collect;
-//  }
+    List<Notice> classNoticeList = noticeRepository.findByStatusAndClassId(Status.ACTIVE,
+        findClass);
+
+    for (Course course : classCourseList) {
+      List<Notice> courseNoticeList = noticeRepository.findByStatusAndCourseId(Status.ACTIVE,
+          course);
+      classNoticeList.addAll(courseNoticeList);
+    }
+
+    classNoticeList.sort(Comparator.comparing(Notice::getCreatedAt).reversed());
+
+    List<NoticeResponse> collect = classNoticeList.stream()
+        .map(notice -> modelMapper.map(notice, NoticeResponse.class))
+        .collect(Collectors.toList());
+
+    PageRequest pageRequest = PageRequest.of(page, size);
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), collect.size());
+    Page<NoticeResponse> response = new PageImpl<>(collect.subList(start, end), pageRequest,
+        collect.size());
+    return response;
+  }
 
   private NoticeResponse mapToResponseDto(Notice savedNotice) {
     NoticeResponse responseDto = new NoticeResponse();
@@ -397,7 +348,6 @@ public class NoticeService {
     responseDto.setCreatedChargeId(savedNotice.getCreatedChargeId());
     responseDto.setUpdatedAt(savedNotice.getUpdatedAt());
     responseDto.setUpdatedChargeId(savedNotice.getUpdatedChargeId());
-
 
     if (savedNotice.getImageList() != null) {
       List<ImageResponseDTO> collect = savedNotice.getImageList().stream()

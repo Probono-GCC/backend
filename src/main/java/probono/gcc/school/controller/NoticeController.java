@@ -55,19 +55,19 @@ public class NoticeController {
   }
 
   /**
-   * page객체는 합칠 수 없다. 특정 class에 진입 시 어떻게 class공지와 course공지를 합쳐서 보여줄 것인지 고민해보자 각각의 api를 사용하면 각각 정렬된
-   * 데이터를 받는다...
+   * notice에서 course정보를 받아오기 쉽지 않다.
    */
-//  @GetMapping("/notice/classAndCourseNoticeList")
-//  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
-//  public ResponseEntity<Page<NoticeResponse>> getClassAndCourseNoticeList(
-//      @RequestParam Long classId,
-//      @RequestParam(value = "page", defaultValue = "0") int page,
-//      @RequestParam(value = "size", defaultValue = "10") int size) {
-//    Page<NoticeResponse> noticeList = noticeService.getClassAndCourseNoticeList(classId, page,
-//        size);
-//    return ResponseEntity.ok(noticeList);
-//  }
+  @GetMapping("/notice/classAndCourseNoticeList")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
+  public ResponseEntity<Page<NoticeResponse>> getClassAndCourseNoticeList(
+      @RequestParam Long classId,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<NoticeResponse> noticeList = noticeService.getClassAndCourseNoticeList(classId, page,
+        size);
+    return ResponseEntity.ok(noticeList);
+  }
+
   @GetMapping("/notice/courseNoticeList")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<Page<NoticeResponse>> getCourseNoticeList(@RequestParam Long id,

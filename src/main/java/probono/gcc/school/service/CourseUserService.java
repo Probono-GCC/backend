@@ -11,8 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
@@ -21,6 +23,7 @@ import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.courseUser.CourseUserResponse;
 import probono.gcc.school.model.dto.courseUser.CreateCourseUserRequest;
+import probono.gcc.school.model.dto.image.ImageResponseDTO;
 import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.CourseUser;
@@ -274,13 +277,20 @@ public class CourseUserService {
     return responseDto;
   }
 
-  public List<CourseUserResponse> getCoursesByTeacherUsername(String username) {
+  public Page<CourseUserResponse> getCoursesByTeacherUsername(String username, int page, int size) {
     Users teacher = userRepository.findByUsername(username)
         .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
     List<CourseUser> courseUserList = courseUserRepository.findByUsernameAndRole(teacher,
         ROLE_TEACHER);
-    return courseUserList.stream()
+    List<CourseUserResponse> collect = courseUserList.stream()
         .map(this::mapToResponseDto)
         .collect(Collectors.toList());
+
+    PageRequest pageRequest = PageRequest.of(page, size);
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), collect.size());
+    Page<CourseUserResponse> response = new PageImpl<>(collect.subList(start, end), pageRequest,
+        collect.size());
+    return response;
   }
 }
