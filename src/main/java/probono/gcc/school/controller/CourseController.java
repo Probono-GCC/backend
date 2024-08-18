@@ -3,6 +3,7 @@ package probono.gcc.school.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.course.CreateCourseRequest;
@@ -54,9 +56,11 @@ public class CourseController {
     return ResponseEntity.noContent().build();
   }
 
-  @GetMapping("/course")
-  public ResponseEntity<List<CourseResponse>> getAllCourse() {
-    List<CourseResponse> courses = courseService.getAllCourses();
+  @GetMapping("/courses")
+  public ResponseEntity<Page<CourseResponse>> getAllCourse(
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "page", defaultValue = "10") int size) {
+    Page<CourseResponse> courses = courseService.getAllCourses(page, size);
     return ResponseEntity.ok(courses);
   }
 }
