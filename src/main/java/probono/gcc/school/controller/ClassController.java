@@ -51,7 +51,7 @@ public class ClassController {
     return ResponseEntity.ok(classResponse);
   }
 
-  @GetMapping("/classList")
+  @GetMapping("/classes")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Page<ClassResponse>> getClassList(
       @RequestParam(value = "page", defaultValue = "0") int page,

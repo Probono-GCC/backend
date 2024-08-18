@@ -5,6 +5,10 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
@@ -129,19 +133,20 @@ public class CourseService {
   }
 
   @Transactional(readOnly = true)
-  public List<CourseResponse> getAllCourses() {
-    List<Course> courseList = courseRepository.findByStatus(Status.ACTIVE);;
+  public Page<CourseResponse> getAllCourses(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Order.asc("createdAt")));
 
-    if (courseList.isEmpty()) {
-      throw new NoSuchElementException("No courses found.");
-    }
+    Page<Course> allCourse = courseRepository.findByStatus(Status.ACTIVE, pageRequest);
 
-    // Mapping each Course entity to a CourseResponse DTO
-    List<CourseResponse> responseList = courseList.stream()
-        .map(this::mapToResponseDto)
-        .collect(Collectors.toList());
+//    if (allCourse.isEmpty()) {
+//      throw new NoSuchElementException("No courses found.");
+//    }
 
-    return responseList;
+    Page<CourseResponse> response = allCourse.map(
+        course -> new CourseResponse(course.getCourseId(), modelMapper.map(course.getClassId(),
+            ClassResponse.class),
+            modelMapper.map(course.getSubjectId(), SubjectResponseDTO.class)));
+    return response;
   }
 
   private CourseResponse mapToResponseDto(Course savedCourse) {
@@ -156,7 +161,6 @@ public class CourseService {
     responseDto.setSubjectResponseDTO((savedSubject));
     return responseDto;
   }
-
 
 
 }
