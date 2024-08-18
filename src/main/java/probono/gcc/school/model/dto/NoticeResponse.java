@@ -41,7 +41,6 @@ public class NoticeResponse {
 
   //private CourseResponse courseResponse;
 
-
 //  private List<CreateImageResponseDTO> imageList;
 
   private List<ImageResponseDTO> imageList;

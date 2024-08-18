@@ -88,10 +88,11 @@ public class CourseUserController {
   //선생님이 담당하는 courseList 조회
   @GetMapping("/courseUser/teacher/{username}/courses")
   @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-  public ResponseEntity<List<CourseUserResponse>> getCoursesByTeacher(
+  public ResponseEntity<Page<CourseUserResponse>> getCoursesByTeacher(
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size, @PathVariable String username) {
-    List<CourseUserResponse> coursesList = courseUserService.getCoursesByTeacherUsername(username);
+    Page<CourseUserResponse> coursesList = courseUserService.getCoursesByTeacherUsername(username,
+        page, size);
     return ResponseEntity.ok(coursesList);
   }
 }

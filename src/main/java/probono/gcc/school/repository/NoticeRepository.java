@@ -21,7 +21,11 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
   Page<Notice> findByStatusAndClassId(Status status, Classes classes, Pageable pageable);
 
+  List<Notice> findByStatusAndClassId(Status status, Classes classes);
+
   Page<Notice> findByStatusAndCourseId(Status status, Course course, Pageable pageable);
+
+  List<Notice> findByStatusAndCourseId(Status status, Course course);
 
   Page<Notice> findByTypeAndStatus(NoticeType type, Status status, Pageable pageable);
 
