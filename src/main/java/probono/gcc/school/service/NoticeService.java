@@ -17,10 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import probono.gcc.school.model.dto.CreateNoticeRequest;
-import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.dto.UpdateNoticeRequest;
 import probono.gcc.school.model.dto.classes.ClassResponse;
+import probono.gcc.school.model.dto.image.ImageResponseDTO;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Image;
@@ -300,6 +301,7 @@ public class NoticeService {
           ));
       return noticeResponse;
     }
+
   }
 
 //  @Transactional(readOnly = true)
@@ -368,6 +370,7 @@ public class NoticeService {
 //    return noticeList;
 //  }
 
+
 //  public List<NoticeResponse> getNoticeList(Long id) {
 //    List<Notice> findNotice = noticeRepository.findByClassId(id);
 //
@@ -395,13 +398,13 @@ public class NoticeService {
     responseDto.setUpdatedAt(savedNotice.getUpdatedAt());
     responseDto.setUpdatedChargeId(savedNotice.getUpdatedChargeId());
 
+
     if (savedNotice.getImageList() != null) {
       List<ImageResponseDTO> collect = savedNotice.getImageList().stream()
           .map(image -> new ImageResponseDTO(image.getImageId(), image.getImagePath(),
               image.getCreatedChargeId())).collect(Collectors.toList());
       responseDto.setImageList(collect);
     }
-
     return responseDto;
   }
 }

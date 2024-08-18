@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -70,7 +71,7 @@ public class Classes {
   private List<Notice> notice;
 
 
-  @OneToMany(mappedBy = "username")
+  @OneToMany(mappedBy = "classId")
   private List<Users> users;
 
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)

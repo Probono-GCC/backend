@@ -18,4 +18,6 @@ public interface ClassRepository extends JpaRepository<Classes, Long> {
   List<Classes> findByStatusAndYear(Status status, int year);
 
   Page<Classes> findByStatusAndYear(Status status, int year, Pageable pageable);
+
+
 }

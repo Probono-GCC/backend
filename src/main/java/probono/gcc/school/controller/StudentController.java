@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +37,7 @@ import probono.gcc.school.service.StudentService;
 @AllArgsConstructor
 public class StudentController {
 
+  @Lazy
   private final StudentService studentService;
   private ModelMapper modelMapper;
   private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
@@ -119,8 +121,6 @@ public class StudentController {
       return ResponseEntity.ok("Login ID is available.");
     }
   }
-
-  // Student에 class 할당
 
 
 

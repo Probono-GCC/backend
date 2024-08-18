@@ -2,7 +2,6 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -11,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.classes.ClassResponse;
-import probono.gcc.school.model.dto.ImageResponseDTO;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
@@ -291,38 +289,6 @@ public class TeacherService {
     return false;
   }
 
-  //teacher의 담당 class 할당
-  public TeacherResponseDTO assignClass(String username, Long classId) {
-    // Find the teacher by loginId
-    Users teacher = teacherRepository.findByUsername(username)
-        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + username,
-            HttpStatus.NOT_FOUND));
-
-      // Find the class by classId
-      Classes assignedClass = classRepository.findById(classId)
-          .orElseThrow(
-              () -> new CustomException("Class not found with ID: " + classId,
-                  HttpStatus.NOT_FOUND));
-
-      // Debugging logs
-      logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, username);
-
-      // Initialize associated notices
-      Hibernate.initialize(assignedClass.getNotice());
-
-      // 양방향 관계 매핑
-      teacher.addClass(assignedClass);
-
-      // Save the updated teacher entity
-      Users updatedTeacher = teacherRepository.save(teacher);
-      logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId,
-      username);
-
-
-      TeacherResponseDTO teacherResponseDTO = mapToResponseDTO(updatedTeacher);
-
-      return teacherResponseDTO;
-    }
 
     public TeacherResponseDTO mapToResponseDTO (Users savedTeacher){
       // Create a new TeacherResponseDTO instance
@@ -351,8 +317,8 @@ public class TeacherService {
 
       // Map the image entity (Image) to ImageResponseDTO if the image is assigned
       if (savedTeacher.getImageId() != null) {
-        ImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
-            ImageResponseDTO.class);
+        CreateImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
+            CreateImageResponseDTO.class);
         responseDto.setImageId(imageResponse);
       }
 

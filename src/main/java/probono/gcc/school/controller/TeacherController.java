@@ -147,17 +147,7 @@ public class TeacherController {
     }
   }
 
-  //teacher를 class에 할당
-  //담당하는 class 할당(담임선생님)
-  @PutMapping("/teachers/{loginId}/assignClass/{classId}")
-  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<?> assignClassToTeacher(
-      @PathVariable String username, @PathVariable Long classId) {
 
-    TeacherResponseDTO updatedTeacher = teacherService.assignClass(username, classId);
-    return ResponseEntity.ok(updatedTeacher);
-
-  }
 
 
 }

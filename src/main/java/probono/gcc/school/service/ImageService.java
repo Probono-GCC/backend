@@ -4,21 +4,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import probono.gcc.school.model.dto.ImageRequestDTO;
-import probono.gcc.school.model.dto.ImageResponseDTO;
-import probono.gcc.school.model.dto.SubjectResponseDTO;
+import probono.gcc.school.model.dto.image.ImageRequestDTO;
+import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ImageRepository;
 import probono.gcc.school.repository.NoticeRepository;
-import probono.gcc.school.repository.SubjectRepository;
 import probono.gcc.school.repository.UserRepository;
 
 @Service
@@ -36,7 +33,7 @@ public class ImageService {
 
   private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
-  public ImageResponseDTO createProfileImage(ImageRequestDTO requestDto) {
+  public CreateImageResponseDTO createProfileImage(ImageRequestDTO requestDto) {
 
     Image image = new Image();
     image.setStatus(Status.ACTIVE);
@@ -54,18 +51,18 @@ public class ImageService {
       user.setImageId(image);
     }
 
-    return mapToImageResponseDTO(image,username);
+    return mapToCreateResponseDTO(image,username);
   }
 
-  private ImageResponseDTO mapToImageResponseDTO(Image image, String username) {
+  public CreateImageResponseDTO mapToCreateResponseDTO(Image image, String username) {
 
-    ImageResponseDTO imageResponseDTO = new ImageResponseDTO();
-    imageResponseDTO.setImageId(image.getImageId());
-    imageResponseDTO.setImagePath(image.getImagePath());
-    imageResponseDTO.setCreatedChargeId(image.getCreatedChargeId());
-    imageResponseDTO.setUsername(username);
+    CreateImageResponseDTO createImageResponseDTO = new CreateImageResponseDTO();
+    createImageResponseDTO.setImageId(image.getImageId());
+    createImageResponseDTO.setImagePath(image.getImagePath());
+    createImageResponseDTO.setCreatedChargeId(image.getCreatedChargeId());
+    createImageResponseDTO.setUsername(username);
 
-    return imageResponseDTO;
+    return createImageResponseDTO;
 
   }
 
@@ -100,12 +97,12 @@ public class ImageService {
   }
 
 
-  public List<ImageResponseDTO> findAllProfileImages() {
+  public List<CreateImageResponseDTO> findAllProfileImages() {
     try {
       List<Image> imageList = imageRepository.findAll();
       // stream과 mapper를 사용하여 리스트 변환
       return imageList.stream()
-          .map(image -> modelMapper.map(image, ImageResponseDTO.class))
+          .map(image -> modelMapper.map(image, CreateImageResponseDTO.class))
           .collect(Collectors.toList());
     } catch (Exception e) {
       // Exception handling
@@ -114,11 +111,11 @@ public class ImageService {
   }
 
 
-  public ImageResponseDTO findOneImage(Long id) {
+  public CreateImageResponseDTO findOneImage(Long id) {
     Image image = imageRepository.findById(id).orElseThrow(
         () -> new IllegalArgumentException("Fail to find image with ID: " + id)
     );
-    return modelMapper.map(image, ImageResponseDTO.class);
+    return modelMapper.map(image, CreateImageResponseDTO.class);
   }
 
   public void deleteProfileImage(Long id) {
@@ -160,6 +157,15 @@ public class ImageService {
 //
 //    return modelMapper.map(savedImage, ImageResponseDTO.class);
 //  }
+
+  public CreateImageResponseDTO mapToResponseDTO(Image image) {
+
+    return CreateImageResponseDTO.builder()
+        .imageId(image.getImageId())
+        .imagePath(image.getImagePath())
+        .createdChargeId(image.getCreatedChargeId())
+        .build();
+  }
 
 
 }
