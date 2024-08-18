@@ -31,6 +31,6 @@ public class TeacherResponseDTO {
   private Status status;
   private Timestamp createdAt;
   private Timestamp updatedAt;
-  private Long createdChargeId;
-  private Long updatedChargeId;
+  private String createdChargeId;
+  private String updatedChargeId;
 }

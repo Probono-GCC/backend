@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
@@ -68,7 +69,7 @@ public class CourseUserService {
 
     courseUser.setCourseId(findCourse);
     courseUser.setUsername(findUser);
-    courseUser.setCreatedChargeId(-1l);
+    courseUser.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
       courseUser.setRole(Role.ROLE_STUDENT);
@@ -103,7 +104,8 @@ public class CourseUserService {
 
     existingCourseUser.setCourseId(findCourse);
     existingCourseUser.setUsername(findUser);
-    existingCourseUser.setUpdatedChargeId(-1l);
+    existingCourseUser.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     CourseUser savedCourseUser = courseUserRepository.save(existingCourseUser);
     return mapToResponseDto(savedCourseUser);
@@ -113,7 +115,8 @@ public class CourseUserService {
   public void deleteCourseUser(long id) {
     CourseUser existingCourseUser = getCourseUserById(id);
     existingCourseUser.setStatus(Status.INACTIVE);
-    existingCourseUser.setUpdatedChargeId(-1l);
+    existingCourseUser.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     courseUserRepository.save(existingCourseUser);
   }

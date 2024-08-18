@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import probono.gcc.school.model.dto.image.ImageRequestDTO;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
@@ -28,7 +29,7 @@ public class ImageService {
   private S3ImageService s3ImageService;
 
   private NoticeRepository noticeRepository;
-  
+
   private UserRepository userRepository;
 
   private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
@@ -37,21 +38,20 @@ public class ImageService {
 
     Image image = new Image();
     image.setStatus(Status.ACTIVE);
-    image.setCreatedChargeId(1L);
+    image.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
     image.setImagePath(requestDto.getImagePath());
-
 
     imageRepository.save(image);
 
     String username = requestDto.getUsername();
     Optional<Users> usersOptional = userRepository.findByUsername(username);
-    Users user=null;
+    Users user = null;
     if (usersOptional.isPresent()) {
       user = usersOptional.get();
       user.setImageId(image);
     }
 
-    return mapToCreateResponseDTO(image,username);
+    return mapToCreateResponseDTO(image, username);
   }
 
   public CreateImageResponseDTO mapToCreateResponseDTO(Image image, String username) {
@@ -70,7 +70,7 @@ public class ImageService {
 //
 //    Image image = new Image();
 //    image.setImagePath(imagePath);
-//    image.setCreatedChargeId(1L);
+//    image.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 //
 //    Optional<Notice> findNotice = noticeRepository.findById(noticeId);
 //    if (findNotice.isEmpty()) {
@@ -87,7 +87,7 @@ public class ImageService {
 
     Image image = new Image();
     image.setImagePath(imagePath);
-    image.setCreatedChargeId(1L);
+    image.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     image.setNoticeId(notice);
 
@@ -128,7 +128,7 @@ public class ImageService {
 //    // 논리적 삭제 수행
 //    image.setStatus(Status.INACTIVE);
 //    // Dummy Data
-//    image.setUpdatedChargeId(2L);
+//    image.setUpdatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 //
 //    // 엔티티를 저장하여 변경 사항을 데이터베이스에 반영
 //    imageRepository.save(image);
@@ -150,7 +150,7 @@ public class ImageService {
 //
 //    Image image = new Image();
 //    image.setStatus(Status.ACTIVE);
-//    image.setCreatedChargeId(1L);
+//    image.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 //    image.setImagePath(requestDto.getImagePath());
 //
 //    Image savedImage = imageRepository.save(image);

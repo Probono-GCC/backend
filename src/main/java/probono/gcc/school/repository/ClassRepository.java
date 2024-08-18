@@ -13,7 +13,8 @@ import probono.gcc.school.model.enums.Status;
 @Repository
 public interface ClassRepository extends JpaRepository<Classes, Long> {
 
-  boolean existsByYearAndGradeAndSection(int year, Grades grade, Sections section);
+  boolean existsByYearAndGradeAndSectionAndStatus(int year, Grades grade, Sections section,
+      Status status);
 
   List<Classes> findByStatusAndYear(Status status, int year);
 

@@ -62,10 +62,10 @@ public class Classes {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private long createdChargeId;
+  private String createdChargeId;
 
   @Column
-  private long updatedChargeId;
+  private String updatedChargeId;
 
   @OneToMany(mappedBy = "classId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Notice> notice;

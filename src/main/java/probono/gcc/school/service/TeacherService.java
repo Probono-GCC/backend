@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,6 @@ public class TeacherService {
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-
   public TeacherResponseDTO createTeacher(TeacherCreateRequestDTO requestDto) {
 
     if (requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()) {
@@ -84,7 +84,8 @@ public class TeacherService {
     teacher.setUsername(requestDto.getUsername());
     teacher.setPassword(bCryptPasswordEncoder.encode(requestDto.getPassword()));
     teacher.setStatus(ACTIVE);
-    teacher.setCreatedChargeId(1L); // Set the createdChargeId
+    teacher.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication()
+        .getName()); // Set the createdChargeId
     teacher.setRole(Role.ROLE_TEACHER);
     teacher.setSerialNumber(null);
 
@@ -93,7 +94,6 @@ public class TeacherService {
     return mapToResponseDTO(teacherCreated);
 
   }
-
 
 
   // Retrieve all teachers
@@ -133,12 +133,13 @@ public class TeacherService {
             HttpStatus.NOT_FOUND)
     );
 
-    boolean isFirstUpdate = teacher.getBirth()==null;
+    boolean isFirstUpdate = teacher.getBirth() == null;
 
-    if(isFirstUpdate){
-      if(requestDto.getBirth()==null || requestDto.getSex()==null
-          || requestDto.getPwAnswer()==null || requestDto.getImageId()==null){
-        throw new IllegalStateException( "Birth, sex, Image and password answer are required for the first update.");
+    if (isFirstUpdate) {
+      if (requestDto.getBirth() == null || requestDto.getSex() == null
+          || requestDto.getPwAnswer() == null || requestDto.getImageId() == null) {
+        throw new IllegalStateException(
+            "Birth, sex, Image and password answer are required for the first update.");
       }
       teacher.setBirth(requestDto.getBirth());
       teacher.setSex(requestDto.getSex());
@@ -150,7 +151,7 @@ public class TeacherService {
       teacher.setImageId(image);
       updateAlwaysChangableField(requestDto, teacher);
 
-    }else{
+    } else {
       if (requestDto.getPwAnswer() != null) {//최초 1회 접속이 아닌데 pwAnswer 요청 들어올 경우 예외처리
         // pwAnswer should not be provided after the first update
         throw new CustomException("Password answer can only be set during the first update.",
@@ -159,10 +160,10 @@ public class TeacherService {
 
       updateAlwaysChangableField(requestDto, teacher);
 
-      if (requestDto.getBirth()!=null){
+      if (requestDto.getBirth() != null) {
         teacher.setBirth(requestDto.getBirth());
       }
-      if(requestDto.getSex()!=null){
+      if (requestDto.getSex() != null) {
         teacher.setSex(requestDto.getSex());
       }
       if (requestDto.getImageId() != null) {
@@ -269,7 +270,7 @@ public class TeacherService {
     // 논리적 삭제 수행
     teacher.setStatus(Status.INACTIVE);
     // Dummy Data
-    teacher.setUpdatedChargeId(2L);
+    teacher.setUpdatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
     return teacher.getUsername();
   }
 
