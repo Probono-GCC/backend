@@ -3,6 +3,7 @@ package probono.gcc.school.model.dto.users;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import probono.gcc.school.model.dto.image.ImageResponseDTO;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.enums.Grades;
@@ -11,6 +12,7 @@ import probono.gcc.school.model.enums.Sex;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserResponse {
 
   private String username;

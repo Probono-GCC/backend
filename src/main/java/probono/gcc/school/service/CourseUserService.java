@@ -57,7 +57,9 @@ public class CourseUserService {
 
     validateDuplicateCourseUser(findCourse, findUser);
     //course에 teacher 이미 할당했으면 예외처리
-    AlreadyAssignedTeacherInCourse(findCourse, findUser);
+    if (findUser.getRole().equals(ROLE_TEACHER)) {
+      AlreadyAssignedTeacherInCourse(findCourse, findUser);
+    }
 
     CourseUser courseUser = new CourseUser();
 
