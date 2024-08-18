@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.mapper.StudentMapper;
 import probono.gcc.school.model.dto.users.StudentCreateRequestDTO;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
@@ -42,6 +43,7 @@ public class StudentController {
   @Lazy
   private final StudentService studentService;
   private ModelMapper modelMapper;
+
   private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
 
   //student 생성
@@ -78,15 +80,8 @@ public class StudentController {
   public ResponseEntity<?> updateStudent(
       @PathVariable String username, @RequestBody @Valid StudentUpdateRequestDTO requestDto) {
 
-    String updatedTeacherId = studentService.updateStudent(username, requestDto);
-    Users updatedTeacher = studentService.findById(updatedTeacherId);
-
-//      logger.info("updatedTeacher.getCreatedAt() : {}",updatedTeacher.getCreatedAt());
-//      logger.info("updatedTeacher.getUpdatedAt() : {}",updatedTeacher.getUpdatedAt());
-
-    TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
-
-    return ResponseEntity.ok(responseDto);
+    StudentResponseDTO studentResponseDTO = studentService.updateStudent(username, requestDto);
+    return ResponseEntity.ok(studentResponseDTO);
 
   }
 

@@ -83,26 +83,11 @@ public class TeacherController {
   // Update a teacher
   @PutMapping("/teachers/{username}")
   @PreAuthorize("hasAnyRole('ADMIN')")
-  public ResponseEntity<?> updateTeacher(
+  public ResponseEntity<TeacherResponseDTO> updateTeacher(
       @PathVariable String username, @RequestBody TeacherRequestDTO requestDto) {
-    try {
 
-      String updatedTeacherId = teacherService.updateTeacher(username, requestDto);
-      Users updatedTeacher = teacherService.findById(updatedTeacherId);
-
-//      logger.info("updatedTeacher.getCreatedAt() : {}",updatedTeacher.getCreatedAt());
-//      logger.info("updatedTeacher.getUpdatedAt() : {}",updatedTeacher.getUpdatedAt());
-
-      TeacherResponseDTO responseDto = modelMapper.map(updatedTeacher, TeacherResponseDTO.class);
-
-      return ResponseEntity.ok(responseDto);
-    } catch (CustomException ex) {
-      logger.error("Error occurred during teacher update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-    } catch (Exception ex) {
-      logger.error("Unexpected error occurred during teacher update: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-    }
+      TeacherResponseDTO teacherResponseDTO = teacherService.updateTeacher(username, requestDto);
+    return ResponseEntity.ok(teacherResponseDTO);
   }
 
   //Delete a teacher
