@@ -3,11 +3,9 @@ package probono.gcc.school.service;
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
-import probono.gcc.school.model.dto.image.ImageResponseDTO;
 import probono.gcc.school.model.dto.users.StudentCreateRequestDTO;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
-import probono.gcc.school.model.dto.users.TeacherResponseDTO;
-import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
@@ -44,6 +40,7 @@ public class StudentService {
   private UserRepository studentRepository;
   private ImageRepository imageRepository;
   private ImageService imageService;
+  private BCryptPasswordEncoder passwordEncoder;
 
   @Lazy
   private ClassService classService;
@@ -55,11 +52,16 @@ public class StudentService {
 
   public StudentResponseDTO createStudent(StudentCreateRequestDTO requestDto) {
 
-    //serialNumber 같은 거 예외처리
+
     try {
       //username 중복 확인 체크
       if (studentRepository.existsByUsername(requestDto.getUsername())) {
         throw new CustomException("Login ID already exists.", HttpStatus.CONFLICT);
+      }
+
+      // serialNumber 중복 확인
+      if (studentRepository.existsBySerialNumber(requestDto.getSerialNumber())) {
+        throw new DuplicateEntityException("Serial number already exists.");
       }
 
       // Create a new Users entity for the student
@@ -121,7 +123,7 @@ public class StudentService {
   }
 
 
-  public String updateStudent(String username, StudentUpdateRequestDTO requestDto) {
+  public StudentResponseDTO updateStudent(String username, StudentUpdateRequestDTO requestDto) {
     try {
       Users student = studentRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
           () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
@@ -135,7 +137,7 @@ public class StudentService {
         // Ensure birth, sex, and pwAnswer are provided on the first update
         if (requestDto.getBirth() == null || requestDto.getSex() == null
             || requestDto.getPwAnswer() == null || requestDto.getImageId() == null) {
-          logger.info("birth or sex or pwAnswer field is null");
+          logger.info("birth or sex or pwAnswer or imageId field is null");
           throw new CustomException(
               "Birth, sex, Image and password answer are required for the first update.",
               HttpStatus.BAD_REQUEST);
@@ -148,50 +150,77 @@ public class StudentService {
                 () -> new CustomException("Image not found with id: " + requestDto.getImageId(),
                     HttpStatus.NOT_FOUND));
         student.setImageId(image);
-      } else if (requestDto.getPwAnswer() != null) {//최초 1회 접속이 아닌데 pwAnswer 요청 들어올 경우 예외처리
-        // pwAnswer should not be provided after the first update
-        throw new CustomException("Password answer can only be set during the first update.",
-            HttpStatus.BAD_REQUEST);
-      }
+        updateAlwaysChangeableField(requestDto, student);
 
-      // Update fields that can always be updated
-      if (requestDto.getPassword() != null) {
-        student.setPassword(requestDto.getPassword());
-      }
-      if (requestDto.getName() != null) {
-        student.setName(requestDto.getName());
-      }
-      if (requestDto.getSerialNumber() != 0) {
-        student.setSerialNumber(requestDto.getSerialNumber());
-      }
-      if (requestDto.getGrade() != null) {
-        student.setGrade(requestDto.getGrade());
-      }
-      if (requestDto.getPhoneNum() != null) {
-        student.setPhoneNum(requestDto.getPhoneNum());
-      }
-      if (requestDto.getFatherPhoneNum() != null) {
-        student.setFatherPhoneNum(requestDto.getFatherPhoneNum());
-      }
-      if (requestDto.getMotherPhoneNum() != null) {
-        student.setMotherPhoneNum(requestDto.getMotherPhoneNum());
-      }
-      if (requestDto.getGuardiansPhoneNum() != null) {
-        student.setGuardiansPhoneNum(requestDto.getGuardiansPhoneNum());
-      }
-      if (requestDto.getImageId() != null) {
-        Image image = imageRepository.findById(requestDto.getImageId())
-            .orElseThrow(() -> new CustomException("Image not found", HttpStatus.NOT_FOUND));
-        student.setImageId(image);
+      } else {
+        if (requestDto.getPwAnswer() != null) {//최초 1회 접속이 아닌데 pwAnswer 요청 들어올 경우 예외처리
+          // pwAnswer should not be provided after the first update
+          throw new CustomException("Password answer can only be set during the first update.",
+              HttpStatus.BAD_REQUEST);
+        }
+
+
+        //항상 바꿀 수 있는 field
+        updateAlwaysChangeableField(requestDto, student);
+
+        if (requestDto.getBirth()!=null){
+          student.setBirth(requestDto.getBirth());
+        }
+        if(requestDto.getSex()!=null){
+          student.setSex(requestDto.getSex());
+        }
+        if (requestDto.getImageId() != null) {
+          Image image = imageRepository.findById(requestDto.getImageId())
+              .orElseThrow(() -> new CustomException("Image not found", HttpStatus.NOT_FOUND));
+          student.setImageId(image);
+        }
       }
 
       // Save the updated student entity
       studentRepository.save(student);
-      return student.getUsername();
+      return mapToResponseDTO(student);
+
 
     } catch (CustomException e) {
       logger.error("Error updating student: {}", e.getMessage());
       throw e;
+    }
+  }
+
+  private void updateAlwaysChangeableField(StudentUpdateRequestDTO requestDto, Users student) {
+    changePassword(requestDto, student);
+    if (requestDto.getName() != null) {
+      student.setName(requestDto.getName());
+
+    }
+    if (requestDto.getSerialNumber() != 0) {
+      student.setSerialNumber(requestDto.getSerialNumber());
+    }
+    if (requestDto.getGrade() != null) {
+      student.setGrade(requestDto.getGrade());
+    }
+    if (requestDto.getPhoneNum() != null) {
+      student.setPhoneNum(requestDto.getPhoneNum());
+    }
+    if (requestDto.getFatherPhoneNum() != null) {
+      student.setFatherPhoneNum(requestDto.getFatherPhoneNum());
+    }
+    if (requestDto.getMotherPhoneNum() != null) {
+      student.setMotherPhoneNum(requestDto.getMotherPhoneNum());
+    }
+    if (requestDto.getGuardiansPhoneNum() != null) {
+      student.setGuardiansPhoneNum(requestDto.getGuardiansPhoneNum());
+    }
+  }
+
+  private void changePassword(StudentUpdateRequestDTO requestDto, Users student) {
+    // Update fields that can always be updated
+    if (requestDto.getNewPassword() != null) {
+      if (passwordEncoder.matches(requestDto.getCurrentPassword(), student.getPassword())) {
+        student.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+      } else {
+        throw new IllegalArgumentException("current password is wrong");
+      }
     }
   }
 

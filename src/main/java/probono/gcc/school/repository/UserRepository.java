@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<Users, Long> {
   List<Users> findByStatusAndRole(Status status, Role role);
 
   List<Users> findByClassIdAndRoleAndStatus(Classes classId, Role role,Status status);
+
+  boolean existsBySerialNumber(int serialNumber);
 }

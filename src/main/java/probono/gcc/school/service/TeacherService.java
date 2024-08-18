@@ -17,8 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
+import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
@@ -42,28 +44,11 @@ public class TeacherService {
   private ImageRepository imageRepository;
   private ClassRepository classRepository;
   private ImageService imageService;
+  private BCryptPasswordEncoder passwordEncoder;
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
 
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-
-//  @PostConstruct
-//  public void setupMapper() {
-//    // Create TypeMap for Users to TeacherResponseDTO conversion
-//    TypeMap<Users, TeacherResponseDTO> typeMap = modelMapper.createTypeMap(Users.class,
-//        TeacherResponseDTO.class);
-//
-//    // Custom mapping for Classes (classId) to ClassResponse
-//    typeMap.addMappings(mapper ->
-//        mapper.map(
-//            user -> user.getClassId(), // Source field: classId of type Classes
-//            TeacherResponseDTO::setClassId // Destination field: classId of type ClassResponse
-//        )
-//    );
-//    // Add conversion from Classes to ClassResponse
-//    modelMapper.createTypeMap(Classes.class, ClassResponse.class);
-//  }
 
 
   public TeacherResponseDTO createTeacher(TeacherCreateRequestDTO requestDto) {
@@ -93,15 +78,12 @@ public class TeacherService {
     teacher.setRole(Role.ROLE_TEACHER);
     teacher.setSerialNumber(null);
 
-    // Save the teacher entity to the database
     Users teacherCreated = teacherRepository.save(teacher);
 
-    // Convert and return the saved entity to a DTO
     return mapToResponseDTO(teacherCreated);
-//    return modelMapper.map(teacherCreated, TeacherResponseDTO.class);
 
   }
-  // 필수 필드 null 체크
+
 
 
   // Retrieve all teachers
@@ -131,91 +113,89 @@ public class TeacherService {
 
   }
 
+
   @Transactional
-  public String updateTeacher(String username, TeacherRequestDTO requestDto) {
-    logger.info("enter into updateTeacher");
-    // birth , sex , pwAnswer null
-    //username로 DB 조회했을 때 birth, sex , pwAnswer가 null이라면 requestDto에서 해당값 get해서 update하기
-    // 세 값 하나라도 빠지면 예외처리
-    // DB에서 username로 교사 정보 조회
+  public TeacherResponseDTO updateTeacher(String username, TeacherRequestDTO requestDto) {
     Users teacher = teacherRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
         () -> new CustomException("Teacher with username " + username + " not found.",
             HttpStatus.NOT_FOUND)
     );
-    if (teacher.getBirth() == null && teacher.getSex() == null && teacher.getPwAnswer() == null
-        && teacher.getImageId() == null) {
-      firstTimeUpdate(teacher, requestDto);
-    } else {
-      logger.info("enter into subsequentUpdate()");
-      subsequentUpdate(teacher, requestDto);
+
+    boolean isFirstUpdate = teacher.getBirth()==null;
+
+    if(isFirstUpdate){
+      if(requestDto.getBirth()==null || requestDto.getSex()==null
+          || requestDto.getPwAnswer()==null || requestDto.getImageId()==null){
+        throw new IllegalStateException( "Birth, sex, Image and password answer are required for the first update.");
+      }
+      teacher.setBirth(requestDto.getBirth());
+      teacher.setSex(requestDto.getSex());
+      teacher.setPwAnswer(requestDto.getPwAnswer());
+      Image image = imageRepository.findById(requestDto.getImageId())
+          .orElseThrow(
+              () -> new CustomException("Image not found with id: " + requestDto.getImageId(),
+                  HttpStatus.NOT_FOUND));
+      teacher.setImageId(image);
+      updateAlwaysChangableField(requestDto, teacher);
+
+    }else{
+      if (requestDto.getPwAnswer() != null) {//최초 1회 접속이 아닌데 pwAnswer 요청 들어올 경우 예외처리
+        // pwAnswer should not be provided after the first update
+        throw new CustomException("Password answer can only be set during the first update.",
+            HttpStatus.BAD_REQUEST);
+      }
+
+      updateAlwaysChangableField(requestDto, teacher);
+
+      if (requestDto.getBirth()!=null){
+        teacher.setBirth(requestDto.getBirth());
+      }
+      if(requestDto.getSex()!=null){
+        teacher.setSex(requestDto.getSex());
+      }
+      if (requestDto.getImageId() != null) {
+        Image image = imageRepository.findById(requestDto.getImageId())
+            .orElseThrow(() -> new CustomException("Image not found", HttpStatus.NOT_FOUND));
+        teacher.setImageId(image);
+      }
     }
 
     teacherRepository.save(teacher);
+    return mapToResponseDTO(teacher);
 
-    return teacher.getUsername();
 
   }
 
+  private void updateAlwaysChangableField(TeacherRequestDTO requestDto, Users teacher) {
 
-  private void subsequentUpdate(Users teacher, TeacherRequestDTO requestDto) {
-    //pwAnswer가 있으면 예외처리
-    if (requestDto.getPwAnswer() != null) {
-      throw new CustomException("Cannot update pwAnswer anymore", HttpStatus.BAD_REQUEST);
-    }
-
-    //name,birth,phoneNum,password,imageId
+    changePassword(requestDto, teacher);
     if (requestDto.getName() != null) {
       teacher.setName(requestDto.getName());
-    }
-    if (requestDto.getBirth() != null) {
-      teacher.setBirth(requestDto.getBirth());
     }
     if (requestDto.getPhoneNum() != null) {
       teacher.setPhoneNum(requestDto.getPhoneNum());
     }
-    if (requestDto.getPassword() != null) {
-      teacher.setPassword(requestDto.getPassword());
-    }
-    if (requestDto.getImageId() != null) {
-      Image image = imageRepository.findById(requestDto.getImageId())
-          .orElseThrow(() -> new CustomException("Image not found", HttpStatus.NOT_FOUND));
-      teacher.setImageId(image);
-    }
-    if (requestDto.getSex() != null) {
-      teacher.setSex(requestDto.getSex());
-    }
-
-    //`updated_charged_id`를 설정
-    teacher.setUpdatedChargeId(2L); // Dummy data 설정
-
-    // 엔티티 상태가 변경되었으므로 JPA는 이를 자동으로 감지하고 업데이트
-    // `save` 메소드를 호출하지 않아도 트랜잭션 종료 시 자동으로 업데이트
 
   }
 
-  private void firstTimeUpdate(Users teacher, TeacherRequestDTO requestDto) {
-    updateTeacherFieldIfNull(teacher::getBirth, teacher::setBirth, requestDto.getBirth(),
-        "Birth is missing in the request.");
-    updateTeacherFieldIfNull(teacher::getSex, teacher::setSex, requestDto.getSex(),
-        "Sex is missing in the request.");
-    updateTeacherFieldIfNull(teacher::getPwAnswer, teacher::setPwAnswer, requestDto.getPwAnswer(),
-        "Password answer is missing in the request.");
-    updateTeacherImageIdField(teacher::getImageId, teacher::setImageId, requestDto.getImageId(),
-        "Image ID is missing in the request.");
-
-    //requestDto에 password가 있으면 update
-    updateTeacherpasswordField(teacher::getPassword, teacher::setPassword, requestDto.getPassword(),
-        "Login Pw is missing in the request.");
-
-
+  private void changePassword(TeacherRequestDTO requestDto, Users student) {
+    // Update fields that can always be updated
+    if (requestDto.getNewPassword() != null) {
+      if (passwordEncoder.matches(requestDto.getCurrentPassword(), student.getPassword())) {
+        student.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+      } else {
+        throw new IllegalArgumentException("current password is wrong");
+      }
+    }
   }
+
 
   private void updateTeacherpasswordField(Supplier<String> getpassword,
       Consumer<String> setpassword,
       String password, String errorMessage) {
     if (password != null) {//새로운 비밀번호가 password에 담겨있음
       // 새로운 비밀번호가 제공된 경우 업데이트
-      setpassword.accept(password);
+
     }
   }
 
