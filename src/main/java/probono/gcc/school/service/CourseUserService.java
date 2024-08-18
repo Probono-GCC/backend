@@ -2,6 +2,7 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Role.ROLE_STUDENT;
 import static probono.gcc.school.model.enums.Role.ROLE_TEACHER;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -56,7 +57,7 @@ public class CourseUserService {
 
     validateDuplicateCourseUser(findCourse, findUser);
     //course에 teacher 이미 할당했으면 예외처리
-    AlreadyAssignedTeacherInCourse(findCourse,findUser);
+    AlreadyAssignedTeacherInCourse(findCourse, findUser);
 
     CourseUser courseUser = new CourseUser();
 
@@ -71,9 +72,6 @@ public class CourseUserService {
     } else {
       throw new IllegalArgumentException("course에 할당할 수 없는 유저입니다.");
     }
-
-
-
 
     CourseUser savedCourseUser = courseUserRepository.save(courseUser);
     return mapToResponseDto(savedCourseUser);
@@ -126,17 +124,18 @@ public class CourseUserService {
   }
 
   private void validateDuplicateCourseUser(Course findCourse, Users findUser) {
-    if (courseUserRepository.existsByCourseIdAndUsernameAndStatus(findCourse, findUser,Status.ACTIVE)) {
+    if (courseUserRepository.existsByCourseIdAndUsernameAndStatus(findCourse, findUser,
+        Status.ACTIVE)) {
       throw new DuplicateEntityException("이미 존재하는 CourseUser 입니다.");
     }
   }
 
   private void AlreadyAssignedTeacherInCourse(Course findCourse, Users findUser) {
     //이미 해당 course에 할당된 teacher가 존재하면
-    if(courseUserRepository.findByCourseIdAndRoleAndStatus(findCourse,ROLE_TEACHER,Status.ACTIVE)!=null){
+    if (!courseUserRepository.findByCourseIdAndRoleAndStatus(findCourse, ROLE_TEACHER,
+        Status.ACTIVE).isEmpty()) {
       throw new IllegalArgumentException("이미 해당 Course에 Teacher가 할당되어 있습니다");
     }
-
   }
 
 
@@ -220,7 +219,8 @@ public class CourseUserService {
     CourseUser teacherCourseUser = courseUsers.stream()
         .filter(courseUser -> Role.ROLE_TEACHER.equals(courseUser.getRole()))
         .findFirst()  // 하나만 있을 것으로 기대하므로 첫 번째 요소 반환
-        .orElseThrow(() -> new NoSuchElementException("No teacher found for course with id: " + courseId));
+        .orElseThrow(
+            () -> new NoSuchElementException("No teacher found for course with id: " + courseId));
 
     // CourseUser 객체를 CourseUserResponse로 변환하여 반환
     return mapToResponseDto(teacherCourseUser);  // courseUser -> response로 변환하는 메서드
@@ -234,7 +234,7 @@ public class CourseUserService {
         .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
 
     // Check if user is a teacher
-    if (teacher.getRole()!=ROLE_TEACHER) {
+    if (teacher.getRole() != ROLE_TEACHER) {
       throw new IllegalArgumentException("User is not a teacher");
     }
 
@@ -275,7 +275,8 @@ public class CourseUserService {
   public List<CourseUserResponse> getCoursesByTeacherUsername(String username) {
     Users teacher = userRepository.findByUsername(username)
         .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
-    List<CourseUser> courseUserList=courseUserRepository.findByUsernameAndRole(teacher,ROLE_TEACHER);
+    List<CourseUser> courseUserList = courseUserRepository.findByUsernameAndRole(teacher,
+        ROLE_TEACHER);
     return courseUserList.stream()
         .map(this::mapToResponseDto)
         .collect(Collectors.toList());

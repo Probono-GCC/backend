@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +29,7 @@ import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.service.ImageService;
 import probono.gcc.school.service.StudentService;
@@ -54,10 +56,11 @@ public class StudentController {
   // 모든 Students 조회
   @GetMapping("/students")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
-    List<StudentResponseDTO> students = studentService.findAllStudents();
+  public ResponseEntity<Page<UserResponse>> getAllStudents(
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<UserResponse> students = studentService.findAllStudents(page, size);
     return ResponseEntity.ok(students);
-
   }
 
   // 특정 Student 조회 (username로 조회)
@@ -121,7 +124,6 @@ public class StudentController {
       return ResponseEntity.ok("Login ID is available.");
     }
   }
-
 
 
 }
