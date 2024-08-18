@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 
 import org.springframework.data.domain.Page;
@@ -18,6 +20,8 @@ import org.springframework.expression.spel.ast.Assign;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
+import probono.gcc.school.mapper.StudentMapper;
+import probono.gcc.school.mapper.TeacherMapper;
 import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.classes.CreateClassRequest;
@@ -37,25 +41,19 @@ import probono.gcc.school.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
+
 public class ClassService {
 
   private final ModelMapper modelMapper;
   private final ClassRepository classRepository;
 
   private final CourseService courseService;
+  private final TeacherMapper teacherMapper;
+  private final StudentMapper studentMapper;
 
   private final CourseRepository courseRepository;
+  private static final Logger logger = LoggerFactory.getLogger(ClassService.class);
 
-  private final UserRepository userRepository;
-
-  //@Lazy
- // private final TeacherService teacherService;
-  //@Lazy
-  //private final StudentService studentService;
-
-  /**
-   * 클래스 생성
-   */
   @Transactional
   public ClassResponse create(Classes requestClass) {
 
@@ -176,7 +174,7 @@ public class ClassService {
 
 
 
-  private ClassResponse mapToResponseDto(Classes savedClass) {
+  public ClassResponse mapToResponseDto(Classes savedClass) {
     ClassResponse responseDto = new ClassResponse();
     responseDto.setClassId(savedClass.getClassId());
     responseDto.setGrade(savedClass.getGrade());
@@ -186,6 +184,46 @@ public class ClassService {
   }
 
 
+  @Transactional
+  public List<TeacherResponseDTO> getTeachersInClass(Long classId) {
+    Optional<Classes> findClass=classRepository.findById(classId);
+
+    Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
+
+    List<Users> userList=findClass.map(Classes::getUsers) // Optional<Classes>에서 getUsers() 호출
+        .orElseThrow(() -> new NoSuchElementException("Class not found with id: " + classId));
+
+    logger.info("userList.size() : {}",userList.size());
+
+    // Role이 ROLE_TEACHER인 사용자만 필터링
+    List<Users> teacherList = userList.stream()
+        .filter(user -> Role.ROLE_TEACHER.equals(user.getRole())) // Role이 ROLE_TEACHER인 사용자 필터링
+        .toList();
+
+    return teacherList.stream()
+        .map(teacherMapper::mapToResponseDTO)
+        .collect(Collectors.toList());
+
+  }
+
+  @Transactional
+  public List<StudentResponseDTO> getStudentsInClass(Long classId) {
+    Optional<Classes> findClass=classRepository.findById(classId);
+    Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
+
+    List<Users> userList=findClass.map(Classes::getUsers) // Optional<Classes>에서 getUsers() 호출
+        .orElseThrow(() -> new NoSuchElementException("Class not found with id: " + classId));
+    logger.info("userList.size() : {}",userList.size());
+
+    // Role이 ROLE_TEACHER인 사용자만 필터링
+    List<Users> studentList = userList.stream()
+        .filter(user -> Role.ROLE_STUDENT.equals(user.getRole())) // Role이 ROLE_TEACHER인 사용자 필터링
+        .toList();
 
 
+    return studentList.stream()
+        .map(studentMapper::mapToResponseDTO)
+        .collect(Collectors.toList());
+
+  }
 }

@@ -14,16 +14,21 @@ import java.time.LocalDate;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Persistable;
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Sex;
 import probono.gcc.school.model.enums.Status;
+import probono.gcc.school.service.AssignClassService;
 
 @Entity
 @Table(name = "users")
 @Data
 public class Users implements Persistable<String> {
+
+  private static final Logger logger = LoggerFactory.getLogger(Users.class);
 
   @Id
   @Column(length = 20)
@@ -106,5 +111,6 @@ public class Users implements Persistable<String> {
   public void addClass(Classes assignedClass) {
     this.setClassId(assignedClass);
     assignedClass.getUsers().add(this);
+    logger.info("[User] assignedClass.getUsres().size():{}",assignedClass.getUsers().size());
   }
 }

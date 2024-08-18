@@ -55,6 +55,8 @@ public class CourseUserService {
     }
 
     validateDuplicateCourseUser(findCourse, findUser);
+    //course에 teacher 이미 할당했으면 예외처리
+    AlreadyAssignedTeacherInCourse(findCourse,findUser);
 
     CourseUser courseUser = new CourseUser();
 
@@ -70,7 +72,7 @@ public class CourseUserService {
       throw new IllegalArgumentException("course에 할당할 수 없는 유저입니다.");
     }
 
-    //course에 teacher 이미 할당했으면 예외처리
+
 
 
     CourseUser savedCourseUser = courseUserRepository.save(courseUser);
@@ -124,9 +126,17 @@ public class CourseUserService {
   }
 
   private void validateDuplicateCourseUser(Course findCourse, Users findUser) {
-    if (courseUserRepository.existsByCourseIdAndUsername(findCourse, findUser)) {
+    if (courseUserRepository.existsByCourseIdAndUsernameAndStatus(findCourse, findUser,Status.ACTIVE)) {
       throw new DuplicateEntityException("이미 존재하는 CourseUser 입니다.");
     }
+  }
+
+  private void AlreadyAssignedTeacherInCourse(Course findCourse, Users findUser) {
+    //이미 해당 course에 할당된 teacher가 존재하면
+    if(courseUserRepository.findByCourseIdAndRoleAndStatus(findCourse,ROLE_TEACHER,Status.ACTIVE)!=null){
+      throw new IllegalArgumentException("이미 해당 Course에 Teacher가 할당되어 있습니다");
+    }
+
   }
 
 
@@ -241,7 +251,7 @@ public class CourseUserService {
         .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
     List<CourseUser> courseUserList=courseUserRepository.findByUsernameAndRole(teacher,ROLE_TEACHER);
     return courseUserList.stream()
-        .map(courseUser -> mapToResponseDto(courseUser))
+        .map(this::mapToResponseDto)
         .collect(Collectors.toList());
   }
 }

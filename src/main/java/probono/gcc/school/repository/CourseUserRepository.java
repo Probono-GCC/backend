@@ -20,7 +20,6 @@ import probono.gcc.school.model.enums.Status;
 @Repository
 public interface CourseUserRepository extends JpaRepository<CourseUser, Long> {
 
-  boolean existsByCourseIdAndUsername(Course course, Users user);
 
   List<CourseUser> findByCourseId(Course course);
 
@@ -31,4 +30,7 @@ public interface CourseUserRepository extends JpaRepository<CourseUser, Long> {
   Page<CourseUser> findByStatusAndRoleAndCourseId(Status status, Role role, Course course,
       Pageable pageable);
 
+  List<CourseUser> findByCourseIdAndRoleAndStatus(Course findCourse, Role role, Status status);
+
+  boolean existsByCourseIdAndUsernameAndStatus(Course findCourse, Users findUser, Status status);
 }

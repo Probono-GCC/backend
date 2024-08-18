@@ -289,38 +289,6 @@ public class TeacherService {
     return false;
   }
 
-  //teacher의 담당 class 할당
-  public TeacherResponseDTO assignClass(String username, Long classId) {
-    // Find the teacher by loginId
-    Users teacher = teacherRepository.findByUsername(username)
-        .orElseThrow(() -> new CustomException("Teacher not found with ID: " + username,
-            HttpStatus.NOT_FOUND));
-
-      // Find the class by classId
-      Classes assignedClass = classRepository.findById(classId)
-          .orElseThrow(
-              () -> new CustomException("Class not found with ID: " + classId,
-                  HttpStatus.NOT_FOUND));
-
-      // Debugging logs
-      logger.info("Assigning class with ID: {} to teacher with login ID: {}", classId, username);
-
-      // Initialize associated notices
-      Hibernate.initialize(assignedClass.getNotice());
-
-      // 양방향 관계 매핑
-      teacher.addClass(assignedClass);
-
-      // Save the updated teacher entity
-      Users updatedTeacher = teacherRepository.save(teacher);
-      logger.info("Assigned class ID: {} to teacher with login ID: {} successfully.", classId,
-      username);
-
-
-      TeacherResponseDTO teacherResponseDTO = mapToResponseDTO(updatedTeacher);
-
-      return teacherResponseDTO;
-    }
 
     public TeacherResponseDTO mapToResponseDTO (Users savedTeacher){
       // Create a new TeacherResponseDTO instance

@@ -1,8 +1,12 @@
 package probono.gcc.school.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
@@ -20,28 +24,30 @@ public class AssignClassService {
   private final TeacherService teacherService;
   private final UserRepository userRepository;
   private final ClassRepository classRepository;
+  @PersistenceContext
+  private EntityManager entityManager;
+
+  private static final Logger logger = LoggerFactory.getLogger(AssignClassService.class);
   @Transactional
   public AssignClassResponseDTO assignUser(Long classId, String username) {
-    // Find the user by loginId
+
     Users user = userRepository.findByUsername(username)
         .orElseThrow(() -> new NoSuchElementException("Teacher not found with ID: " + username));
 
-    // Find the class by classId
     Classes assignedClass = classRepository.findById(classId)
         .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + classId));
+
+    //이미 할당했는지 예외처리
 
     // Initialize associated notices (if needed for any reason)
     Hibernate.initialize(assignedClass.getNotice());
 
-    // Assign the class to the user
     user.addClass(assignedClass);
+    entityManager.flush(); // 트랜잭션 내에서 영속성 컨텍스트 동기화
+    logger.info("assignedClass.getUsers().size() : {}",assignedClass.getUsers().size());
 
-    // Save the updated teacher entity
     Users updatedUser = userRepository.save(user);
-
-    // Create the response DTO
     AssignClassResponseDTO assignedUserDTO = mapToAssignResponseDTO(assignedClass,updatedUser);
-
     return assignedUserDTO;
   }
   @Transactional
