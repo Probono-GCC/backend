@@ -20,7 +20,6 @@ public class TeacherResponseDTO {
 
 
   private String username;
-  private String password;
   private Role role;
   private String name;
   private LocalDate birth;

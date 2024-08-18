@@ -17,8 +17,8 @@ import probono.gcc.school.model.enums.Sex;
 @Builder
 public class StudentUpdateRequestDTO {
 
-
-  private String password;//항상 바꿀 수 있음
+  private String currentPassword;
+  private String newPassword;//항상 바꿀 수 있음
   private String name;//항상 바꿀 수 있음
   private int serialNumber;//항상 바꿀 수 있음
   private Grades grade; //항상 바꿀 수 있음

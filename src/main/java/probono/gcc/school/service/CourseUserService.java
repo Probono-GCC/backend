@@ -137,6 +137,7 @@ public class CourseUserService {
 
   private void AlreadyAssignedTeacherInCourse(Course findCourse, Users findUser) {
     //이미 해당 course에 할당된 teacher가 존재하면
+
     if (!courseUserRepository.findByCourseIdAndRoleAndStatus(findCourse, ROLE_TEACHER,
         Status.ACTIVE).isEmpty()) {
       throw new IllegalArgumentException("이미 해당 Course에 Teacher가 할당되어 있습니다");
