@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,12 +21,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.service.TeacherService;
 
@@ -44,7 +47,7 @@ public class TeacherController {
   @PostMapping("/teachers/join")
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<TeacherResponseDTO> createTeacher(
-       @RequestBody @Valid TeacherCreateRequestDTO requestDto) {
+      @RequestBody @Valid TeacherCreateRequestDTO requestDto) {
 
     TeacherResponseDTO teacher = teacherService.createTeacher(requestDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(teacher);
@@ -54,14 +57,11 @@ public class TeacherController {
   // Retrieve all teachers
   @GetMapping("/teachers")
   @PreAuthorize("hasAnyRole('ADMIN')")
-  public ResponseEntity<List<TeacherResponseDTO>> getAllTeachers() {
-    try {
-      List<TeacherResponseDTO> teachers = teacherService.findAllTeachers();
-      return ResponseEntity.ok(teachers);
-    } catch (Exception ex) {
-      logger.error("Unexpected error occurred while fetching teachers: {}", ex.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+  public ResponseEntity<Page<UserResponse>> getAllTeachers(
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<UserResponse> teachers = teacherService.findAllTeachers(page, size);
+    return ResponseEntity.ok(teachers);
   }
 
   // Retrieve a single teacher by ID
@@ -131,8 +131,6 @@ public class TeacherController {
       return ResponseEntity.ok("Login ID is available.");
     }
   }
-
-
 
 
 }

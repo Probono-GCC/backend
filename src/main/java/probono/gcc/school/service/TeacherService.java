@@ -3,6 +3,7 @@ package probono.gcc.school.service;
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -12,6 +13,9 @@ import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,10 +24,15 @@ import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
+
 import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
+
+import probono.gcc.school.model.dto.image.ImageResponseDTO;
+
 import probono.gcc.school.model.dto.users.TeacherCreateRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Users;
@@ -87,19 +96,21 @@ public class TeacherService {
 
 
   // Retrieve all teachers
-  public List<TeacherResponseDTO> findAllTeachers() {
-    try {
-      List<Users> teacherList = teacherRepository.findByStatusAndRole(Status.ACTIVE,
-          Role.ROLE_TEACHER);
-      // Use stream and ModelMapper to convert entity list to DTO list
-      return teacherList.stream()
-          .map(teacher -> mapToResponseDTO(teacher))
-          .collect(Collectors.toList());
-    } catch (Exception e) {
-      // Handle any exceptions that occur during the fetching process
-      logger.error("An error occurred while fetching teachers: {}", e.getMessage());
-      throw new RuntimeException("An error occurred while fetching teachers", e);
-    }
+  public Page<UserResponse> findAllTeachers(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("name")));
+
+    Page<Users> teacherList = teacherRepository.findByStatusAndRole(Status.ACTIVE,
+        Role.ROLE_TEACHER, pageRequest);
+    // Use stream and ModelMapper to convert entity list to DTO list
+
+    Page<UserResponse> responses = teacherList.map(
+        teacher -> new UserResponse(teacher.getUsername(), teacher.getName(), null, null,
+            teacher.getBirth(), teacher.getSex(), teacher.getPhoneNum(), null, null, null,
+            teacher.getRole(),
+            Optional.ofNullable(teacher.getImageId())
+                .map(imageId -> modelMapper.map(imageId, ImageResponseDTO.class))
+                .orElse(null)));
+    return responses;
   }
 
   // Retrieve a single teacher by ID
@@ -270,40 +281,40 @@ public class TeacherService {
   }
 
 
-    public TeacherResponseDTO mapToResponseDTO (Users savedTeacher){
-      // Create a new TeacherResponseDTO instance
-      TeacherResponseDTO responseDto = new TeacherResponseDTO();
+  public TeacherResponseDTO mapToResponseDTO(Users savedTeacher) {
+    // Create a new TeacherResponseDTO instance
+    TeacherResponseDTO responseDto = new TeacherResponseDTO();
 
-      // Set fields directly from the savedTeacher entity
-      responseDto.setUsername(savedTeacher.getUsername());
-      responseDto.setRole(savedTeacher.getRole());
-      responseDto.setName(savedTeacher.getName());
-      responseDto.setBirth(savedTeacher.getBirth());
-      responseDto.setSex(savedTeacher.getSex());
-      responseDto.setPhoneNum(savedTeacher.getPhoneNum());
-      responseDto.setPwAnswer(savedTeacher.getPwAnswer());
-      responseDto.setStatus(savedTeacher.getStatus());
-      responseDto.setCreatedAt(savedTeacher.getCreatedAt());
-      responseDto.setUpdatedAt(savedTeacher.getUpdatedAt());
-      responseDto.setCreatedChargeId(savedTeacher.getCreatedChargeId());
-      responseDto.setUpdatedChargeId(savedTeacher.getUpdatedChargeId());
+    // Set fields directly from the savedTeacher entity
+    responseDto.setUsername(savedTeacher.getUsername());
+    responseDto.setRole(savedTeacher.getRole());
+    responseDto.setName(savedTeacher.getName());
+    responseDto.setBirth(savedTeacher.getBirth());
+    responseDto.setSex(savedTeacher.getSex());
+    responseDto.setPhoneNum(savedTeacher.getPhoneNum());
+    responseDto.setPwAnswer(savedTeacher.getPwAnswer());
+    responseDto.setStatus(savedTeacher.getStatus());
+    responseDto.setCreatedAt(savedTeacher.getCreatedAt());
+    responseDto.setUpdatedAt(savedTeacher.getUpdatedAt());
+    responseDto.setCreatedChargeId(savedTeacher.getCreatedChargeId());
+    responseDto.setUpdatedChargeId(savedTeacher.getUpdatedChargeId());
 
-      // Map the class entity (Classes) to ClassResponse if the class is assigned
-      if (savedTeacher.getClassId() != null) {
-        ClassResponse classResponse = modelMapper.map(savedTeacher.getClassId(),
-            ClassResponse.class);
-        responseDto.setClassId(classResponse);
-      }
-
-      // Map the image entity (Image) to ImageResponseDTO if the image is assigned
-      if (savedTeacher.getImageId() != null) {
-        CreateImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
-            CreateImageResponseDTO.class);
-        responseDto.setImageId(imageResponse);
-      }
-
-      return responseDto;
+    // Map the class entity (Classes) to ClassResponse if the class is assigned
+    if (savedTeacher.getClassId() != null) {
+      ClassResponse classResponse = modelMapper.map(savedTeacher.getClassId(),
+          ClassResponse.class);
+      responseDto.setClassId(classResponse);
     }
 
+    // Map the image entity (Image) to ImageResponseDTO if the image is assigned
+    if (savedTeacher.getImageId() != null) {
+      CreateImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
+          CreateImageResponseDTO.class);
+      responseDto.setImageId(imageResponse);
+    }
 
+    return responseDto;
   }
+
+
+}

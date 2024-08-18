@@ -137,3 +137,4 @@ ALTER TABLE image
     ADD FOREIGN KEY (noticeId) REFERENCES notice (noticeId);
 
 
+
