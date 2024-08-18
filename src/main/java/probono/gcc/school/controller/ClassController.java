@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.classes.CreateClassRequest;
-import probono.gcc.school.model.dto.NoticeResponse;
+import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.service.AssignClassService;
 import probono.gcc.school.service.ClassService;
-import probono.gcc.school.service.TeacherService;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +30,7 @@ public class ClassController {
 
   private final ClassService classService;
   private final AssignClassService assignClassService;
+
 
   @PostMapping("/class")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
@@ -80,6 +80,7 @@ public class ClassController {
 
   //class에 teacher를 할당 (담임선생님)
   // Assign a teacher to a class
+  // Assign a student to a class
   @PutMapping("/class/{classId}/assignUser/{username}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> assignTeacherToClass(@PathVariable Long classId,
@@ -87,6 +88,28 @@ public class ClassController {
     AssignClassResponseDTO assignClassResponseDTO = assignClassService.assignUser(classId,username);
     return ResponseEntity.ok(assignClassResponseDTO);
   }
+
+  //할당 삭제
+
+
+  @GetMapping("/class/{classId}/teachers")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<List<TeacherResponseDTO>> getTeachersInClass(@PathVariable Long classId){
+
+    List<TeacherResponseDTO> teachers = classService.getTeachersInClass(classId);
+    return ResponseEntity.ok(teachers);
+
+  }
+
+  @GetMapping("/class/{classId}/students")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<List<StudentResponseDTO>> getStudentsInClass(@PathVariable Long classId){
+
+    List<StudentResponseDTO> students = classService.getStudentsInClass(classId);
+    return ResponseEntity.ok(students);
+
+  }
+
 
 
 }

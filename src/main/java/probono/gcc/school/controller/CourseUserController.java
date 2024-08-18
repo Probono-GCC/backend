@@ -64,7 +64,7 @@ public class CourseUserController {
 
 
   //해당 course를 듣는 학생리스트 조회
-  @GetMapping("/courseUser/course/{courseId}")
+  @GetMapping("/courseUser/course/{courseId}/students")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Page<CourseUserResponse>> getStudentsByCourse(@PathVariable long courseId,
       @RequestParam(value = "page", defaultValue = "0") int page,

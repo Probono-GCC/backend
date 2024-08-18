@@ -122,17 +122,6 @@ public class StudentController {
     }
   }
 
-  // Student에 class 할당
-  @PutMapping("/students/{username}/assignClass/{classId}")
-  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<?> assignClassToStudent(
-      @PathVariable String username, @PathVariable Long classId) {
-
-    StudentResponseDTO assignedStudent = studentService.assignClass(username, classId);
-    return ResponseEntity.ok(assignedStudent);
-
-  }
-
 
 
 }
