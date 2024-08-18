@@ -3,6 +3,10 @@ package probono.gcc.school.service;
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
 import java.util.List;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,9 +26,15 @@ import probono.gcc.school.exception.CustomException;
 import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
+import probono.gcc.school.model.dto.image.ImageResponseDTO;
 import probono.gcc.school.model.dto.users.StudentCreateRequestDTO;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
+
+import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.dto.users.UserResponse;
+import probono.gcc.school.model.entity.Classes;
+
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
@@ -90,19 +103,23 @@ public class StudentService {
 
 
   // Retrieve all students
-  public List<StudentResponseDTO> findAllStudents() {
-    try {
-      List<Users> studentList = studentRepository.findByStatusAndRole(Status.ACTIVE,
-          Role.ROLE_STUDENT);
-      // Use stream and ModelMapper to convert entity list to DTO list
-      return studentList.stream()
-          .map(student -> modelMapper.map(student, StudentResponseDTO.class))
-          .collect(Collectors.toList());
-    } catch (Exception e) {
-      // Handle any exceptions that occur during the fetching process
-      logger.error("An error occurred while fetching students: {}", e.getMessage());
-      throw new RuntimeException("An error occurred while fetching students", e);
-    }
+  public Page<UserResponse> findAllStudents(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("name")));
+
+    Page<Users> studentList = studentRepository.findByStatusAndRole(Status.ACTIVE,
+        Role.ROLE_STUDENT, pageRequest);
+    // Use stream and ModelMapper to convert entity list to DTO list
+
+    Page<UserResponse> responses = studentList.map(
+        student -> new UserResponse(student.getUsername(), student.getName(),
+            student.getSerialNumber(), student.getGrade(),
+            student.getBirth(), student.getSex(), student.getPhoneNum(),
+            student.getFatherPhoneNum(), student.getMotherPhoneNum(),
+            student.getGuardiansPhoneNum(),
+            student.getRole(), Optional.ofNullable(student.getImageId())
+            .map(imageId -> modelMapper.map(imageId, ImageResponseDTO.class))
+            .orElse(null)));
+    return responses;
   }
 
   // Retrieve a single student by ID
@@ -265,7 +282,6 @@ public class StudentService {
   }
 
 
-
   public StudentResponseDTO mapToResponseDTO(Users student) {
     // Create a new StudentResponseDTO instance
     StudentResponseDTO responseDto = new StudentResponseDTO();
@@ -297,7 +313,8 @@ public class StudentService {
 
     // Map the image entity (Image) to ImageResponseDTO if the image is assigned
     if (student.getImageId() != null) {
-      CreateImageResponseDTO imageResponse = modelMapper.map(student.getImageId(), CreateImageResponseDTO.class);
+      CreateImageResponseDTO imageResponse = modelMapper.map(student.getImageId(),
+          CreateImageResponseDTO.class);
       responseDto.setImageResponseDTO(imageResponse);
     }
 
