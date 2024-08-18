@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.dto.SubjectRequestDTO;
@@ -41,7 +42,7 @@ public class SubjectService {
     subject.setElective(requestDto.isElective());
     subject.setStatus(ACTIVE);
     //createdChargeId 설정
-    subject.setCreatedChargeId(1L);
+    subject.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     // subject 엔티티를 데이터베이스에 저장
     Subject subjectCreated = subjectRepository.save(subject);
@@ -80,7 +81,8 @@ public class SubjectService {
     subject.setElective(requestDto.isElective());
 
     // `updated_at`과 `updated_charged_id`를 설정
-    subject.setUpdatedChargeId(2L); // Dummy data 설정
+    subject.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName()); // Dummy data 설정
 
     // 엔티티 상태가 변경되었으므로 JPA는 이를 자동으로 감지하고 업데이트
     // `save` 메소드를 호출하지 않아도 트랜잭션 종료 시 자동으로 업데이트
@@ -114,7 +116,7 @@ public class SubjectService {
     // 논리적 삭제 수행
     subject.setStatus(Status.INACTIVE);
     // Dummy Data
-    subject.setUpdatedChargeId(2L);
+    subject.setUpdatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
     return subject.getSubjectId();
   }
 }

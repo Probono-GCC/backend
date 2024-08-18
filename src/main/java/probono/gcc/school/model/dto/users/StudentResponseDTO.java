@@ -18,6 +18,7 @@ import probono.gcc.school.model.enums.Status;
 @Data
 @Builder
 public class StudentResponseDTO {
+
   private String username;
   private String name;
   private int serialNumber;
@@ -33,8 +34,8 @@ public class StudentResponseDTO {
   private Status status;
   private Timestamp createdAt;
   private Timestamp updatedAt;
-  private Long createdChargeId;
-  private Long updatedChargeId;
+  private String createdChargeId;
+  private String updatedChargeId;
   private CreateImageResponseDTO imageResponseDTO;
   private ClassResponse classResponse;
 

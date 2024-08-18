@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +66,6 @@ public class StudentService {
 
   public StudentResponseDTO createStudent(StudentCreateRequestDTO requestDto) {
 
-
     try {
       //username 중복 확인 체크
       if (studentRepository.existsByUsername(requestDto.getUsername())) {
@@ -87,7 +87,8 @@ public class StudentService {
       student.setPassword(bCryptPasswordEncoder.encode(requestDto.getPassword()));
       student.setGrade(requestDto.getGrade());
       student.setStatus(ACTIVE);
-      student.setCreatedChargeId(1L); // Set the createdChargeId
+      student.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication()
+          .getName()); // Set the createdChargeId
       student.setRole(Role.ROLE_STUDENT);
 
       Users studentCreated = studentRepository.save(student);
@@ -176,14 +177,13 @@ public class StudentService {
               HttpStatus.BAD_REQUEST);
         }
 
-
         //항상 바꿀 수 있는 field
         updateAlwaysChangeableField(requestDto, student);
 
-        if (requestDto.getBirth()!=null){
+        if (requestDto.getBirth() != null) {
           student.setBirth(requestDto.getBirth());
         }
-        if(requestDto.getSex()!=null){
+        if (requestDto.getSex() != null) {
           student.setSex(requestDto.getSex());
         }
         if (requestDto.getImageId() != null) {
@@ -270,7 +270,7 @@ public class StudentService {
     // 논리적 삭제 수행
     student.setStatus(Status.INACTIVE);
     // Dummy Data
-    student.setUpdatedChargeId(2L);
+    student.setUpdatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
     return student.getUsername();
   }
 

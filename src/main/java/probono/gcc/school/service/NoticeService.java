@@ -1,5 +1,6 @@
 package probono.gcc.school.service;
 
+import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +50,8 @@ public class NoticeService {
 
   private final S3ImageService s3ImageService;
 
+  private final EntityManager entityManager;
+
 
   @Transactional
   public NoticeResponse create(CreateNoticeRequest request) {
@@ -56,7 +60,7 @@ public class NoticeService {
     notice.setTitle(request.getTitle());
     notice.setContent(request.getContent());
     notice.setType(request.getType());
-    notice.setCreatedChargeId(-1L);
+    notice.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     // 저장할 이미지가 존재하는 경우 S3에 저장 후 notice와 연결
     if (request.getImageList().isEmpty() || !request.getImageList().get(0).isEmpty()) {
@@ -95,32 +99,36 @@ public class NoticeService {
     }
 
     Notice savedNotice = noticeRepository.save(notice);
+
+    entityManager.refresh(notice);
+
     return mapToResponseDto(savedNotice);
   }
+
+//  @Transactional
+//  public NoticeResponse getNotice(Long id) {
+//    Notice findNotice = this.getNoticeById(id);
+//    List<Image> imageList = findNotice.getImageList();
+//
+//    /**
+//     * view증가 로직
+//     */
+//    findNotice.setViews(findNotice.getViews() + 1);
+//    noticeRepository.save(findNotice);
+//
+//    return modelMapper.map(findNotice, NoticeResponse.class);
+//  }
 
   @Transactional
   public NoticeResponse getNotice(Long id) {
     Notice findNotice = this.getNoticeById(id);
     List<Image> imageList = findNotice.getImageList();
 
-//    List<ImageResponseDTO> imageResponse = imageList.stream()
-//        .filter(n -> n.getStatus() == Status.ACTIVE)
-//        .map(
-//            m -> new ImageResponseDTO(m.getImageId(), m.getImagePath(), m.getCreatedChargeId()
-//            ))
-//        .collect(Collectors.toList());
-//
-//    NoticeResponse noticeResponse = mapToResponseDto(findNotice);
-//    noticeResponse.setImageList(imageResponse);
-//    noticeResponse.setViews(noticeResponse.getViews() + 1);
-    /**
-     * view증가 로직
-     */
-    findNotice.setViews(findNotice.getViews() + 1);
-    noticeRepository.save(findNotice);
+    // view 증가 로직
+    noticeRepository.incrementViews(id);
 
-//    return mapToResponseDto(findNotice);
-//    return noticeResponse;
+    // findNotice 객체를 새로 고침하여 변경된 views 값을 반영
+    entityManager.refresh(findNotice);
 
     return modelMapper.map(findNotice, NoticeResponse.class);
   }
@@ -185,7 +193,7 @@ public class NoticeService {
 //    LocalDateTime now = LocalDateTime.now();
 //    Timestamp timestamp = Timestamp.valueOf(now);
 //    existingNotice.setUpdatedAt(timestamp);
-//    existingNotice.setUpdatedChargeId(-1L);
+//    existingNotice.setUpdatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 //
 //    Notice savedNotice = noticeRepository.save(existingNotice);
   }

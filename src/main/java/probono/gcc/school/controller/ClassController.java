@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,13 +35,13 @@ public class ClassController {
 
   @PostMapping("/class")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<ClassResponse> createStudent(
+  public ResponseEntity<ClassResponse> createClass(
       @RequestBody @Valid CreateClassRequest request) {
     Classes classes = new Classes();
     classes.setGrade(request.getGrade());
     classes.setSection(request.getSection());
     classes.setYear(request.getYear());
-    classes.setCreatedChargeId(-1L);
+    classes.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     ClassResponse createdClass = classService.create(classes);
     return ResponseEntity.ok(createdClass);
@@ -85,7 +86,8 @@ public class ClassController {
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> assignTeacherToClass(@PathVariable Long classId,
       @PathVariable String username) {
-    AssignClassResponseDTO assignClassResponseDTO = assignClassService.assignUser(classId,username);
+    AssignClassResponseDTO assignClassResponseDTO = assignClassService.assignUser(classId,
+        username);
     return ResponseEntity.ok(assignClassResponseDTO);
   }
 
@@ -94,7 +96,7 @@ public class ClassController {
 
   @GetMapping("/class/{classId}/teachers")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<List<TeacherResponseDTO>> getTeachersInClass(@PathVariable Long classId){
+  public ResponseEntity<List<TeacherResponseDTO>> getTeachersInClass(@PathVariable Long classId) {
 
     List<TeacherResponseDTO> teachers = classService.getTeachersInClass(classId);
     return ResponseEntity.ok(teachers);
@@ -103,13 +105,12 @@ public class ClassController {
 
   @GetMapping("/class/{classId}/students")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<List<StudentResponseDTO>> getStudentsInClass(@PathVariable Long classId){
+  public ResponseEntity<List<StudentResponseDTO>> getStudentsInClass(@PathVariable Long classId) {
 
     List<StudentResponseDTO> students = classService.getStudentsInClass(classId);
     return ResponseEntity.ok(students);
 
   }
-
 
 
 }
