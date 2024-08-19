@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.model.dto.NewPasswordDTO;
 import probono.gcc.school.model.dto.PasswordRequestDTO;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
@@ -48,4 +49,22 @@ public class PasswordService {
   }
 
 
+  public void checkPwAnswerIfForgotPassword(String username, String pwAnswer) {
+    Users user = userRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
+        () -> new NoSuchElementException("User not found with ID: " + username));
+    if(user.getPwAnswer()==null){
+      throw new IllegalArgumentException("PwAnswer가 null입니다.");
+    }
+    if(!user.getPwAnswer().equals(pwAnswer)){
+      throw new IllegalArgumentException("PwAnswer가 일치하지 않습니다");
+    }
+
+  }
+
+  public void changePasswordByPwAnswer(String username, NewPasswordDTO requestDto) {
+    Users user = userRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
+        () -> new NoSuchElementException("User not found with ID: " + username));
+    user.setPassword(bCryptPasswordEncoder.encode(requestDto.getNewPassword()));
+    userRepository.save(user);
+  }
 }
