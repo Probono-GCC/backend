@@ -92,6 +92,16 @@ public class ClassController {
   }
 
   //할당 삭제
+  @DeleteMapping("/class/{classId}/assignedUser/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<Object> deleteAssignedTeacherToClass(@PathVariable Long classId,
+      @PathVariable String username){
+
+    Object userDTO = assignClassService.deleteAssignedUser(classId,
+        username);
+    return ResponseEntity.ok(userDTO);
+
+  }
 
 
   @GetMapping("/class/{classId}/teachers")

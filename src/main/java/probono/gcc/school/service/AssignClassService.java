@@ -9,10 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import probono.gcc.school.mapper.StudentMapper;
+import probono.gcc.school.mapper.TeacherMapper;
 import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
+import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.UserRepository;
 
@@ -24,6 +27,8 @@ public class AssignClassService {
   private final TeacherService teacherService;
   private final UserRepository userRepository;
   private final ClassRepository classRepository;
+  private final StudentMapper studentMapper;
+  private final TeacherMapper teacherMapper;
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -31,10 +36,10 @@ public class AssignClassService {
   @Transactional
   public AssignClassResponseDTO assignUser(Long classId, String username) {
 
-    Users user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NoSuchElementException("Teacher not found with ID: " + username));
+    Users user = userRepository.findByUsernameAndStatus(username,Status.ACTIVE)
+        .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + username));
 
-    Classes assignedClass = classRepository.findById(classId)
+    Classes assignedClass = classRepository.findByClassIdAndStatus(classId,Status.ACTIVE)
         .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + classId));
 
     //이미 할당했는지 예외처리
@@ -47,9 +52,32 @@ public class AssignClassService {
     logger.info("assignedClass.getUsers().size() : {}",assignedClass.getUsers().size());
 
     Users updatedUser = userRepository.save(user);
-    AssignClassResponseDTO assignedUserDTO = mapToAssignResponseDTO(assignedClass,updatedUser);
-    return assignedUserDTO;
+    return mapToAssignResponseDTO(assignedClass,updatedUser);
   }
+
+  @Transactional
+  public Object deleteAssignedUser(Long classId, String username) {
+
+    Classes findClass = classRepository.findByClassIdAndStatus(classId,Status.ACTIVE)
+        .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + classId));
+
+    Users user=userRepository.findByUsernameAndClassIdAndStatus(username,findClass, Status.ACTIVE)
+        .orElseThrow(() -> new NoSuchElementException("User not found with username and classId : " ));
+
+    user.deleteClass(findClass);
+
+    if(user.getRole()==Role.ROLE_ADMIN){
+      return new IllegalStateException("Admin은 할당된 class가 없어 삭제할 수 없습니다.");
+    }
+
+    if(user.getRole()==Role.ROLE_STUDENT) {
+      return studentMapper.mapToResponseDTO(user);
+    }
+    else{
+      return teacherMapper.mapToResponseDTO(user);
+    }
+  }
+
   @Transactional
   public AssignClassResponseDTO mapToAssignResponseDTO(Classes classes,Users user) {
     AssignClassResponseDTO assignClassResponseDTO = new AssignClassResponseDTO();
@@ -66,7 +94,5 @@ public class AssignClassService {
 
 
   }
-
-
 
 }

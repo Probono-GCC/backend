@@ -13,6 +13,8 @@ import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Sections;
+import probono.gcc.school.model.enums.Status;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
