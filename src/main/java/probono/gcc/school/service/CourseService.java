@@ -5,6 +5,8 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -46,27 +48,45 @@ public class CourseService {
 
   private final CourseUserService courseUserService;
 
+  private static final Logger logger = LoggerFactory.getLogger(CourseService.class);
+
   @Transactional
-  public CourseResponse create(long classId, long subjectId) {
-    Classes findClass = classRepository.findById(classId)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 classId 입니다."));
+  public CourseResponse create(Long classId, long subjectId) {
+
     Subject findSubject = subjectRepository.findById(subjectId)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 subjectId 입니다."));
 
-    if (findClass.getStatus() == Status.INACTIVE
-        || findSubject.getStatus() == Status.INACTIVE) {
-      throw new NoSuchElementException("존재하지 않는 class 혹은 course 입니다.");
+    if (classId == null && !findSubject.isElective()) { // 공통과목인데 classId가 null일 경우
+      throw new IllegalArgumentException("공통과목의 classId는 null일 수 없습니다.");
+    }
+
+    Classes findClass=null;
+    if(classId!=null) {//공통과목일 때
+     findClass = classRepository.findById(classId)
+          .orElseThrow(() -> new NoSuchElementException("존재하지 않는 classId 입니다."));
+    }
+
+    if (findSubject.getStatus() == Status.INACTIVE) {
+      if(findClass!=null & findClass.getStatus() == Status.INACTIVE){ //공통과목일 때
+        throw new NoSuchElementException("존재하지 않는 class 혹은 course 입니다.");
+      }
+      throw new NoSuchElementException("존재하지 않는 class 혹은 course 입니다."); //선택과목일 때
     }
 
     validateDuplicateCourse(findClass, findSubject);
 
-    Course course = new Course();
+    logger.info("end of excption create() in CourseService");
 
-    course.setClassId(findClass);
+
+    Course course = new Course();
+    if(!findSubject.isElective()) { //공통과목일 때(findClass가 null이 아닐때)
+      course.setClassId(findClass);
+    }
     course.setSubjectId(findSubject);
     course.setCreatedChargeId(-1L);
 
     Course savedCourse = courseRepository.save(course);
+    logger.info("end of create() in CourseService");
     return mapToResponseDto(savedCourse);
   }
 
@@ -153,11 +173,13 @@ public class CourseService {
     CourseResponse responseDto = new CourseResponse();
     responseDto.setCourseId(savedCourse.getCourseId());
 
-    ClassResponse savedClass = modelMapper.map(savedCourse.getClassId(), ClassResponse.class);
+    if(savedCourse.getClassId()!=null) {
+      ClassResponse savedClass = modelMapper.map(savedCourse.getClassId(), ClassResponse.class);
+      responseDto.setClassResponse(savedClass);
+    }
     SubjectResponseDTO savedSubject = modelMapper.map(savedCourse.getSubjectId(),
         SubjectResponseDTO.class);
 
-    responseDto.setClassResponse(savedClass);
     responseDto.setSubjectResponseDTO((savedSubject));
     return responseDto;
   }

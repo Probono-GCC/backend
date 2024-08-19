@@ -79,7 +79,7 @@ CREATE TABLE course
     createdChargeId BIGINT    NOT NULL,
     updatedChargeId BIGINT NULL,
     subjectId       BIGINT    NOT NULL,
-    classId         BIGINT    NOT NULL
+    classId         BIGINT
 
 );
 CREATE TABLE course_user

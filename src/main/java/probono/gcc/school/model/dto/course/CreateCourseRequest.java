@@ -9,7 +9,6 @@ public class CreateCourseRequest {
   @NotNull
   private long subjectId;
 
-  @NotNull
-  private long classId;
+  private Long classId;
 
 }
