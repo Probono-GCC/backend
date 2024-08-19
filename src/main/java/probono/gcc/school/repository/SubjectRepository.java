@@ -13,4 +13,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
   Optional<Subject> findByName(String name);
 
   Page<Subject> findAllByStatus(Status status, Pageable pageable);
+
+  List<Subject> findAllByStatusAndIsElective(Status status, boolean isElective);
 }
