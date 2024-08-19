@@ -173,52 +173,32 @@ public class CourseService {
     return response;
   }
 
-//  @Transactional(readOnly = true)
-//  public Page<CourseResponse> getAllElectiveCourses(int page, int size) {
-//    List<Subject> electiveSubjects = subjectRepository.findAllByStatusAndIsElective(
-//        Status.ACTIVE, true);
-//
-//    List<Course> electiveCourseList = new ArrayList<>();
-//    for (Subject subject : electiveSubjects) {
-//      List<Course> findCourse = courseRepository.findBySubjectIdAndStatus(subject, Status.ACTIVE);
-//      electiveCourseList.addAll(findCourse);
-//    }
-//
-//    // Assuming Course is a class with appropriate getters
-//    List<CourseResponse> courseResponses = electiveCourseList.stream()
-//        .map(course -> {
-//          // Create ClassResponse from the course object
-//          ClassResponse classResponse = new ClassResponse(
-//              course.getClassId(),          // Assuming Course has a getClassId() method
-//              course.getYear(),             // Assuming Course has a getYear() method
-//              course.getGrade(),            // Assuming Course has a getGrade() method
-//              course.getSection()           // Assuming Course has a getSection() method
-//          );
-//
-//          // Create SubjectResponseDTO from the course's subject object
-//          SubjectResponseDTO subjectResponseDTO = new SubjectResponseDTO(
-//              course.getSubject().getSubjectId(),    // Assuming Course has a getSubject() method that returns Subject
-//              course.getSubject().getName(),         // Assuming Subject has a getName() method
-//              course.getSubject().isElective()       // Assuming Subject has an isElective() method
-//          );
-//
-//          // Create CourseResponse using the above responses
-//          return new CourseResponse(
-//              course.getCourseId(),          // Assuming Course has a getCourseId() method
-//              classResponse,
-//              subjectResponseDTO
-//          );
-//        })
-//        .collect(Collectors.toList());
-//
-//    PageRequest pageRequest = PageRequest.of(page, size);
-//    int start = (int) pageRequest.getOffset();
-//    int end = Math.min((start + pageRequest.getPageSize()), electiveCourseList.size());
-//    Page<CourseResponse> response = new PageImpl<>(electiveCourseList.subList(start, end),
-//        pageRequest,
-//        electiveCourseList.size());
-//    return response;
-//  }
+  @Transactional(readOnly = true)
+  public Page<CourseResponse> getAllElectiveCourses(int page, int size) {
+    List<Subject> electiveSubjects = subjectRepository.findAllByStatusAndIsElective(
+        Status.ACTIVE, true);
+
+    List<Course> electiveCourseList = new ArrayList<>();
+    for (Subject subject : electiveSubjects) {
+      List<Course> findCourse = courseRepository.findBySubjectIdAndStatus(subject, Status.ACTIVE);
+      electiveCourseList.addAll(findCourse);
+    }
+
+    // Assuming Course is a class with appropriate getters
+    List<CourseResponse> courseResponses = electiveCourseList.stream()
+        .map(course -> new CourseResponse(course.getCourseId(),
+            null,
+            modelMapper.map(course.getSubjectId(),
+                SubjectResponseDTO.class))).collect(Collectors.toList());
+
+    PageRequest pageRequest = PageRequest.of(page, size);
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), courseResponses.size());
+    Page<CourseResponse> response = new PageImpl<>(courseResponses.subList(start, end),
+        pageRequest,
+        courseResponses.size());
+    return response;
+  }
 
   private CourseResponse mapToResponseDto(Course savedCourse) {
     CourseResponse responseDto = new CourseResponse();
