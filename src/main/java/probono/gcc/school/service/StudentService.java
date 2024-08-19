@@ -38,6 +38,7 @@ import probono.gcc.school.model.entity.Classes;
 
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
@@ -104,10 +105,30 @@ public class StudentService {
 
   // Retrieve all students
   public Page<UserResponse> findAllStudents(int page, int size) {
-    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("name")));
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
 
     Page<Users> studentList = studentRepository.findByStatusAndRole(Status.ACTIVE,
         Role.ROLE_STUDENT, pageRequest);
+    // Use stream and ModelMapper to convert entity list to DTO list
+
+    Page<UserResponse> responses = studentList.map(
+        student -> new UserResponse(student.getUsername(), student.getName(),
+            student.getSerialNumber(), student.getGrade(),
+            student.getBirth(), student.getSex(), student.getPhoneNum(),
+            student.getFatherPhoneNum(), student.getMotherPhoneNum(),
+            student.getGuardiansPhoneNum(),
+            student.getRole(), Optional.ofNullable(student.getImageId())
+            .map(imageId -> modelMapper.map(imageId, ImageResponseDTO.class))
+            .orElse(null)));
+    return responses;
+  }
+
+  // Get all Grade students
+  public Page<UserResponse> findGradeStudents(Grades grade, int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
+
+    Page<Users> studentList = studentRepository.findByStatusAndRoleAndGrade(Status.ACTIVE,
+        Role.ROLE_STUDENT, grade, pageRequest);
     // Use stream and ModelMapper to convert entity list to DTO list
 
     Page<UserResponse> responses = studentList.map(

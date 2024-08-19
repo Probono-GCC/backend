@@ -32,6 +32,7 @@ import probono.gcc.school.model.dto.users.TeacherRequestDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.service.ImageService;
 import probono.gcc.school.service.StudentService;
 
@@ -120,5 +121,14 @@ public class StudentController {
     }
   }
 
-
+  // 특정 학년의 모든 Students 조회
+  @GetMapping("/students/grade")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<Page<UserResponse>> getAllStudents(
+      @RequestParam(value = "grade") Grades grade,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<UserResponse> students = studentService.findGradeStudents(grade, page, size);
+    return ResponseEntity.ok(students);
+  }
 }
