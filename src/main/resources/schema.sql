@@ -76,8 +76,8 @@ CREATE TABLE course
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     createdAt       TIMESTAMP NOT NULL,
     updatedAt       TIMESTAMP NOT NULL,
-    createdChargeId BIGINT    NOT NULL,
-    updatedChargeId BIGINT NULL,
+    createdChargeId VARCHAR(20) NOT NULL,
+    updatedChargeId VARCHAR(20) NULL,
     subjectId       BIGINT    NOT NULL,
     classId         BIGINT
 
