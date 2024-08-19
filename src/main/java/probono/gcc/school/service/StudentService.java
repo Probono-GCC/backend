@@ -294,6 +294,13 @@ public class StudentService {
     return student.getUsername();
   }
 
+  public boolean isSerialNumberExists(Integer serialNumber) {
+    if(studentRepository.existsBySerialNumber(serialNumber)){
+      return true;
+    }
+    return false;
+  }
+
   public boolean isusernameExists(String username) {
     if (studentRepository.existsByUsername(username)) {
       return true;
@@ -340,5 +347,4 @@ public class StudentService {
 
     return responseDto;
   }
-
 }
