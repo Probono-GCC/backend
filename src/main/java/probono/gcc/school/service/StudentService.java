@@ -54,7 +54,6 @@ public class StudentService {
   private UserRepository studentRepository;
   private ImageRepository imageRepository;
   private ImageService imageService;
-  private BCryptPasswordEncoder passwordEncoder;
 
   @Lazy
   private ClassService classService;
@@ -230,11 +229,11 @@ public class StudentService {
     }
   }
 
-  private void changePassword(StudentUpdateRequestDTO requestDto, Users student) {
+  public void changePassword(StudentUpdateRequestDTO requestDto, Users student) {
     // Update fields that can always be updated
     if (requestDto.getNewPassword() != null) {
-      if (passwordEncoder.matches(requestDto.getCurrentPassword(), student.getPassword())) {
-        student.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+      if (bCryptPasswordEncoder.matches(requestDto.getCurrentPassword(), student.getPassword())) {
+        student.setPassword(bCryptPasswordEncoder.encode(requestDto.getNewPassword()));
       } else {
         throw new IllegalArgumentException("current password is wrong");
       }
