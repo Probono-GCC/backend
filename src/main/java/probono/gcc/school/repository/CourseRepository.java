@@ -19,6 +19,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
   List<Course> findBySubjectId(Subject subject);
 
+  List<Course> findBySubjectIdAndStatus(Subject subject, Status status);
+
   Page<Course> findByStatus(Status status, Pageable pageable);
 
 }

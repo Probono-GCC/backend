@@ -89,6 +89,7 @@ public class ImageService {
     image.setImagePath(imagePath);
     image.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
+    System.out.print("notice id is setting");
     image.setNoticeId(notice);
 
     Image savedImage = imageRepository.save(image);
