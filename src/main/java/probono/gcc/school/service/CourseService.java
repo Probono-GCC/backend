@@ -1,13 +1,14 @@
 package probono.gcc.school.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -30,6 +31,7 @@ import probono.gcc.school.repository.CourseRepository;
 import probono.gcc.school.repository.CourseUserRepository;
 import probono.gcc.school.repository.NoticeRepository;
 import probono.gcc.school.repository.SubjectRepository;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,14 +63,14 @@ public class CourseService {
       throw new IllegalArgumentException("공통과목의 classId는 null일 수 없습니다.");
     }
 
-    Classes findClass=null;
-    if(classId!=null) {//공통과목일 때
-     findClass = classRepository.findById(classId)
+    Classes findClass = null;
+    if (classId != null) {//공통과목일 때
+      findClass = classRepository.findById(classId)
           .orElseThrow(() -> new NoSuchElementException("존재하지 않는 classId 입니다."));
     }
 
     if (findSubject.getStatus() == Status.INACTIVE) {
-      if(findClass!=null & findClass.getStatus() == Status.INACTIVE){ //공통과목일 때
+      if (findClass != null & findClass.getStatus() == Status.INACTIVE) { //공통과목일 때
         throw new NoSuchElementException("존재하지 않는 class 혹은 course 입니다.");
       }
       throw new NoSuchElementException("존재하지 않는 class 혹은 course 입니다."); //선택과목일 때
@@ -78,9 +80,8 @@ public class CourseService {
 
     logger.info("end of excption create() in CourseService");
 
-
     Course course = new Course();
-    if(!findSubject.isElective()) { //공통과목일 때(findClass가 null이 아닐때)
+    if (!findSubject.isElective()) { //공통과목일 때(findClass가 null이 아닐때)
       course.setClassId(findClass);
     }
     course.setSubjectId(findSubject);
@@ -172,11 +173,58 @@ public class CourseService {
     return response;
   }
 
+//  @Transactional(readOnly = true)
+//  public Page<CourseResponse> getAllElectiveCourses(int page, int size) {
+//    List<Subject> electiveSubjects = subjectRepository.findAllByStatusAndIsElective(
+//        Status.ACTIVE, true);
+//
+//    List<Course> electiveCourseList = new ArrayList<>();
+//    for (Subject subject : electiveSubjects) {
+//      List<Course> findCourse = courseRepository.findBySubjectIdAndStatus(subject, Status.ACTIVE);
+//      electiveCourseList.addAll(findCourse);
+//    }
+//
+//    // Assuming Course is a class with appropriate getters
+//    List<CourseResponse> courseResponses = electiveCourseList.stream()
+//        .map(course -> {
+//          // Create ClassResponse from the course object
+//          ClassResponse classResponse = new ClassResponse(
+//              course.getClassId(),          // Assuming Course has a getClassId() method
+//              course.getYear(),             // Assuming Course has a getYear() method
+//              course.getGrade(),            // Assuming Course has a getGrade() method
+//              course.getSection()           // Assuming Course has a getSection() method
+//          );
+//
+//          // Create SubjectResponseDTO from the course's subject object
+//          SubjectResponseDTO subjectResponseDTO = new SubjectResponseDTO(
+//              course.getSubject().getSubjectId(),    // Assuming Course has a getSubject() method that returns Subject
+//              course.getSubject().getName(),         // Assuming Subject has a getName() method
+//              course.getSubject().isElective()       // Assuming Subject has an isElective() method
+//          );
+//
+//          // Create CourseResponse using the above responses
+//          return new CourseResponse(
+//              course.getCourseId(),          // Assuming Course has a getCourseId() method
+//              classResponse,
+//              subjectResponseDTO
+//          );
+//        })
+//        .collect(Collectors.toList());
+//
+//    PageRequest pageRequest = PageRequest.of(page, size);
+//    int start = (int) pageRequest.getOffset();
+//    int end = Math.min((start + pageRequest.getPageSize()), electiveCourseList.size());
+//    Page<CourseResponse> response = new PageImpl<>(electiveCourseList.subList(start, end),
+//        pageRequest,
+//        electiveCourseList.size());
+//    return response;
+//  }
+
   private CourseResponse mapToResponseDto(Course savedCourse) {
     CourseResponse responseDto = new CourseResponse();
     responseDto.setCourseId(savedCourse.getCourseId());
 
-    if(savedCourse.getClassId()!=null) {
+    if (savedCourse.getClassId() != null) {
       ClassResponse savedClass = modelMapper.map(savedCourse.getClassId(), ClassResponse.class);
       responseDto.setClassResponse(savedClass);
     }

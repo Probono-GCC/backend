@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -63,7 +64,7 @@ public class NoticeService {
     notice.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     // 저장할 이미지가 존재하는 경우 S3에 저장 후 notice와 연결
-    if (!request.getImageList().isEmpty()) {
+    if (request.getImageList() != null || !request.getImageList().isEmpty()) {
       List<String> imageUrls = new ArrayList<>();
       for (MultipartFile imageFile : request.getImageList()) {
         String url = s3ImageService.upload(imageFile);
@@ -71,6 +72,7 @@ public class NoticeService {
       }
 
       List<Image> images = new ArrayList<>();
+      System.out.println(imageUrls.isEmpty());
       for (String imageUrl : imageUrls) {
         images.add(imageService.saveNoticeImage(imageUrl, notice));
       }
@@ -100,7 +102,7 @@ public class NoticeService {
 
     Notice savedNotice = noticeRepository.save(notice);
 
-    entityManager.refresh(notice);
+    //entityManager.refresh(notice);
 
     return mapToResponseDto(savedNotice);
   }
@@ -130,7 +132,8 @@ public class NoticeService {
     // findNotice 객체를 새로 고침하여 변경된 views 값을 반영
     entityManager.refresh(findNotice);
 
-    return modelMapper.map(findNotice, NoticeResponse.class);
+//    return modelMapper.map(findNotice, NoticeResponse.class);
+    return mapToResponseDto(findNotice);
   }
 
   @Transactional
@@ -141,25 +144,25 @@ public class NoticeService {
 
     List<String> imageUrls = new ArrayList<>();
 
-    for (MultipartFile imageFile : request.getImageList()) {
-      String url = s3ImageService.upload(imageFile);
-      imageUrls.add(url);
+    List<MultipartFile> requestImage = Optional.ofNullable(request.getImageList())
+        .orElse(Collections.emptyList());
+
+    if (!requestImage.isEmpty()) {
+      for (MultipartFile imageFile : request.getImageList()) {
+        String url = s3ImageService.upload(imageFile);
+        imageUrls.add(url);
+      }
+
+      List<Image> imageList = new ArrayList<>();
+      for (String imageUrl : imageUrls) {
+        imageList.add(imageService.saveNoticeImage(imageUrl, existingNotice));
+      }
+      // 기존 이미지 리스트를 비우고 새로운 리스트를 설정합니다.
+      existingNotice.getImageList().clear();
+      existingNotice.getImageList().addAll(imageList);
+    } else {
+      existingNotice.getImageList().clear();
     }
-
-    List<Image> imageList = new ArrayList<>();
-    for (String imageUrl : imageUrls) {
-      imageList.add(imageService.saveNoticeImage(imageUrl, existingNotice));
-    }
-
-//    List<Image> existingNoticeImageList = existingNotice.getImageList();
-//    for (Image image : existingNoticeImageList) {
-//      imageService.deleteProfileImage(image.getImageId());
-//      image.setNoticeId(null); // 연관관계 제거
-//    }
-
-    // 기존 이미지 리스트를 비우고 새로운 리스트를 설정합니다.
-    existingNotice.getImageList().clear();
-    existingNotice.getImageList().addAll(imageList);
 
     LocalDateTime now = LocalDateTime.now();
     Timestamp timestamp = Timestamp.valueOf(now);
@@ -237,7 +240,7 @@ public class NoticeService {
 
     //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
     PageRequest pageRequest = PageRequest.of(page, size,
-        Sort.by(Sort.Order.asc("createdAt")));
+        Sort.by(Sort.Order.desc("createdAt")));
 
     if (NoticeType.CLASS.equals(type)) {
       Classes findClass = classRepository.findById(id)
@@ -357,7 +360,7 @@ public class NoticeService {
     responseDto.setUpdatedAt(savedNotice.getUpdatedAt());
     responseDto.setUpdatedChargeId(savedNotice.getUpdatedChargeId());
 
-    if (savedNotice.getImageList() != null) {
+    if (!savedNotice.getImageList().isEmpty()) {
       List<ImageResponseDTO> collect = savedNotice.getImageList().stream()
           .map(image -> new ImageResponseDTO(image.getImageId(), image.getImagePath(),
               image.getCreatedChargeId())).collect(Collectors.toList());
