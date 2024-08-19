@@ -74,12 +74,12 @@ CREATE TABLE course
 (
     courseId        BIGINT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
-    createdAt       TIMESTAMP   NOT NULL,
-    updatedAt       TIMESTAMP   NOT NULL,
+    createdAt       TIMESTAMP NOT NULL,
+    updatedAt       TIMESTAMP NOT NULL,
     createdChargeId VARCHAR(20) NOT NULL,
     updatedChargeId VARCHAR(20) NULL,
-    subjectId       BIGINT      NOT NULL,
-    classId         BIGINT      NOT NULL
+    subjectId       BIGINT    NOT NULL,
+    classId         BIGINT
 
 );
 CREATE TABLE course_user
