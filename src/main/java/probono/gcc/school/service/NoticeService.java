@@ -63,7 +63,7 @@ public class NoticeService {
     notice.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     // 저장할 이미지가 존재하는 경우 S3에 저장 후 notice와 연결
-    if (!request.getImageList().isEmpty()) {
+    if (request.getImageList() != null || !request.getImageList().isEmpty()) {
       List<String> imageUrls = new ArrayList<>();
       for (MultipartFile imageFile : request.getImageList()) {
         String url = s3ImageService.upload(imageFile);
@@ -73,11 +73,9 @@ public class NoticeService {
       List<Image> images = new ArrayList<>();
       System.out.println(imageUrls.isEmpty());
       for (String imageUrl : imageUrls) {
-        System.out.println("important!!!!");
         images.add(imageService.saveNoticeImage(imageUrl, notice));
       }
       notice.setImageList(images);
-      System.out.println("Image added~~~~~~~~~~~~~~~~~~~");
     }
 
     LocalDateTime now = LocalDateTime.now();
@@ -361,7 +359,6 @@ public class NoticeService {
     responseDto.setUpdatedAt(savedNotice.getUpdatedAt());
     responseDto.setUpdatedChargeId(savedNotice.getUpdatedChargeId());
 
-    System.out.println(savedNotice.getImageList().isEmpty());
     if (!savedNotice.getImageList().isEmpty()) {
       List<ImageResponseDTO> collect = savedNotice.getImageList().stream()
           .map(image -> new ImageResponseDTO(image.getImageId(), image.getImagePath(),
