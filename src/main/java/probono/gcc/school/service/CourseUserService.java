@@ -11,8 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
@@ -21,6 +24,7 @@ import probono.gcc.school.model.dto.SubjectResponseDTO;
 import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.courseUser.CourseUserResponse;
 import probono.gcc.school.model.dto.courseUser.CreateCourseUserRequest;
+import probono.gcc.school.model.dto.image.ImageResponseDTO;
 import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.CourseUser;
@@ -57,13 +61,15 @@ public class CourseUserService {
 
     validateDuplicateCourseUser(findCourse, findUser);
     //course에 teacher 이미 할당했으면 예외처리
-    AlreadyAssignedTeacherInCourse(findCourse, findUser);
+    if (findUser.getRole().equals(ROLE_TEACHER)) {
+      AlreadyAssignedTeacherInCourse(findCourse, findUser);
+    }
 
     CourseUser courseUser = new CourseUser();
 
     courseUser.setCourseId(findCourse);
     courseUser.setUsername(findUser);
-    courseUser.setCreatedChargeId(-1l);
+    courseUser.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (Role.ROLE_STUDENT.equals(findUser.getRole())) {
       courseUser.setRole(Role.ROLE_STUDENT);
@@ -98,7 +104,8 @@ public class CourseUserService {
 
     existingCourseUser.setCourseId(findCourse);
     existingCourseUser.setUsername(findUser);
-    existingCourseUser.setUpdatedChargeId(-1l);
+    existingCourseUser.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     CourseUser savedCourseUser = courseUserRepository.save(existingCourseUser);
     return mapToResponseDto(savedCourseUser);
@@ -108,7 +115,8 @@ public class CourseUserService {
   public void deleteCourseUser(long id) {
     CourseUser existingCourseUser = getCourseUserById(id);
     existingCourseUser.setStatus(Status.INACTIVE);
-    existingCourseUser.setUpdatedChargeId(-1l);
+    existingCourseUser.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     courseUserRepository.save(existingCourseUser);
   }
@@ -273,13 +281,20 @@ public class CourseUserService {
     return responseDto;
   }
 
-  public List<CourseUserResponse> getCoursesByTeacherUsername(String username) {
+  public Page<CourseUserResponse> getCoursesByTeacherUsername(String username, int page, int size) {
     Users teacher = userRepository.findByUsername(username)
         .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
     List<CourseUser> courseUserList = courseUserRepository.findByUsernameAndRole(teacher,
         ROLE_TEACHER);
-    return courseUserList.stream()
+    List<CourseUserResponse> collect = courseUserList.stream()
         .map(this::mapToResponseDto)
         .collect(Collectors.toList());
+
+    PageRequest pageRequest = PageRequest.of(page, size);
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), collect.size());
+    Page<CourseUserResponse> response = new PageImpl<>(collect.subList(start, end), pageRequest,
+        collect.size());
+    return response;
   }
 }

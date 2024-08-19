@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
@@ -83,7 +84,7 @@ public class CourseService {
       course.setClassId(findClass);
     }
     course.setSubjectId(findSubject);
-    course.setCreatedChargeId(-1L);
+    course.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     Course savedCourse = courseRepository.save(course);
     logger.info("end of create() in CourseService");
@@ -111,7 +112,8 @@ public class CourseService {
 
     existingCourse.setClassId(findClass);
     existingCourse.setSubjectId(findSubject);
-    existingCourse.setUpdatedChargeId(-1l);
+    existingCourse.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     Course savedCourse = courseRepository.save(existingCourse);
     return mapToResponseDto(savedCourse);
@@ -121,7 +123,8 @@ public class CourseService {
   public void deleteCourse(long id) {
     Course existingCourse = getCourseById(id);
     existingCourse.setStatus(Status.INACTIVE);
-    existingCourse.setUpdatedChargeId(-1l);
+    existingCourse.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     List<Notice> courseNoticeList = noticeRepository.findByCourseId(existingCourse);
     for (Notice notice : courseNoticeList) {

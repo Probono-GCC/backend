@@ -54,10 +54,10 @@ public class Notice {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private long createdChargeId;
+  private String createdChargeId;
 
   @Column
-  private long updatedChargeId;
+  private String updatedChargeId;
 
   @Column(nullable = false)
   private int views;

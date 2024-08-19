@@ -45,9 +45,9 @@ public class Course {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private long createdChargeId;
+  private String createdChargeId;
 
-  private long updatedChargeId;
+  private String updatedChargeId;
 
   @ManyToOne
   @JoinColumn(name = "subjectId")

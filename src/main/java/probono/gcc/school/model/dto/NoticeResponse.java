@@ -33,21 +33,20 @@ public class NoticeResponse {
 
   private Timestamp updatedAt;
 
-  private long createdChargeId;
+  private String createdChargeId;
 
-  private long updatedChargeId;
+  private String updatedChargeId;
 
   private int views;
 
   //private CourseResponse courseResponse;
-
 
 //  private List<CreateImageResponseDTO> imageList;
 
   private List<ImageResponseDTO> imageList;
 
   public NoticeResponse(long noticeId, String title, String content, Timestamp createdAt,
-      Timestamp updatedAt, long createdChargeId, long updatedChargeId, int views) {
+      Timestamp updatedAt, String createdChargeId, String updatedChargeId, int views) {
     this.noticeId = noticeId;
     this.title = title;
     this.content = content;

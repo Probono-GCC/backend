@@ -24,8 +24,9 @@ public interface CourseUserRepository extends JpaRepository<CourseUser, Long> {
   List<CourseUser> findByCourseId(Course course);
 
 
-
   List<CourseUser> findByUsernameAndRole(Users username, Role role);
+
+  Page<CourseUser> findByUsernameAndRole(Users username, Role role, Pageable pageable);
 
   Page<CourseUser> findByStatusAndRoleAndCourseId(Status status, Role role, Course course,
       Pageable pageable);

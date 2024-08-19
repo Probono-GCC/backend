@@ -43,10 +43,10 @@ public class Image {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private long createdChargeId;
+  private String createdChargeId;
 
   @Column(nullable = false)
-  private long updatedChargeId;
+  private String updatedChargeId;
 
   @ManyToOne
   @JoinColumn(name = "noticeId")
@@ -54,6 +54,4 @@ public class Image {
 
   @Column(length = 2048, nullable = false)
   private String imagePath;
-
-
 }
