@@ -58,7 +58,7 @@ public class SecurityConfig {
 
                 configuration.setAllowedOrigins(
                     Arrays.asList("http://localhost:3000", "http://52.78.104.115:80"));
-                configuration.setAllowedMethods(Collections.singletonList("*"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedHeaders(Collections.singletonList("*"));
                 configuration.setMaxAge(3600L);
