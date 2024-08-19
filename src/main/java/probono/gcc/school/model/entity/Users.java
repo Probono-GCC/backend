@@ -113,4 +113,9 @@ public class Users implements Persistable<String> {
     assignedClass.getUsers().add(this);
     logger.info("[User] assignedClass.getUsres().size():{}", assignedClass.getUsers().size());
   }
+
+  public void deleteClass(Classes findClass) {
+    this.setClassId(null);
+    findClass.getUsers().remove(this);
+  }
 }

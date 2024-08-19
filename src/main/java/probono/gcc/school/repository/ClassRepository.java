@@ -1,6 +1,7 @@
 package probono.gcc.school.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,5 @@ public interface ClassRepository extends JpaRepository<Classes, Long> {
   Page<Classes> findByStatusAndYear(Status status, int year, Pageable pageable);
 
 
+  Optional<Classes> findByClassIdAndStatus(Long classId, Status status);
 }

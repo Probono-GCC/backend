@@ -30,4 +30,6 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
   boolean existsBySerialNumber(int serialNumber);
 
+
+  Optional<Users> findByUsernameAndClassIdAndStatus(String username, Classes classId, Status status);
 }
