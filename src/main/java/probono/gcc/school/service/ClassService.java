@@ -10,34 +10,28 @@ import org.modelmapper.ModelMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.expression.spel.ast.Assign;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.mapper.StudentMapper;
 import probono.gcc.school.mapper.TeacherMapper;
-import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.classes.CreateClassRequest;
-import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
-import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
-import probono.gcc.school.model.entity.Notice;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.CourseRepository;
-import probono.gcc.school.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -64,8 +58,8 @@ public class ClassService {
   }
 
   private void validateDuplicateClass(Classes requestClass) {
-    if (classRepository.existsByYearAndGradeAndSection(requestClass.getYear(),
-        requestClass.getGrade(), requestClass.getSection())) {
+    if (classRepository.existsByYearAndGradeAndSectionAndStatus(requestClass.getYear(),
+        requestClass.getGrade(), requestClass.getSection(), Status.ACTIVE)) {
       throw new DuplicateEntityException("이미 존재하는 class 입니다.");
     }
   }
@@ -82,7 +76,8 @@ public class ClassService {
     existingClass.setGrade(request.getGrade());
     existingClass.setSection(request.getSection());
     existingClass.setYear(request.getYear());
-    existingClass.setUpdatedChargeId(-1L);
+    existingClass.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     Classes savedClass = classRepository.save(existingClass);
     return mapToResponseDto(savedClass);
@@ -92,7 +87,8 @@ public class ClassService {
   public void deleteClass(Long id) {
     Classes existingClass = this.getClassById(id);
     existingClass.setStatus(Status.INACTIVE);
-    existingClass.setUpdatedChargeId(-1L);
+    existingClass.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     List<Course> classCourseList = courseRepository.findByClassId(existingClass);
     for (Course course : classCourseList) {
@@ -150,7 +146,6 @@ public class ClassService {
 //    return collect;
 //  }
 
-
 //  @Transactional
 //  public Page<NoticeResponse> getClassNoticeList(Long id, int page, int size) {
 //    //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
@@ -172,8 +167,6 @@ public class ClassService {
 //  }
 
 
-
-
   public ClassResponse mapToResponseDto(Classes savedClass) {
     ClassResponse responseDto = new ClassResponse();
     responseDto.setClassId(savedClass.getClassId());
@@ -186,14 +179,14 @@ public class ClassService {
 
   @Transactional
   public List<TeacherResponseDTO> getTeachersInClass(Long classId) {
-    Optional<Classes> findClass=classRepository.findById(classId);
+    Optional<Classes> findClass = classRepository.findById(classId);
 
     Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
 
-    List<Users> userList=findClass.map(Classes::getUsers) // Optional<Classes>에서 getUsers() 호출
+    List<Users> userList = findClass.map(Classes::getUsers) // Optional<Classes>에서 getUsers() 호출
         .orElseThrow(() -> new NoSuchElementException("Class not found with id: " + classId));
 
-    logger.info("userList.size() : {}",userList.size());
+    logger.info("userList.size() : {}", userList.size());
 
     // Role이 ROLE_TEACHER인 사용자만 필터링
     List<Users> teacherList = userList.stream()
@@ -208,18 +201,17 @@ public class ClassService {
 
   @Transactional
   public List<StudentResponseDTO> getStudentsInClass(Long classId) {
-    Optional<Classes> findClass=classRepository.findById(classId);
+    Optional<Classes> findClass = classRepository.findById(classId);
     Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
 
-    List<Users> userList=findClass.map(Classes::getUsers) // Optional<Classes>에서 getUsers() 호출
+    List<Users> userList = findClass.map(Classes::getUsers) // Optional<Classes>에서 getUsers() 호출
         .orElseThrow(() -> new NoSuchElementException("Class not found with id: " + classId));
-    logger.info("userList.size() : {}",userList.size());
+    logger.info("userList.size() : {}", userList.size());
 
     // Role이 ROLE_TEACHER인 사용자만 필터링
     List<Users> studentList = userList.stream()
         .filter(user -> Role.ROLE_STUDENT.equals(user.getRole())) // Role이 ROLE_TEACHER인 사용자 필터링
         .toList();
-
 
     return studentList.stream()
         .map(studentMapper::mapToResponseDTO)

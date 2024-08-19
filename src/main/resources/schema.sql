@@ -22,8 +22,8 @@ CREATE TABLE users
     status            ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     createdAt         TIMESTAMP    NOT NULL,
     updatedAt         TIMESTAMP    NOT NULL,
-    createdChargeId   BIGINT       NOT NULL,
-    updatedChargeId   BIGINT,
+    createdChargeId   VARCHAR(20)  NOT NULL,
+    updatedChargeId   VARCHAR(20),
     classId           BIGINT,
     imageId           BIGINT,
     PRIMARY KEY (username)
@@ -36,8 +36,8 @@ CREATE TABLE notice
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     createdAt       TIMESTAMP    NOT NULL,
     updatedAt       TIMESTAMP    NOT NULL,
-    createdChargeId BIGINT       NOT NULL,
-    updatedChargeId BIGINT,
+    createdChargeId VARCHAR(20)  NOT NULL,
+    updatedChargeId VARCHAR(20),
     views           INT          NOT NULL DEFAULT 0,
     type            ENUM('CLASS', 'SCHOOL','COURSE') NOT NULL,
     classId         BIGINT,
@@ -47,15 +47,15 @@ CREATE TABLE notice
 );
 CREATE TABLE classes
 (
-    classId         BIGINT    NOT NULL AUTO_INCREMENT,
-    year            INT       NOT NULL,
+    classId         BIGINT      NOT NULL AUTO_INCREMENT,
+    year            INT         NOT NULL,
     grade           ENUM('LOWER_KG', 'NURSERY', 'PLAYGROUP', 'UPPER_KG', 'CLASS1', 'CLASS2', 'CLASS3', 'CLASS4', 'CLASS5', 'CLASS6', 'CLASS7', 'CLASS8', 'CLASS9', 'CLASS10', 'GRADUATED') NOT NULL,
     section         ENUM('A','B') NOT NULL,
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
-    createdAt       TIMESTAMP NOT NULL,
-    updatedAt       TIMESTAMP NOT NULL,
-    createdChargeId BIGINT    NOT NULL,
-    updatedChargeId BIGINT,
+    createdAt       TIMESTAMP   NOT NULL,
+    updatedAt       TIMESTAMP   NOT NULL,
+    createdChargeId VARCHAR(20) NOT NULL,
+    updatedChargeId VARCHAR(20),
     PRIMARY KEY (classId)
 );
 CREATE TABLE subject
@@ -66,13 +66,13 @@ CREATE TABLE subject
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     createdAt       TIMESTAMP   NOT NULL,
     updatedAt       TIMESTAMP   NOT NULL,
-    createdChargeId BIGINT      NOT NULL,
-    updatedChargeId BIGINT NULL
+    createdChargeId VARCHAR(20) NOT NULL,
+    updatedChargeId VARCHAR(20) NULL
 );
 
 CREATE TABLE course
 (
-    courseId        BIGINT    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    courseId        BIGINT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     createdAt       TIMESTAMP NOT NULL,
     updatedAt       TIMESTAMP NOT NULL,
@@ -84,13 +84,13 @@ CREATE TABLE course
 );
 CREATE TABLE course_user
 (
-    cuId            BIGINT    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cuId            BIGINT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
     role            ENUM('ROLE_STUDENT', 'ROLE_TEACHER', 'ROLE_ADMIN') NOT NULL,
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
-    createdAt       TIMESTAMP NOT NULL,
-    updatedAt       TIMESTAMP NOT NULL,
-    createdChargeId BIGINT    NOT NULL,
-    updatedChargeId BIGINT NULL,
+    createdAt       TIMESTAMP   NOT NULL,
+    updatedAt       TIMESTAMP   NOT NULL,
+    createdChargeId VARCHAR(20) NOT NULL,
+    updatedChargeId VARCHAR(20) NULL,
     courseId        BIGINT,
     username        VARCHAR(20)
 );
@@ -100,8 +100,8 @@ CREATE TABLE image
     status          ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     createdAt       TIMESTAMP     NOT NULL,
     updatedAt       TIMESTAMP     NOT NULL,
-    createdChargeId BIGINT        NOT NULL,
-    updatedChargeId BIGINT NULL,
+    createdChargeId VARCHAR(20)   NOT NULL,
+    updatedChargeId VARCHAR(20) NULL,
     noticeId        BIGINT,
     imagePath       VARCHAR(2048) NOT NULL
 );

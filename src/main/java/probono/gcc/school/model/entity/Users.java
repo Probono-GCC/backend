@@ -84,10 +84,10 @@ public class Users implements Persistable<String> {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private long createdChargeId;
+  private String createdChargeId;
 
   @Column
-  private long updatedChargeId;
+  private String updatedChargeId;
 
   @ManyToOne
   @JoinColumn(name = "classId")
@@ -111,6 +111,6 @@ public class Users implements Persistable<String> {
   public void addClass(Classes assignedClass) {
     this.setClassId(assignedClass);
     assignedClass.getUsers().add(this);
-    logger.info("[User] assignedClass.getUsres().size():{}",assignedClass.getUsers().size());
+    logger.info("[User] assignedClass.getUsres().size():{}", assignedClass.getUsers().size());
   }
 }

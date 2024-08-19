@@ -51,10 +51,10 @@ public class Subject {
   private Timestamp updatedAt;
 
   @Column(nullable = false)
-  private long createdChargeId;
+  private String createdChargeId;
 
   @Column
-  private long updatedChargeId;
+  private String updatedChargeId;
 
   @OneToMany(mappedBy = "subjectId", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Course> courseList;

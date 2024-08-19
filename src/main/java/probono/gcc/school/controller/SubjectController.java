@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,8 +53,10 @@ public class SubjectController {
   //과목 목록 조회
   @GetMapping("/subjects")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<List<SubjectResponseDTO>> getAllSubjects() {
-    List<SubjectResponseDTO> subjects = subjectService.findAllSubject();
+  public ResponseEntity<Page<SubjectResponseDTO>> getAllSubjects(
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<SubjectResponseDTO> subjects = subjectService.findAllSubject(page, size);
     return ResponseEntity.ok(subjects);
   }
 

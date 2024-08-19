@@ -13,8 +13,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ImageResponseDTO {
+
   private Long imageId;
   @Column(length = 2048, nullable = false)
   private String imagePath;
-  private long createdChargeId;
+  private String createdChargeId;
 }

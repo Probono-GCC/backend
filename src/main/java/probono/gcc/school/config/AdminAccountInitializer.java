@@ -53,7 +53,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
       Timestamp timestamp = Timestamp.valueOf(now);
       admin.setCreatedAt(timestamp);
       admin.setUpdatedAt(timestamp);
-      admin.setCreatedChargeId(1l);
+      admin.setCreatedChargeId("gcc");
       userRepository.save(admin);
     }
 
@@ -68,7 +68,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
       Timestamp timestamp = Timestamp.valueOf(now);
       tAdmin.setCreatedAt(timestamp);
       tAdmin.setUpdatedAt(timestamp);
-      tAdmin.setCreatedChargeId(1l);
+      tAdmin.setCreatedChargeId("gcc");
       userRepository.save(tAdmin);
     }
 
@@ -83,7 +83,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
       Timestamp timestamp = Timestamp.valueOf(now);
       student.setCreatedAt(timestamp);
       student.setUpdatedAt(timestamp);
-      student.setCreatedChargeId(1l);
+      student.setCreatedChargeId("gcc");
       userRepository.save(student);
     }
 
@@ -98,7 +98,7 @@ public class AdminAccountInitializer implements CommandLineRunner {
       Timestamp timestamp = Timestamp.valueOf(now);
       teacher.setCreatedAt(timestamp);
       teacher.setUpdatedAt(timestamp);
-      teacher.setCreatedChargeId(1l);
+      teacher.setCreatedChargeId("gcc");
       userRepository.save(teacher);
     }
   }
