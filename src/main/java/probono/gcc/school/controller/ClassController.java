@@ -32,6 +32,10 @@ public class ClassController {
   private final ClassService classService;
   private final AssignClassService assignClassService;
 
+  @GetMapping("/test")
+  public String test() {
+    return "this is test";
+  }
 
   @PostMapping("/class")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
@@ -95,7 +99,7 @@ public class ClassController {
   @DeleteMapping("/class/{classId}/assignedUser/{username}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Object> deleteAssignedTeacherToClass(@PathVariable Long classId,
-      @PathVariable String username){
+      @PathVariable String username) {
 
     Object userDTO = assignClassService.deleteAssignedUser(classId,
         username);

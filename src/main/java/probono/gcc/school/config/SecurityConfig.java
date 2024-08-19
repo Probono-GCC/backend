@@ -57,7 +57,7 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 configuration.setAllowedOrigins(
-                    Arrays.asList("http://localhost:3000", "http://52.78.104.115:80"));
+                    Arrays.asList("http://localhost:3000", "http://52.78.104.115"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -83,7 +83,8 @@ public class SecurityConfig {
     //경로별 인가 작업
     http
         .authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/login", "/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+            .requestMatchers("/login", "/", "/swagger-ui/**", "/v3/api-docs/**", "/test")
+            .permitAll()
 //            .requestMatchers("/admin").hasRole("ADMIN")
 //            .requestMatchers("/teachers").hasAnyRole("TEACHER", "ADMIN")
 //            .requestMatchers("/students").hasRole("STUDENT")
