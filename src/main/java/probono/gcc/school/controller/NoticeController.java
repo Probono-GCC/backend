@@ -91,7 +91,7 @@ public class NoticeController {
   @PutMapping("/notice/{id}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<NoticeResponse> updateNotice(@PathVariable Long id,
-      @Valid @ModelAttribute UpdateNoticeRequest request) {
+      @Valid UpdateNoticeRequest request) {
     NoticeResponse updatedNotice = noticeService.updateNotice(id, request);
     return ResponseEntity.ok(updatedNotice);
   }

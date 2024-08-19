@@ -63,7 +63,7 @@ public class NoticeService {
     notice.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     // 저장할 이미지가 존재하는 경우 S3에 저장 후 notice와 연결
-    if (request.getImageList().isEmpty() || !request.getImageList().get(0).isEmpty()) {
+    if (!request.getImageList().isEmpty()) {
       List<String> imageUrls = new ArrayList<>();
       for (MultipartFile imageFile : request.getImageList()) {
         String url = s3ImageService.upload(imageFile);
