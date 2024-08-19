@@ -63,7 +63,7 @@ public class NoticeService {
     notice.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
 
     // 저장할 이미지가 존재하는 경우 S3에 저장 후 notice와 연결
-    if (!request.getImageList().isEmpty()) {
+    if (request.getImageList() != null || !request.getImageList().isEmpty()) {
       List<String> imageUrls = new ArrayList<>();
       for (MultipartFile imageFile : request.getImageList()) {
         String url = s3ImageService.upload(imageFile);
@@ -71,6 +71,7 @@ public class NoticeService {
       }
 
       List<Image> images = new ArrayList<>();
+      System.out.println(imageUrls.isEmpty());
       for (String imageUrl : imageUrls) {
         images.add(imageService.saveNoticeImage(imageUrl, notice));
       }
@@ -100,7 +101,7 @@ public class NoticeService {
 
     Notice savedNotice = noticeRepository.save(notice);
 
-    entityManager.refresh(notice);
+    //entityManager.refresh(notice);
 
     return mapToResponseDto(savedNotice);
   }
@@ -130,7 +131,8 @@ public class NoticeService {
     // findNotice 객체를 새로 고침하여 변경된 views 값을 반영
     entityManager.refresh(findNotice);
 
-    return modelMapper.map(findNotice, NoticeResponse.class);
+//    return modelMapper.map(findNotice, NoticeResponse.class);
+    return mapToResponseDto(findNotice);
   }
 
   @Transactional
@@ -357,7 +359,7 @@ public class NoticeService {
     responseDto.setUpdatedAt(savedNotice.getUpdatedAt());
     responseDto.setUpdatedChargeId(savedNotice.getUpdatedChargeId());
 
-    if (savedNotice.getImageList() != null) {
+    if (!savedNotice.getImageList().isEmpty()) {
       List<ImageResponseDTO> collect = savedNotice.getImageList().stream()
           .map(image -> new ImageResponseDTO(image.getImageId(), image.getImagePath(),
               image.getCreatedChargeId())).collect(Collectors.toList());
