@@ -47,6 +47,10 @@ public class AssignClassService {
     // Initialize associated notices (if needed for any reason)
     Hibernate.initialize(assignedClass.getNotice());
 
+    if(user.getRole()==Role.ROLE_STUDENT && user.getGrade()!=assignedClass.getGrade()){
+      throw new IllegalStateException("class의 grade와 student의 grade가 일치하지 않습니다.");
+    }
+
     user.addClass(assignedClass);
     entityManager.flush(); // 트랜잭션 내에서 영속성 컨텍스트 동기화
     logger.info("assignedClass.getUsers().size() : {}",assignedClass.getUsers().size());
