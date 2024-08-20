@@ -68,7 +68,7 @@ public class StudentController {
 
   // 특정 Student 조회 (username로 조회)
   @GetMapping("/students/{username}")
-  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<StudentResponseDTO> getOneStudent(@PathVariable String username) {
 
     StudentResponseDTO student = studentService.findOneStudent(username);
@@ -85,6 +85,7 @@ public class StudentController {
     return ResponseEntity.ok(studentResponseDTO);
 
   }
+
 
   // Delete a student
   @DeleteMapping("/students/{username}")

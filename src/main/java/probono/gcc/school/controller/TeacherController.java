@@ -90,6 +90,8 @@ public class TeacherController {
     return ResponseEntity.ok(teacherResponseDTO);
   }
 
+
+
   //Delete a teacher
   @DeleteMapping("/teachers/{username}")
   @PreAuthorize("hasAnyRole('ADMIN')")

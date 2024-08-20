@@ -10,10 +10,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import probono.gcc.school.exception.CustomException;
+import probono.gcc.school.model.dto.GradeUpdateRequest;
+import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.dto.users.UserResponse;
+import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.service.TeacherService;
 import probono.gcc.school.service.UserService;
 
@@ -40,7 +45,12 @@ public class UserController {
     }
   }
 
+  @PutMapping("/changeGrade/{username}")
+  @PreAuthorize("hasAnyRole('Admin','Teacher')")
+  public ResponseEntity<StudentResponseDTO> changeGrade(@PathVariable String username,@RequestBody GradeUpdateRequest gradeUpdateRequest){
+    StudentResponseDTO studentResponseDTO =userService.changeGrade(username,gradeUpdateRequest);
+    return ResponseEntity.ok(studentResponseDTO);
 
-
+  }
 
 }
