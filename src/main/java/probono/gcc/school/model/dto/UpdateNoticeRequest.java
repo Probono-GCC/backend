@@ -15,5 +15,7 @@ public class UpdateNoticeRequest {
   @NotNull
   private String content;
 
+  private List<Long> maintainImageList;
+
   private List<MultipartFile> imageList;
 }
