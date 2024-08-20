@@ -124,7 +124,7 @@ public class StudentController {
   // 특정 학년의 모든 Students 조회
   @GetMapping("/students/grade")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<Page<UserResponse>> getAllStudents(
+  public ResponseEntity<Page<UserResponse>> getAllGradeStudents(
       @RequestParam(value = "grade") Grades grade,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {

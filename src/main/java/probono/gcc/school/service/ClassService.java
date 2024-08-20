@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -23,6 +24,7 @@ import probono.gcc.school.mapper.StudentMapper;
 import probono.gcc.school.mapper.TeacherMapper;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.classes.CreateClassRequest;
+import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
@@ -200,7 +202,7 @@ public class ClassService {
   }
 
   @Transactional
-  public List<StudentResponseDTO> getStudentsInClass(Long classId) {
+  public Page<StudentResponseDTO> getStudentsInClass(Long classId, int page, int size) {
     Optional<Classes> findClass = classRepository.findById(classId);
     Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
 
@@ -208,14 +210,22 @@ public class ClassService {
         .orElseThrow(() -> new NoSuchElementException("Class not found with id: " + classId));
     logger.info("userList.size() : {}", userList.size());
 
-    // Role이 ROLE_TEACHER인 사용자만 필터링
+    // Role이 ROLE_STUDENT인 사용자만 필터링
     List<Users> studentList = userList.stream()
-        .filter(user -> Role.ROLE_STUDENT.equals(user.getRole())) // Role이 ROLE_TEACHER인 사용자 필터링
+        .filter(user -> Role.ROLE_STUDENT.equals(user.getRole()) && Status.ACTIVE.equals(
+            user.getStatus())) // Role이 ROLE_TEACHER인 사용자 필터링
         .toList();
 
-    return studentList.stream()
+    List<StudentResponseDTO> collect = studentList.stream()
         .map(studentMapper::mapToResponseDTO)
         .collect(Collectors.toList());
 
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), collect.size());
+    Page<StudentResponseDTO> response = new PageImpl<>(collect.subList(start, end),
+        pageRequest,
+        collect.size());
+    return response;
   }
 }
