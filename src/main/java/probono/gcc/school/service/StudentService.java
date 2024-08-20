@@ -143,6 +143,9 @@ public class StudentService {
     return responses;
   }
 
+
+
+
   // Retrieve a single student by ID
   public StudentResponseDTO findOneStudent(String username) {
     try {
@@ -150,7 +153,7 @@ public class StudentService {
           () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
       // Convert the found entity to a DTO
-      return modelMapper.map(student, StudentResponseDTO.class);
+      return mapToResponseDTO(student);
     } catch (CustomException e) {
       logger.error("Student not found: {}", e.getMessage());
       throw e;
@@ -306,6 +309,7 @@ public class StudentService {
       return true;
     }
     return false;
+
   }
 
 

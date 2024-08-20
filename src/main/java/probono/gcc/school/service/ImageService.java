@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.dto.image.ImageRequestDTO;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.entity.Image;
@@ -34,6 +35,7 @@ public class ImageService {
 
   private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
+  @Transactional
   public CreateImageResponseDTO createProfileImage(ImageRequestDTO requestDto) {
 
     Image image = new Image();
@@ -46,10 +48,13 @@ public class ImageService {
     String username = requestDto.getUsername();
     Optional<Users> usersOptional = userRepository.findByUsername(username);
     Users user = null;
+
     if (usersOptional.isPresent()) {
       user = usersOptional.get();
       user.setImageId(image);
+      userRepository.save(user);
     }
+
 
     return mapToCreateResponseDTO(image, username);
   }
