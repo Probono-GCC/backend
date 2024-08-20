@@ -34,7 +34,7 @@ public class PasswordController {
   @PutMapping("/admin/changePassword/{username}")
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<?> updateUserPasswordByAdmin(
-      @PathVariable String username, @RequestBody @Valid PasswordRequestDTO requestDto) {
+      @PathVariable String username, @RequestBody @Valid NewPasswordDTO requestDto) {
 
     passwordService.changePassword(username,requestDto,ROLE_ADMIN);
     return ResponseEntity.ok("changed password successfully");
@@ -45,7 +45,7 @@ public class PasswordController {
   @PutMapping("/teacher/changePassword/{username}")
   @PreAuthorize("hasAnyRole('Teacher')")
   public ResponseEntity<?> updateStudentPasswordByTeacher(
-      @PathVariable String username, @RequestBody @Valid PasswordRequestDTO requestDto
+      @PathVariable String username, @RequestBody @Valid NewPasswordDTO requestDto
      ) {
 
     passwordService.changePassword(username,requestDto,ROLE_TEACHER);

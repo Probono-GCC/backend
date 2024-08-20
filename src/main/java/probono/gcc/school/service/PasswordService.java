@@ -24,7 +24,7 @@ public class PasswordService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private static final Logger logger = LoggerFactory.getLogger(PasswordService.class);
-  public void changePassword(String username, @Valid PasswordRequestDTO requestDto, Role role) {
+  public void changePassword(String username, @Valid NewPasswordDTO requestDto, Role role) {
     //Role은 요청 보낸 객체
 
     Users user = userRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
@@ -37,11 +37,8 @@ public class PasswordService {
     }
 
     logger.info("current password : {}",user.getPassword());
-    if (bCryptPasswordEncoder.matches(requestDto.getCurrentPassword(), user.getPassword())) {
-      user.setPassword(bCryptPasswordEncoder.encode(requestDto.getNewPassword()));
-    } else {
-      throw new IllegalArgumentException("current password is wrong");
-    }
+
+    user.setPassword(bCryptPasswordEncoder.encode(requestDto.getNewPassword()));
 
     userRepository.save(user);
     logger.info("new password : {}",user.getPassword());
