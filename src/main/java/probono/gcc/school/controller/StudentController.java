@@ -143,4 +143,18 @@ public class StudentController {
     Page<UserResponse> students = studentService.findGradeStudents(grade, page, size);
     return ResponseEntity.ok(students);
   }
+
+  //특정 학년의 할당되지 않은 Students 조회
+//  @GetMapping("/students/notAssigned/grade")
+//  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+//  public ResponseEntity<Page<UserResponse>> getNotAssignedStudents(
+//      @RequestParam(value = "grade") Grades grade,
+//      @RequestParam(value = "page", defaultValue = "0") int page,
+//      @RequestParam(value = "size", defaultValue = "10") int size) {
+//    Page<UserResponse> students = studentService.findNotAssignedGradeStudents(grade, page, size);
+//    return ResponseEntity.ok(students);
+//  }
+
+
+
 }
