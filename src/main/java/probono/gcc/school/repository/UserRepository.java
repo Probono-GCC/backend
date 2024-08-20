@@ -32,4 +32,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
 
   Optional<Users> findByUsernameAndClassIdAndStatus(String username, Classes classId, Status status);
+
+
+  boolean existsByClassIdAndUsernameAndStatus(Classes assignedClass, String username, Status status);
 }
