@@ -97,19 +97,17 @@ public class TeacherService {
 
 
   // Retrieve all teachers
-  public Page<TeacherResponseDTO> findAllTeachers(int page, int size) {
+  public Page<UserResponse> findAllTeachers(int page, int size) {
     PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("name")));
 
     Page<Users> teacherList = teacherRepository.findByStatusAndRole(Status.ACTIVE,
         Role.ROLE_TEACHER, pageRequest);
     // Use stream and ModelMapper to convert entity list to DTO list
 
-    Page<TeacherResponseDTO> responses = teacherList.map(
-        teacher -> new TeacherResponseDTO(teacher.getUsername(), teacher.getRole(), teacher.getName(),
-            teacher.getBirth(), teacher.getSex(), teacher.getPhoneNum(),teacher.getPwAnswer(),teacher.getStatus(),
-            Optional.ofNullable(teacher.getClassId())
-                .map(classId -> modelMapper.map(classId, ClassResponse.class))
-                .orElse(null),
+    Page<UserResponse> responses = teacherList.map(
+        teacher -> new UserResponse(teacher.getUsername(), teacher.getName(), null, null,
+            teacher.getBirth(), teacher.getSex(), teacher.getPhoneNum(), null, null, null,
+            teacher.getRole(),
             Optional.ofNullable(teacher.getImageId())
                 .map(imageId -> modelMapper.map(imageId, ImageResponseDTO.class))
                 .orElse(null)));
@@ -298,10 +296,10 @@ public class TeacherService {
     responseDto.setPhoneNum(savedTeacher.getPhoneNum());
     responseDto.setPwAnswer(savedTeacher.getPwAnswer());
     responseDto.setStatus(savedTeacher.getStatus());
-//    responseDto.setCreatedAt(savedTeacher.getCreatedAt());
-//    responseDto.setUpdatedAt(savedTeacher.getUpdatedAt());
-//    responseDto.setCreatedChargeId(savedTeacher.getCreatedChargeId());
-//    responseDto.setUpdatedChargeId(savedTeacher.getUpdatedChargeId());
+    responseDto.setCreatedAt(savedTeacher.getCreatedAt());
+    responseDto.setUpdatedAt(savedTeacher.getUpdatedAt());
+    responseDto.setCreatedChargeId(savedTeacher.getCreatedChargeId());
+    responseDto.setUpdatedChargeId(savedTeacher.getUpdatedChargeId());
 
     // Map the class entity (Classes) to ClassResponse if the class is assigned
     if (savedTeacher.getClassId() != null) {
@@ -312,8 +310,8 @@ public class TeacherService {
 
     // Map the image entity (Image) to ImageResponseDTO if the image is assigned
     if (savedTeacher.getImageId() != null) {
-      ImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
-          ImageResponseDTO.class);
+      CreateImageResponseDTO imageResponse = modelMapper.map(savedTeacher.getImageId(),
+          CreateImageResponseDTO.class);
       responseDto.setImageId(imageResponse);
     }
 

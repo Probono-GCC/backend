@@ -143,9 +143,6 @@ public class StudentService {
     return responses;
   }
 
-
-
-
   // Retrieve a single student by ID
   public StudentResponseDTO findOneStudent(String username) {
     try {
@@ -297,19 +294,11 @@ public class StudentService {
     return student.getUsername();
   }
 
-  public boolean isSerialNumberExists(Integer serialNumber) {
-    if(studentRepository.existsBySerialNumber(serialNumber)){
-      return true;
-    }
-    return false;
-  }
-
   public boolean isusernameExists(String username) {
     if (studentRepository.existsByUsername(username)) {
       return true;
     }
     return false;
-
   }
 
 
@@ -351,4 +340,5 @@ public class StudentService {
 
     return responseDto;
   }
+
 }

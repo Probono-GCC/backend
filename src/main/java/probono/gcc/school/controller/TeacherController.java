@@ -57,10 +57,10 @@ public class TeacherController {
   // Retrieve all teachers
   @GetMapping("/teachers")
   @PreAuthorize("hasAnyRole('ADMIN')")
-  public ResponseEntity<Page<TeacherResponseDTO>> getAllTeachers(
+  public ResponseEntity<Page<UserResponse>> getAllTeachers(
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {
-    Page<TeacherResponseDTO> teachers = teacherService.findAllTeachers(page, size);
+    Page<UserResponse> teachers = teacherService.findAllTeachers(page, size);
     return ResponseEntity.ok(teachers);
   }
 
