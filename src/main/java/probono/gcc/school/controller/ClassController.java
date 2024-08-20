@@ -124,6 +124,4 @@ public class ClassController {
     Page<StudentResponseDTO> students = classService.getStudentsInClass(classId, page, size);
     return ResponseEntity.ok(students);
   }
-
-
 }
