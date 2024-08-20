@@ -170,6 +170,10 @@ public class StudentService {
           () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
 
+      if(student.getRole()!=Role.ROLE_STUDENT){
+        throw new IllegalArgumentException("해당 user는 student가 아닙니다.");
+      }
+
       // Check if it's the first update (i.e., if birth, sex, or pwAnswer are null)
       boolean isFirstUpdate =
           student.getBirth() == null && student.getSex() == null && student.getPwAnswer() == null;
