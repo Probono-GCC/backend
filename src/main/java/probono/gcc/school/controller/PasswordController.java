@@ -75,6 +75,4 @@ public class PasswordController {
     passwordService.changePasswordByPwAnswer(username, requestDto);
     return ResponseEntity.ok("changed password successfully");
   }
-
-
 }
