@@ -135,14 +135,13 @@ public class ClassController {
 
   //특정 class의 할당되지 않은 해당 grade 학생들
   @Operation(summary = "Class에 할당되지 않은 해당 grade 학생들 조회")
-  @GetMapping("/notAssignStudents/{grade}")
+  @GetMapping("/notAssignStudents")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Page<StudentResponseDTO>> notAssignedToClass(
       @RequestParam Grades grade, @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {
     Page<StudentResponseDTO> students = classService.getNotAssignedStudentsInClassByGrade(grade,
         page, size);
-
     return ResponseEntity.ok(students);
   }
 
