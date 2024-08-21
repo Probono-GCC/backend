@@ -133,6 +133,10 @@ public class TeacherService {
             HttpStatus.NOT_FOUND)
     );
 
+    if(teacher.getRole()!=Role.ROLE_TEACHER){
+      throw new IllegalArgumentException("해당 user는 teacher가 아닙니다.");
+    }
+
     boolean isFirstUpdate = teacher.getBirth() == null;
 
     if (isFirstUpdate) {

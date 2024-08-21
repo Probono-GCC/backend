@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.dto.image.ImageRequestDTO;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.model.entity.Image;
@@ -34,6 +35,7 @@ public class ImageService {
 
   private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
+  @Transactional
   public CreateImageResponseDTO createProfileImage(ImageRequestDTO requestDto) {
 
     Image image = new Image();
@@ -46,9 +48,11 @@ public class ImageService {
     String username = requestDto.getUsername();
     Optional<Users> usersOptional = userRepository.findByUsername(username);
     Users user = null;
+
     if (usersOptional.isPresent()) {
       user = usersOptional.get();
       user.setImageId(image);
+      userRepository.save(user);
     }
 
     return mapToCreateResponseDTO(image, username);
@@ -88,7 +92,7 @@ public class ImageService {
     Image image = new Image();
     image.setImagePath(imagePath);
     image.setCreatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
-
+    image.setStatus(Status.ACTIVE);
     image.setNoticeId(notice);
 
     Image savedImage = imageRepository.save(image);
@@ -133,8 +137,24 @@ public class ImageService {
 //    // 엔티티를 저장하여 변경 사항을 데이터베이스에 반영
 //    imageRepository.save(image);
     imageRepository.deleteById(id);
-
   }
+
+  public void deleteImage(Long id) {
+    Image image = imageRepository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
+
+    //s3에서 이미지 삭제 수행
+    //s3ImageService.deleteImageFromS3(image.getImagePath());
+
+    // 논리적 삭제 수행
+    image.setStatus(Status.INACTIVE);
+    // 마지막 수정 username저장
+    image.setUpdatedChargeId(SecurityContextHolder.getContext().getAuthentication().getName());
+//
+    // 엔티티를 저장하여 변경 사항을 데이터베이스에 반영
+    imageRepository.save(image);
+  }
+
 
   public Image findById(Long id) {
     Image image = imageRepository.findById(id)

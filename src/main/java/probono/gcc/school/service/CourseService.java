@@ -174,6 +174,23 @@ public class CourseService {
   }
 
   @Transactional(readOnly = true)
+  public Page<CourseResponse> getAllCoursesInClass(int page, int size, long classId) {
+    Classes classes = classRepository.findById(classId)
+        .orElseThrow(() -> new NoSuchElementException("class not found with id " + classId));
+
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Order.asc("createdAt")));
+
+    Page<Course> allCourse = courseRepository.findByStatusAndClassId(Status.ACTIVE, classes,
+        pageRequest);
+
+    Page<CourseResponse> response = allCourse.map(
+        course -> new CourseResponse(course.getCourseId(), modelMapper.map(course.getClassId(),
+            ClassResponse.class),
+            modelMapper.map(course.getSubjectId(), SubjectResponseDTO.class)));
+    return response;
+  }
+
+  @Transactional(readOnly = true)
   public Page<CourseResponse> getAllElectiveCourses(int page, int size) {
     List<Subject> electiveSubjects = subjectRepository.findAllByStatusAndIsElective(
         Status.ACTIVE, true);

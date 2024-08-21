@@ -150,7 +150,7 @@ public class StudentService {
           () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
       // Convert the found entity to a DTO
-      return modelMapper.map(student, StudentResponseDTO.class);
+      return mapToResponseDTO(student);
     } catch (CustomException e) {
       logger.error("Student not found: {}", e.getMessage());
       throw e;
@@ -166,6 +166,10 @@ public class StudentService {
       Users student = studentRepository.findByUsernameAndStatus(username, ACTIVE).orElseThrow(
           () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
+
+      if(student.getRole()!=Role.ROLE_STUDENT){
+        throw new IllegalArgumentException("해당 user는 student가 아닙니다.");
+      }
 
       // Check if it's the first update (i.e., if birth, sex, or pwAnswer are null)
       boolean isFirstUpdate =

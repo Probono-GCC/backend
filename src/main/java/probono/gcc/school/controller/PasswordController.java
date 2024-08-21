@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,9 +35,8 @@ public class PasswordController {
   @PutMapping("/admin/changePassword/{username}")
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ResponseEntity<?> updateUserPasswordByAdmin(
-      @PathVariable String username, @RequestBody @Valid PasswordRequestDTO requestDto) {
-
-    passwordService.changePassword(username,requestDto,ROLE_ADMIN);
+      @PathVariable String username, @RequestBody @Valid NewPasswordDTO requestDto) {
+    passwordService.changePassword(username, requestDto, ROLE_ADMIN);
     return ResponseEntity.ok("changed password successfully");
   }
 
@@ -45,22 +45,23 @@ public class PasswordController {
   @PutMapping("/teacher/changePassword/{username}")
   @PreAuthorize("hasAnyRole('Teacher')")
   public ResponseEntity<?> updateStudentPasswordByTeacher(
-      @PathVariable String username, @RequestBody @Valid PasswordRequestDTO requestDto
-     ) {
 
-    passwordService.changePassword(username,requestDto,ROLE_TEACHER);
+      @PathVariable String username, @RequestBody @Valid NewPasswordDTO requestDto
+  ) {
+
+    passwordService.changePassword(username, requestDto, ROLE_TEACHER);
     return ResponseEntity.ok("changed password successfully");
 
   }
 
   //비밀번호 잃어버린 경우 바꾸기 (본인이 비밀번호 바꾸기)
   @Operation(summary = "Check password Answer", description = "Check password Answer to reset password")
-  @PutMapping("/checkPwAnswer/{username}/{pwAnswer}")
+  @GetMapping("/checkPwAnswer/{username}/{pwAnswer}")
   @PreAuthorize("hasAnyRole('Teacher','Student')")
   public ResponseEntity<?> checkPwAnswerIfForgotPassword(
-      @PathVariable String username,@PathVariable String pwAnswer
+      @PathVariable String username, @PathVariable String pwAnswer
   ) {
-    passwordService.checkPwAnswerIfForgotPassword(username,pwAnswer);
+    passwordService.checkPwAnswerIfForgotPassword(username, pwAnswer);
     return ResponseEntity.ok("pwAnswer is right");
   }
 
@@ -71,10 +72,7 @@ public class PasswordController {
   public ResponseEntity<?> updatePasswordByPwAnswer(
       @PathVariable String username, @RequestBody NewPasswordDTO requestDto) {
 
-    passwordService.changePasswordByPwAnswer(username,requestDto);
+    passwordService.changePasswordByPwAnswer(username, requestDto);
     return ResponseEntity.ok("changed password successfully");
   }
-
-
-
 }
