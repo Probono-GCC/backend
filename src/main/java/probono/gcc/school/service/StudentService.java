@@ -107,8 +107,8 @@ public class StudentService {
   public Page<UserResponse> findAllStudents(int page, int size) {
     PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
 
-    Page<Users> studentList = studentRepository.findByStatusAndRole(Status.ACTIVE,
-        Role.ROLE_STUDENT, pageRequest);
+    Page<Users> studentList = studentRepository.findByStatusAndRoleAndGradeNot(Status.ACTIVE,
+        Role.ROLE_STUDENT, Grades.GRADUATED,pageRequest);
     // Use stream and ModelMapper to convert entity list to DTO list
 
     Page<UserResponse> responses = studentList.map(
