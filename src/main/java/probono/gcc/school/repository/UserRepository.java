@@ -3,6 +3,7 @@ package probono.gcc.school.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import probono.gcc.school.model.entity.Classes;
@@ -32,4 +33,6 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
 
   Optional<Users> findByUsernameAndClassIdAndStatus(String username, Classes classId, Status status);
+
+  Page<Users> findByStatusAndRoleAndGradeNot(Status status, Role role, Grades grades, PageRequest pageRequest);
 }
