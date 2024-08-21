@@ -20,5 +20,5 @@ if [ -z "$SERVICE_PID" ]; then
 else
   echo "서비스 종료 " >> $STOP_LOG
   # kill "$SERVICE_PID"
-  kill -9 $SERVICE_PID # 강제 종료를 하고 싶다면 이 명령어 사용
+  sudo kill -9 $SERVICE_PID # 강제 종료를 하고 싶다면 이 명령어 사용
 fi
