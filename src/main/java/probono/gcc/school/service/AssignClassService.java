@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.mapper.StudentMapper;
 import probono.gcc.school.mapper.TeacherMapper;
 import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
@@ -43,11 +42,7 @@ public class AssignClassService {
     Classes assignedClass = classRepository.findByClassIdAndStatus(classId,Status.ACTIVE)
         .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + classId));
 
-    //user를 이미 해당 class에 할당했는지 예외처리
-    validateDuplicateUserInClass(assignedClass, user);
-
-    //User가 이미 다른 class에 할당됐는지 예외처리
-    validateAlreadyAssignedUserInClass(user);
+    //이미 할당했는지 예외처리
 
     // Initialize associated notices (if needed for any reason)
     Hibernate.initialize(assignedClass.getNotice());
@@ -62,18 +57,6 @@ public class AssignClassService {
 
     Users updatedUser = userRepository.save(user);
     return mapToAssignResponseDTO(assignedClass,updatedUser);
-  }
-
-  private static void validateAlreadyAssignedUserInClass(Users user) {
-    if(user.getClassId()!=null && user.getRole()!=Role.ROLE_ADMIN){
-        throw new IllegalStateException("User가 이미 다른 Class에 할당되어있습니다.");
-    }
-  }
-
-  private void validateDuplicateUserInClass(Classes assignedClass, Users user) {
-    if(userRepository.existsByClassIdAndUsernameAndStatus(assignedClass, user.getUsername(),Status.ACTIVE)){
-      throw new DuplicateEntityException("이미 해당 User가 해당 Class에 할당되었습니다.");
-    }
   }
 
   @Transactional

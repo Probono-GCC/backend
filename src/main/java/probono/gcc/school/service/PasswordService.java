@@ -37,8 +37,8 @@ public class PasswordService {
     }
 
     logger.info("current password : {}",user.getPassword());
-
     user.setPassword(bCryptPasswordEncoder.encode(requestDto.getNewPassword()));
+
 
     userRepository.save(user);
     logger.info("new password : {}",user.getPassword());

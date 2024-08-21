@@ -39,5 +39,14 @@ public class StudentResponseDTO {
   private CreateImageResponseDTO imageResponseDTO;
   private ClassResponse classResponse;
 
+  public StudentResponseDTO(String username, String name, int serialNumber, Grades grade) {
+    this.username = username;
+    this.name = name;
+    this.serialNumber = serialNumber;
+    this.grade = grade;
+  }
+
+
+
 
 }

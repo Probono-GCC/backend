@@ -1,5 +1,6 @@
 package probono.gcc.school.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +16,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import probono.gcc.school.model.dto.GradeUpdateRequest;
 import probono.gcc.school.model.dto.classes.AssignClassResponseDTO;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.classes.CreateClassRequest;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.entity.Classes;
+import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.service.AssignClassService;
 import probono.gcc.school.service.ClassService;
 
@@ -124,4 +127,18 @@ public class ClassController {
     Page<StudentResponseDTO> students = classService.getStudentsInClass(classId, page, size);
     return ResponseEntity.ok(students);
   }
+
+  //특정 class의 할당되지 않은 해당 grade 학생들
+  @Operation(summary = "Class에 할당되지 않은 해당 grade 학생들 조회")
+  @GetMapping("/class/{classId}/notAssignStudents/{grade}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<Page<StudentResponseDTO>> notAssignedToClass(
+      @RequestParam Grades grade,@RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<StudentResponseDTO> students = classService.getNotAssignedStudentsInClassByGrade(grade,page,size);
+
+    return ResponseEntity.ok(students);
+  }
+
+
 }
