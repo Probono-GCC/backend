@@ -239,14 +239,14 @@ public class ClassService {
 //        Role.ROLE_STUDENT, grade, pageRequest);
 
 
-  public Page<StudentResponseDTO> getNotAssignedStudentsInClassByGrade(Long classId, Grades grade,int page,int size) {
+  public Page<StudentResponseDTO> getNotAssignedStudentsInClassByGrade(Grades grade,int page,int size) {
     PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
 
-    Classes findClass = classRepository.findById(classId).orElseThrow(
-        () -> new NoSuchElementException("Class not found with id " + classId));
-    if (Status.INACTIVE.equals(findClass.getStatus())) {
-      throw new NoSuchElementException("Class not found with id: " + classId);
-    }
+//    Classes findClass = classRepository.findById(classId).orElseThrow(
+//        () -> new NoSuchElementException("Class not found with id " + classId));
+//    if (Status.INACTIVE.equals(findClass.getStatus())) {
+//      throw new NoSuchElementException("Class not found with id: " + classId);
+//    }
 //    Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
 
    Page<Users> studentListByGrade =userRepository.findByStatusAndRoleAndGrade(Status.ACTIVE,Role.ROLE_STUDENT,grade,pageRequest);
