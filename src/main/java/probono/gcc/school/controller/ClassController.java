@@ -40,6 +40,11 @@ public class ClassController {
     return "this is test";
   }
 
+  @GetMapping("/test2")
+  public String serverTest() {
+    return "tomcat server is working";
+  }
+
   @PostMapping("/class")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<ClassResponse> createClass(
@@ -133,9 +138,10 @@ public class ClassController {
   @GetMapping("/class/{classId}/notAssignStudents/{grade}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<Page<StudentResponseDTO>> notAssignedToClass(
-      @RequestParam Grades grade,@RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam Grades grade, @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {
-    Page<StudentResponseDTO> students = classService.getNotAssignedStudentsInClassByGrade(grade,page,size);
+    Page<StudentResponseDTO> students = classService.getNotAssignedStudentsInClassByGrade(grade,
+        page, size);
 
     return ResponseEntity.ok(students);
   }
