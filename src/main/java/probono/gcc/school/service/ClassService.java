@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -25,13 +26,16 @@ import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.classes.CreateClassRequest;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.TeacherResponseDTO;
+import probono.gcc.school.model.dto.users.UserResponse;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.CourseRepository;
+import probono.gcc.school.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,7 @@ public class ClassService {
 
   private final ModelMapper modelMapper;
   private final ClassRepository classRepository;
+  private final UserRepository userRepository;
 
   private final CourseService courseService;
   private final TeacherMapper teacherMapper;
@@ -217,5 +222,41 @@ public class ClassService {
         .map(studentMapper::mapToResponseDTO)
         .collect(Collectors.toList());
 
+  }
+//  public Page<UserResponse> findGradeStudents(Grades grade, int page, int size) {
+//    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
+//
+//    Page<Users> studentList = studentRepository.findByStatusAndRoleAndGrade(Status.ACTIVE,
+//        Role.ROLE_STUDENT, grade, pageRequest);
+
+
+  public Page<StudentResponseDTO> getNotAssignedStudentsInClassByGrade(Long classId, Grades grade,int page,int size) {
+    PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
+
+    Classes findClass = classRepository.findById(classId).orElseThrow(
+        () -> new NoSuchElementException("Class not found with id " + classId));
+    if (Status.INACTIVE.equals(findClass.getStatus())) {
+      throw new NoSuchElementException("Class not found with id: " + classId);
+    }
+//    Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
+
+   Page<Users> studentListByGrade =userRepository.findByStatusAndRoleAndGrade(Status.ACTIVE,Role.ROLE_STUDENT,grade,pageRequest);
+
+    // 필터링: classId가 null인 학생 필터링
+    List<Users> notAssignedStudentList = studentListByGrade.stream()
+        .filter(user -> user.getClassId() == null).toList();
+
+    // 필터링된 학생을 StudentResponseDTO로 변환
+    List<StudentResponseDTO> studentResponseDTOList = notAssignedStudentList.stream()
+        .map(student -> new StudentResponseDTO(student.getUsername(), student.getName(), student.getSerialNumber(), student.getGrade()))
+        .toList();
+    // List<StudentResponseDTO>를 Page<StudentResponseDTO>로 변환
+    Page<StudentResponseDTO> studentResponseDTOPage = new PageImpl<>(
+        studentResponseDTOList,    // 변환된 DTO 리스트
+        pageRequest,               // 페이징 정보 (PageRequest)
+        studentListByGrade.getTotalElements()  // 전체 학생 수 (원래 Page 객체의 총 요소 수)
+    );
+
+    return studentResponseDTOPage;
   }
 }
