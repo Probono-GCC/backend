@@ -121,8 +121,10 @@ public class ClassController {
 
   @GetMapping("/class/{classId}/students")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<List<StudentResponseDTO>> getStudentsInClass(@PathVariable Long classId) {
-    List<StudentResponseDTO> students = classService.getStudentsInClass(classId);
+  public ResponseEntity<Page<StudentResponseDTO>> getStudentsInClass(@PathVariable Long classId,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size) {
+    Page<StudentResponseDTO> students = classService.getStudentsInClass(classId, page, size);
     return ResponseEntity.ok(students);
   }
 
@@ -137,7 +139,6 @@ public class ClassController {
 
     return ResponseEntity.ok(students);
   }
-
 
 
 }

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -36,6 +37,7 @@ import probono.gcc.school.model.enums.NoticeType;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
 import probono.gcc.school.repository.CourseRepository;
+import probono.gcc.school.repository.ImageRepository;
 import probono.gcc.school.repository.NoticeRepository;
 
 @Service
@@ -52,6 +54,8 @@ public class NoticeService {
   private final S3ImageService s3ImageService;
 
   private final EntityManager entityManager;
+
+  private final ImageRepository imageRepository;
 
 
   @Transactional
@@ -102,8 +106,6 @@ public class NoticeService {
 
     Notice savedNotice = noticeRepository.save(notice);
 
-    //entityManager.refresh(notice);
-
     return mapToResponseDto(savedNotice);
   }
 
@@ -124,7 +126,9 @@ public class NoticeService {
   @Transactional
   public NoticeResponse getNotice(Long id) {
     Notice findNotice = this.getNoticeById(id);
-    List<Image> imageList = findNotice.getImageList();
+//    List<Image> imageList = findNotice.getImageList().stream()
+//        .filter(image -> image.getStatus().equals(Status.ACTIVE)).collect(
+//            Collectors.toList());
 
     // view 증가 로직
     noticeRepository.incrementViews(id);
@@ -141,34 +145,105 @@ public class NoticeService {
     Notice existingNotice = this.getNoticeById(id);
     existingNotice.setTitle(request.getTitle());
     existingNotice.setContent(request.getContent());
+    existingNotice.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
-    List<String> imageUrls = new ArrayList<>();
-
-    List<MultipartFile> requestImage = Optional.ofNullable(request.getImageList())
+    // 유지할 이미지 처리
+    List<Long> preservedImageIdList = Optional.ofNullable(request.getMaintainImageList())
         .orElse(Collections.emptyList());
-
-    if (!requestImage.isEmpty()) {
-      for (MultipartFile imageFile : request.getImageList()) {
-        String url = s3ImageService.upload(imageFile);
-        imageUrls.add(url);
+    if (!preservedImageIdList.isEmpty()) {
+      // 유지할 이미지 id가 올바른지 확인
+      for (Long ids : preservedImageIdList) {
+        if (!imageRepository.existsByStatusAndImageId(Status.ACTIVE, ids)) {
+          throw new IllegalArgumentException("유지 할 이미지의 id가 잘못되었습니다.");
+        }
       }
 
-      List<Image> imageList = new ArrayList<>();
-      for (String imageUrl : imageUrls) {
-        imageList.add(imageService.saveNoticeImage(imageUrl, existingNotice));
+      // 기존 Notice의 이미지 리스트에서 imageId만 추출하여 리스트로 저장
+      List<Long> existingImageIdList = existingNotice.getImageList().stream()
+          .filter(image -> image.getStatus().equals(Status.ACTIVE))
+          .map(Image::getImageId) // Image 객체에서 imageId 추출
+          .collect(Collectors.toList());
+
+      // preservedImageIdList에 존재하지 않는 id들을 추출
+      List<Long> imagesToDelete = existingImageIdList.stream()
+          .filter(imageId -> !preservedImageIdList.contains(
+              imageId)) // preservedImageIdList에 없는 이미지 필터링
+          .collect(Collectors.toList());
+
+      // 기존 Notice의 이미지 리스트에서 삭제 대상 imageId를 가진 Image 객체 삭제
+      Iterator<Image> iterator = existingNotice.getImageList().iterator();
+      while (iterator.hasNext()) {
+        Image image = iterator.next();
+        if (imagesToDelete.contains(image.getImageId())) {
+          iterator.remove(); // 리스트에서 해당 Image 객체 제거
+        }
       }
-      // 기존 이미지 리스트를 비우고 새로운 리스트를 설정합니다.
-      existingNotice.getImageList().clear();
-      existingNotice.getImageList().addAll(imageList);
+
+      // 이미지 삭제 메서드 호출
+      imagesToDelete.forEach(imageId -> {
+        imageService.deleteImage(imageId); // imageService의 삭제 메서드 호출
+      });
+
+//      List<Image> collect = existingNotice.getImageList().stream()
+//          .filter(image -> image.getStatus().equals(Status.ACTIVE)).collect(Collectors.toList());
+//      existingNotice.getImageList().clear();
+//      existingNotice.setImageList(collect);
+
+//      // existingNotice의 이미지 리스트에서 삭제된 이미지 제거
+//      Iterator<Image> iterator = existingNotice.getImageList().iterator();
+//      while (iterator.hasNext()) {
+//        Image image = iterator.next();
+//        if (imagesToDelete.contains(image.getImageId())) {
+//          iterator.remove(); // 리스트에서 해당 Image 객체 제거
+//        }
+//      }
     } else {
       existingNotice.getImageList().clear();
     }
+
+    // 새롭게 추가할 이미지 처리
+    List<MultipartFile> requiredNewImage = Optional.ofNullable(request.getImageList())
+        .orElse(Collections.emptyList());
+    List<Image> newImageList = new ArrayList<>();
+    List<String> newImageUrls = new ArrayList<>();
+    if (!requiredNewImage.isEmpty()) { // 새롭게 추가 할 이미지가 존재 한다면
+      for (MultipartFile imageFile : requiredNewImage) {
+        String url = s3ImageService.upload(imageFile);
+        newImageUrls.add(url);
+      }
+
+      // 새롭게 추가 할 이미지 객체들 생성
+      for (String imageUrl : newImageUrls) {
+        newImageList.add(imageService.saveNoticeImage(imageUrl, existingNotice));
+      }
+      existingNotice.getImageList().addAll(newImageList);
+
+//      // 유지할 이미지 처리
+//      List<Long> preservedImageIdList = Optional.ofNullable(request.getMaintainImageList())
+//          .orElse(Collections.emptyList());
+//      if (!preservedImageIdList.isEmpty()) {
+//        for (Long imageId : preservedImageIdList) {
+//          Optional<Image> findImage = imageRepository.findById(imageId);
+//          newImageList.add(findImage.get());
+//        }
+//      }
+    }
+
+    // 기존 이미지 리스트를 비우고 새로운 리스트를 설정합니다.
+//      existingNotice.getImageList().clear();
+//      existingNotice.getImageList().addAll(existingImageList);
+//      existingNotice.getImageList().addAll(newImageList);
+//    } else {
+//      existingNotice.getImageList().clear();
+//    }
 
     LocalDateTime now = LocalDateTime.now();
     Timestamp timestamp = Timestamp.valueOf(now);
     existingNotice.setUpdatedAt(timestamp);
 
     Notice savedNotice = noticeRepository.save(existingNotice);
+
     return mapToResponseDto(savedNotice);
   }
 
@@ -186,11 +261,13 @@ public class NoticeService {
   public void deleteNotice(Long id) {
     Notice existingNotice = this.getNoticeById(id);
     existingNotice.setStatus(Status.INACTIVE);
+    existingNotice.setUpdatedChargeId(
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     List<Image> existingImageList = existingNotice.getImageList();
 
     for (Image image : existingImageList) {
-      imageService.deleteProfileImage(image.getImageId());
+      imageService.deleteImage(image.getImageId());
     }
 
 //    LocalDateTime now = LocalDateTime.now();
@@ -362,6 +439,7 @@ public class NoticeService {
 
     if (!savedNotice.getImageList().isEmpty()) {
       List<ImageResponseDTO> collect = savedNotice.getImageList().stream()
+          .filter(image -> image.getStatus().equals(Status.ACTIVE))
           .map(image -> new ImageResponseDTO(image.getImageId(), image.getImagePath(),
               image.getCreatedChargeId())).collect(Collectors.toList());
       responseDto.setImageList(collect);
