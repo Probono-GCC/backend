@@ -60,7 +60,7 @@ public class CourseController {
   @GetMapping("/courses")
   public ResponseEntity<Page<CourseResponse>> getAllCourse(
       @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "page", defaultValue = "10") int size) {
+      @RequestParam(value = "size", defaultValue = "10") int size) {
     Page<CourseResponse> courses = courseService.getAllCourses(page, size);
     return ResponseEntity.ok(courses);
   }
@@ -68,7 +68,7 @@ public class CourseController {
   @GetMapping("/courses/elective")
   public ResponseEntity<Page<CourseResponse>> getAllElectiveCourse(
       @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "page", defaultValue = "10") int size) {
+      @RequestParam(value = "size", defaultValue = "10") int size) {
     Page<CourseResponse> courses = courseService.getAllElectiveCourses(page, size);
     return ResponseEntity.ok(courses);
   }
@@ -78,7 +78,7 @@ public class CourseController {
   public ResponseEntity<Page<CourseResponse>> getAllCourseInClass(
       @PathVariable long classId,
       @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "page", defaultValue = "10") int size) {
+      @RequestParam(value = "size", defaultValue = "10") int size) {
     Page<CourseResponse> courses = courseService.getAllCoursesInClass(page, size, classId);
     return ResponseEntity.ok(courses);
   }
