@@ -35,4 +35,6 @@ public interface UserRepository extends JpaRepository<Users, Long> {
   Optional<Users> findByUsernameAndClassIdAndStatus(String username, Classes classId, Status status);
 
   Page<Users> findByStatusAndRoleAndGradeNot(Status status, Role role, Grades grades, PageRequest pageRequest);
+
+  List<Users> findByStatusAndRoleAndGradeNot(Status status, Role role, Grades grades);
 }

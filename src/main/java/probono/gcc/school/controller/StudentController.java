@@ -146,5 +146,13 @@ public class StudentController {
     return ResponseEntity.ok(students);
   }
 
+  //모든 학생들의 Grade 1 증가
+  @PutMapping("/students/grade/increment")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ResponseEntity<String> increaseAllStudentsGrade(){
+    studentService.incrementAllStudentGrades();
+    return ResponseEntity.ok("All students' grades have been incremented.");
+  }
+
 
 }

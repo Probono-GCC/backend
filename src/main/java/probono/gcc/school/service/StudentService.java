@@ -108,7 +108,7 @@ public class StudentService {
     PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
 
     Page<Users> studentList = studentRepository.findByStatusAndRoleAndGradeNot(Status.ACTIVE,
-        Role.ROLE_STUDENT, Grades.GRADUATED,pageRequest);
+        Role.ROLE_STUDENT, Grades.GRADUATED, pageRequest);
     // Use stream and ModelMapper to convert entity list to DTO list
 
     Page<UserResponse> responses = studentList.map(
@@ -167,7 +167,7 @@ public class StudentService {
           () -> new CustomException("Student not found with ID: " + username, HttpStatus.NOT_FOUND)
       );
 
-      if(student.getRole()!=Role.ROLE_STUDENT){
+      if (student.getRole() != Role.ROLE_STUDENT) {
         throw new IllegalArgumentException("해당 user는 student가 아닙니다.");
       }
 
@@ -350,5 +350,22 @@ public class StudentService {
       return true;
     }
     return false;
+  }
+
+  public void incrementAllStudentGrades() {
+    List<Users> students = studentRepository.findByStatusAndRoleAndGradeNot(ACTIVE,
+        Role.ROLE_STUDENT, Grades.GRADUATED);
+    students.forEach(student -> {
+
+      Grades currentGrade = student.getGrade();
+      logger.info("currentGrade : {}",currentGrade);
+      student.setGrade(Grades.values()[currentGrade.ordinal() + 1]);
+      logger.info("student.getGrade() : {}",student.getGrade());
+
+    });
+
+    // 변경된 학년 저장
+    studentRepository.saveAll(students);
+
   }
 }
