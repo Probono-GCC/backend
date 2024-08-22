@@ -5,6 +5,7 @@
 //선생님의 담당 course 조회
 package probono.gcc.school.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import probono.gcc.school.model.dto.course.CourseResponse;
 import probono.gcc.school.model.dto.course.CreateCourseRequest;
 import probono.gcc.school.model.dto.courseUser.CourseUserResponse;
 import probono.gcc.school.model.dto.courseUser.CreateCourseUserRequest;
+import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.service.CourseUserService;
 
 @RestController
@@ -95,4 +97,5 @@ public class CourseUserController {
         page, size);
     return ResponseEntity.ok(coursesList);
   }
+
 }
