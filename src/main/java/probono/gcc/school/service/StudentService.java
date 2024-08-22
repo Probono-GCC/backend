@@ -345,4 +345,10 @@ public class StudentService {
     return responseDto;
   }
 
+  public boolean isSerialNumberExists(int serialNumber) {
+    if (studentRepository.existsBySerialNumber(serialNumber)) {
+      return true;
+    }
+    return false;
+  }
 }
