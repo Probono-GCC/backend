@@ -122,6 +122,19 @@ public class StudentController {
     }
   }
 
+  // Check if serialNumber is already taken
+  @GetMapping("/students/checkSerialNumber/{serialNumber}")
+  public ResponseEntity<?> checkSerialNumber(@PathVariable int serialNumber) {
+    boolean exists = studentService.isSerialNumberExists(serialNumber);
+    if (exists) {
+      // Serial Number가 이미 존재하는 경우
+      return ResponseEntity.status(HttpStatus.CONFLICT).body("Serial Number already exists.");
+    } else {
+      // Serial Number가 존재하지 않는 경우
+      return ResponseEntity.ok("Serial Number is available.");
+    }
+  }
+
   // 특정 학년의 모든 Students 조회
   @GetMapping("/students/grade")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
@@ -132,4 +145,6 @@ public class StudentController {
     Page<UserResponse> students = studentService.findGradeStudents(grade, page, size);
     return ResponseEntity.ok(students);
   }
+
+
 }
