@@ -122,9 +122,9 @@ public class ClassService {
     //조회
     Page<Classes> findClassList = classRepository.findByStatusAndYear(Status.ACTIVE, year,
         pageRequest);
-    if (findClassList.isEmpty()) {
-      throw new NoSuchElementException("Class not found with year: " + year);
-    }
+//    if (findClassList.isEmpty()) {
+//      throw new NoSuchElementException("Class not found with year: " + year);
+//    }
 
     //DTO변환
     Page<ClassResponse> classResponse = findClassList.map(
@@ -239,7 +239,8 @@ public class ClassService {
 //        Role.ROLE_STUDENT, grade, pageRequest);
 
 
-  public Page<StudentResponseDTO> getNotAssignedStudentsInClassByGrade(Grades grade,int page,int size) {
+  public Page<StudentResponseDTO> getNotAssignedStudentsInClassByGrade(Grades grade, int page,
+      int size) {
     PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("serialNumber")));
 
 //    Classes findClass = classRepository.findById(classId).orElseThrow(
@@ -249,7 +250,8 @@ public class ClassService {
 //    }
 //    Hibernate.initialize(findClass.map(Classes::getUsers)); // 명시적으로 초기화
 
-   Page<Users> studentListByGrade =userRepository.findByStatusAndRoleAndGrade(Status.ACTIVE,Role.ROLE_STUDENT,grade,pageRequest);
+    Page<Users> studentListByGrade = userRepository.findByStatusAndRoleAndGrade(Status.ACTIVE,
+        Role.ROLE_STUDENT, grade, pageRequest);
 
     // 필터링: classId가 null인 학생 필터링
     List<Users> notAssignedStudentList = studentListByGrade.stream()
@@ -257,7 +259,8 @@ public class ClassService {
 
     // 필터링된 학생을 StudentResponseDTO로 변환
     List<StudentResponseDTO> studentResponseDTOList = notAssignedStudentList.stream()
-        .map(student -> new StudentResponseDTO(student.getUsername(), student.getName(), student.getSerialNumber(), student.getGrade()))
+        .map(student -> new StudentResponseDTO(student.getUsername(), student.getName(),
+            student.getSerialNumber(), student.getGrade()))
         .toList();
     // List<StudentResponseDTO>를 Page<StudentResponseDTO>로 변환
     Page<StudentResponseDTO> studentResponseDTOPage = new PageImpl<>(

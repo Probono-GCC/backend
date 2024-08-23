@@ -328,10 +328,10 @@ public class NoticeService {
       Page<Notice> findClassNoticeList = noticeRepository.findByStatusAndClassId(
           Status.ACTIVE, findClass,
           pageRequest);
-      if (findClassNoticeList.isEmpty()) {
-        throw new NoSuchElementException(
-            "Class Notice not found with classId : " + id + " or page number is too big");
-      }
+//      if (findClassNoticeList.isEmpty()) {
+//        throw new NoSuchElementException(
+//            "Class Notice not found with classId : " + id + " or page number is too big");
+//      }
       //DTO변환
       Page<NoticeResponse> noticeResponse = findClassNoticeList.map(
           notice -> new NoticeResponse(
@@ -353,10 +353,10 @@ public class NoticeService {
       Page<Notice> findCourseNoticeList = noticeRepository.findByStatusAndCourseId(
           Status.ACTIVE, findCourse,
           pageRequest);
-      if (findCourseNoticeList.isEmpty()) {
-        throw new NoSuchElementException(
-            "Course Notice not found with courseId : " + id + " or page number is too big");
-      }
+//      if (findCourseNoticeList.isEmpty()) {
+//        throw new NoSuchElementException(
+//            "Course Notice not found with courseId : " + id + " or page number is too big");
+//      }
 
       //DTO변환
       Page<NoticeResponse> noticeResponse = findCourseNoticeList.map(
@@ -375,9 +375,9 @@ public class NoticeService {
       Page<Notice> findSchoolNoticeList = noticeRepository.findByTypeAndStatus(type,
           Status.ACTIVE,
           pageRequest);
-      if (findSchoolNoticeList.isEmpty()) {
-        throw new NoSuchElementException("School Notice not found" + " or page number is too big");
-      }
+//      if (findSchoolNoticeList.isEmpty()) {
+//        throw new NoSuchElementException("School Notice not found" + " or page number is too big");
+//      }
       //DTO변환
       Page<NoticeResponse> noticeResponse = findSchoolNoticeList.map(
           notice -> new NoticeResponse(
