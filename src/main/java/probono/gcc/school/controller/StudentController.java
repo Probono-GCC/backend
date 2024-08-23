@@ -111,6 +111,7 @@ public class StudentController {
 
   // Check if username is already taken
   @GetMapping("/students/checkusername/{username}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> checkusername(@PathVariable String username) {
     boolean exists = studentService.isusernameExists(username);
     if (exists) {
@@ -124,6 +125,7 @@ public class StudentController {
 
   // Check if serialNumber is already taken
   @GetMapping("/students/checkSerialNumber/{serialNumber}")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
   public ResponseEntity<?> checkSerialNumber(@PathVariable int serialNumber) {
     boolean exists = studentService.isSerialNumberExists(serialNumber);
     if (exists) {
@@ -149,7 +151,7 @@ public class StudentController {
   //모든 학생들의 Grade 1 증가
   @PutMapping("/students/grade/increment")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
-  public ResponseEntity<String> increaseAllStudentsGrade(){
+  public ResponseEntity<String> increaseAllStudentsGrade() {
     studentService.incrementAllStudentGrades();
     return ResponseEntity.ok("All students' grades have been incremented.");
   }

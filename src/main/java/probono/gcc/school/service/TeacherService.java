@@ -2,14 +2,11 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.exception.CustomException;
-import probono.gcc.school.exception.DuplicateEntityException;
 import probono.gcc.school.model.dto.classes.ClassResponse;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
-
-import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
 
 import probono.gcc.school.model.dto.image.ImageResponseDTO;
 
@@ -133,7 +127,7 @@ public class TeacherService {
             HttpStatus.NOT_FOUND)
     );
 
-    if(teacher.getRole()!=Role.ROLE_TEACHER){
+    if (teacher.getRole() != Role.ROLE_TEACHER) {
       throw new IllegalArgumentException("해당 user는 teacher가 아닙니다.");
     }
 

@@ -4,10 +4,8 @@ import static probono.gcc.school.model.enums.Status.ACTIVE;
 
 import java.util.List;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -32,9 +30,7 @@ import probono.gcc.school.model.dto.users.StudentCreateRequestDTO;
 import probono.gcc.school.model.dto.users.StudentResponseDTO;
 import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
 
-import probono.gcc.school.model.dto.users.TeacherResponseDTO;
 import probono.gcc.school.model.dto.users.UserResponse;
-import probono.gcc.school.model.entity.Classes;
 
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Users;
@@ -358,9 +354,9 @@ public class StudentService {
     students.forEach(student -> {
 
       Grades currentGrade = student.getGrade();
-      logger.info("currentGrade : {}",currentGrade);
+      logger.info("currentGrade : {}", currentGrade);
       student.setGrade(Grades.values()[currentGrade.ordinal() + 1]);
-      logger.info("student.getGrade() : {}",student.getGrade());
+      logger.info("student.getGrade() : {}", student.getGrade());
 
     });
 

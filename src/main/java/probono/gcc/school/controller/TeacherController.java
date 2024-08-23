@@ -86,10 +86,9 @@ public class TeacherController {
   public ResponseEntity<TeacherResponseDTO> updateTeacher(
       @PathVariable String username, @RequestBody TeacherRequestDTO requestDto) {
 
-      TeacherResponseDTO teacherResponseDTO = teacherService.updateTeacher(username, requestDto);
+    TeacherResponseDTO teacherResponseDTO = teacherService.updateTeacher(username, requestDto);
     return ResponseEntity.ok(teacherResponseDTO);
   }
-
 
 
   //Delete a teacher
@@ -106,7 +105,10 @@ public class TeacherController {
       teacherService.deleteTeacher(username);
       Users deletedTeacher = teacherService.findById(username);
       // Teacher 엔티티를 DTO로 변환
-      TeacherResponseDTO responseDto = modelMapper.map(deletedTeacher, TeacherResponseDTO.class);
+      //TeacherResponseDTO responseDto = modelMapper.map(deletedTeacher, TeacherResponseDTO.class);
+      TeacherResponseDTO responseDto = new TeacherResponseDTO();
+      responseDto.setName(deletedTeacher.getName());
+
       // Return success response
       return ResponseEntity.ok(responseDto);
     } catch (CustomException ex) {
