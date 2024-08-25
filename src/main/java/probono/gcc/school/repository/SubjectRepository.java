@@ -10,7 +10,7 @@ import probono.gcc.school.model.enums.Status;
 
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
-  Optional<Subject> findByName(String name);
+  Optional<Subject> findByNameAndStatus(String name, Status status);
 
   Page<Subject> findAllByStatus(Status status, Pageable pageable);
 
