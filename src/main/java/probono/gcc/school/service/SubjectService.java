@@ -1,9 +1,7 @@
 package probono.gcc.school.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +30,8 @@ public class SubjectService {
   private CourseService courseService;
 
   public SubjectResponseDTO createSubject(SubjectRequestDTO requestDto) {
-    Optional<Subject> existingSubject = subjectRepository.findByName(requestDto.getName());
+    Optional<Subject> existingSubject = subjectRepository.findByNameAndStatus(requestDto.getName(),
+        Status.ACTIVE);
     if (existingSubject.isPresent()) {
       throw new IllegalArgumentException("A subject with the same name already exists.");
     }
