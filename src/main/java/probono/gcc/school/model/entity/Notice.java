@@ -81,7 +81,7 @@ public class Notice {
   /**
    * Image완성 이후 추가 로직 필요
    */
-  @OneToMany(mappedBy = "noticeId", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "noticeId", cascade = CascadeType.ALL , orphanRemoval = true)
   private List<Image> imageList;
 
   // Getters and Setters
