@@ -126,9 +126,12 @@ public class NoticeService {
   @Transactional
   public NoticeResponse getNotice(Long id) {
     Notice findNotice = this.getNoticeById(id);
-//    List<Image> imageList = findNotice.getImageList().stream()
-//        .filter(image -> image.getStatus().equals(Status.ACTIVE)).collect(
-//            Collectors.toList());
+
+    // ACTIVE인 이미지들만 보여주기
+    List<Image> imageList = findNotice.getImageList().stream()
+        .filter(image -> image.getStatus().equals(Status.ACTIVE)).collect(
+            Collectors.toList());
+    findNotice.setImageList(imageList);
 
     // view 증가 로직
     noticeRepository.incrementViews(id);
@@ -148,9 +151,22 @@ public class NoticeService {
     existingNotice.setUpdatedChargeId(
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    // 유지할 이미지 처리
+    // 입력 데이터 null 예외처리
     List<Long> preservedImageIdList = Optional.ofNullable(request.getMaintainImageList())
         .orElse(Collections.emptyList());
+    List<MultipartFile> requiredNewImage = Optional.ofNullable(request.getImageList())
+        .orElse(Collections.emptyList()); // imageList는 빈 리스트로 요청이 오면 안됨. 아예 보내지 않아야 함.
+
+    // 기존 이미지
+    // 기존 Notice의 이미지 리스트에서 imageId만 추출하여 리스트로 저장
+    List<Long> existingImageIdList = existingNotice.getImageList().stream()
+        .filter(image -> image.getStatus().equals(Status.ACTIVE))
+        .map(Image::getImageId) // Image 객체에서 imageId 추출
+        .collect(Collectors.toList());
+
+    List<Long> imagesToDelete = new ArrayList<>();
+
+    // 유지할 이미지가 존재한다면
     if (!preservedImageIdList.isEmpty()) {
       // 유지할 이미지 id가 올바른지 확인
       for (Long ids : preservedImageIdList) {
@@ -159,52 +175,22 @@ public class NoticeService {
         }
       }
 
-      // 기존 Notice의 이미지 리스트에서 imageId만 추출하여 리스트로 저장
-      List<Long> existingImageIdList = existingNotice.getImageList().stream()
-          .filter(image -> image.getStatus().equals(Status.ACTIVE))
-          .map(Image::getImageId) // Image 객체에서 imageId 추출
-          .collect(Collectors.toList());
-
       // preservedImageIdList에 존재하지 않는 id들을 추출
-      List<Long> imagesToDelete = existingImageIdList.stream()
+      imagesToDelete = existingImageIdList.stream()
           .filter(imageId -> !preservedImageIdList.contains(
               imageId)) // preservedImageIdList에 없는 이미지 필터링
           .collect(Collectors.toList());
-
-      // 기존 Notice의 이미지 리스트에서 삭제 대상 imageId를 가진 Image 객체 삭제
-      Iterator<Image> iterator = existingNotice.getImageList().iterator();
-      while (iterator.hasNext()) {
-        Image image = iterator.next();
-        if (imagesToDelete.contains(image.getImageId())) {
-          iterator.remove(); // 리스트에서 해당 Image 객체 제거
-        }
-      }
-
-      // 이미지 삭제 메서드 호출
-      imagesToDelete.forEach(imageId -> {
-        imageService.deleteImage(imageId); // imageService의 삭제 메서드 호출
-      });
-
-//      List<Image> collect = existingNotice.getImageList().stream()
-//          .filter(image -> image.getStatus().equals(Status.ACTIVE)).collect(Collectors.toList());
-//      existingNotice.getImageList().clear();
-//      existingNotice.setImageList(collect);
-
-//      // existingNotice의 이미지 리스트에서 삭제된 이미지 제거
-//      Iterator<Image> iterator = existingNotice.getImageList().iterator();
-//      while (iterator.hasNext()) {
-//        Image image = iterator.next();
-//        if (imagesToDelete.contains(image.getImageId())) {
-//          iterator.remove(); // 리스트에서 해당 Image 객체 제거
-//        }
-//      }
     } else {
-      existingNotice.getImageList().clear();
+      imagesToDelete = existingImageIdList;
     }
 
+    // 삭제할 이미지들 삭제 처리
+    // 이미지 삭제 메서드 호출
+    imagesToDelete.forEach(imageId -> {
+      imageService.deleteImage(imageId); // imageService의 삭제 메서드 호출
+    });
+
     // 새롭게 추가할 이미지 처리
-    List<MultipartFile> requiredNewImage = Optional.ofNullable(request.getImageList())
-        .orElse(Collections.emptyList());
     List<Image> newImageList = new ArrayList<>();
     List<String> newImageUrls = new ArrayList<>();
     if (!requiredNewImage.isEmpty()) { // 새롭게 추가 할 이미지가 존재 한다면
@@ -219,24 +205,7 @@ public class NoticeService {
       }
       existingNotice.getImageList().addAll(newImageList);
 
-//      // 유지할 이미지 처리
-//      List<Long> preservedImageIdList = Optional.ofNullable(request.getMaintainImageList())
-//          .orElse(Collections.emptyList());
-//      if (!preservedImageIdList.isEmpty()) {
-//        for (Long imageId : preservedImageIdList) {
-//          Optional<Image> findImage = imageRepository.findById(imageId);
-//          newImageList.add(findImage.get());
-//        }
-//      }
     }
-
-    // 기존 이미지 리스트를 비우고 새로운 리스트를 설정합니다.
-//      existingNotice.getImageList().clear();
-//      existingNotice.getImageList().addAll(existingImageList);
-//      existingNotice.getImageList().addAll(newImageList);
-//    } else {
-//      existingNotice.getImageList().clear();
-//    }
 
     LocalDateTime now = LocalDateTime.now();
     Timestamp timestamp = Timestamp.valueOf(now);
