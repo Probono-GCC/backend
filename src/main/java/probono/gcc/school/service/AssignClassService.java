@@ -43,6 +43,9 @@ public class AssignClassService {
         .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + classId));
 
     //이미 할당했는지 예외처리
+    if(user.getClassId()!=null){
+      throw new IllegalStateException("User is already assigned to class");
+    }
 
     // Initialize associated notices (if needed for any reason)
     Hibernate.initialize(assignedClass.getNotice());
