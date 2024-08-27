@@ -1,9 +1,7 @@
 drop
 database probono_db;
-create
-database probono_db;
-use
-probono_db;
+create database probono_db;
+use probono_db;
 CREATE TABLE users
 (
     username          VARCHAR(20)  NOT NULL,
