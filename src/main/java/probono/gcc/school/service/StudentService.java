@@ -4,6 +4,7 @@ import static probono.gcc.school.model.enums.Status.ACTIVE;
 
 import java.util.List;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import lombok.AllArgsConstructor;
@@ -32,12 +33,15 @@ import probono.gcc.school.model.dto.users.StudentUpdateRequestDTO;
 
 import probono.gcc.school.model.dto.users.UserResponse;
 
+import probono.gcc.school.model.entity.Classes;
+import probono.gcc.school.model.entity.Course;
 import probono.gcc.school.model.entity.Image;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
 import probono.gcc.school.repository.ClassRepository;
+import probono.gcc.school.repository.CourseRepository;
 import probono.gcc.school.repository.ImageRepository;
 import probono.gcc.school.repository.UserRepository;
 
@@ -55,6 +59,7 @@ public class StudentService {
   @Lazy
   private ClassService classService;
   private ClassRepository classRepository;
+  private CourseRepository courseRepository;
 
   private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
@@ -357,6 +362,25 @@ public class StudentService {
       logger.info("currentGrade : {}", currentGrade);
       student.setGrade(Grades.values()[currentGrade.ordinal() + 1]);
       logger.info("student.getGrade() : {}", student.getGrade());
+
+      //학생의 classId null처리
+      //해당 year를 가진 모든 class Id 조회 후 그 id를 가지고 있는 모든 class 삭제
+      //해당 year를 가진 모든 class 삭제
+
+
+      //모든 class 삭제
+      //classId를 가지고 있는 모든 course 삭제
+      if (student.getClassId() != null) {
+        Classes findClass = classRepository.findByClassIdAndStatus(student.getClassId().getClassId(), Status.ACTIVE)
+            .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + student.getClassId().getClassId()));
+
+        // 2-3. 학생의 class 삭제
+        student.deleteClass(findClass);
+      } else {
+        logger.warn("Student {} does not have a class assigned.", student.getId());
+      }
+
+
 
     });
 
