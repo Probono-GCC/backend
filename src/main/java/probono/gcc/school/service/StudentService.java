@@ -201,6 +201,9 @@ public class StudentService {
         student.setImageId(image);
         updateAlwaysChangeableField(requestDto, student);
 
+        //최초 1회 접속시에도 grade 수정할 수 있게
+        student.setGrade(requestDto.getGrade());
+
       } else {
         if (requestDto.getPwAnswer() != null) {//최초 1회 접속이 아닌데 pwAnswer 요청 들어올 경우 예외처리
           // pwAnswer should not be provided after the first update
