@@ -401,7 +401,7 @@ public class StudentService {
     try {
       // 파일 리더 설정
       FileReader reader = new FileReader(
-          "C:/Users/junhyung/Desktop/programming_study/probono/backend/migration/mongodb_data.json");
+          "/home/ubuntu/migration/mongodb_data.json");
 
       // JSON 배열로 파싱
       Object obj = parser.parse(reader);
