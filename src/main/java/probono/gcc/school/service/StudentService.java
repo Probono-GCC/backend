@@ -2,6 +2,8 @@ package probono.gcc.school.service;
 
 import static probono.gcc.school.model.enums.Status.ACTIVE;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 import java.util.NoSuchElementException;
@@ -9,6 +11,10 @@ import java.util.Optional;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -367,12 +373,13 @@ public class StudentService {
       //해당 year를 가진 모든 class Id 조회 후 그 id를 가지고 있는 모든 class 삭제
       //해당 year를 가진 모든 class 삭제
 
-
       //모든 class 삭제
       //classId를 가지고 있는 모든 course 삭제
       if (student.getClassId() != null) {
-        Classes findClass = classRepository.findByClassIdAndStatus(student.getClassId().getClassId(), Status.ACTIVE)
-            .orElseThrow(() -> new NoSuchElementException("Class not found with ID: " + student.getClassId().getClassId()));
+        Classes findClass = classRepository.findByClassIdAndStatus(
+                student.getClassId().getClassId(), Status.ACTIVE)
+            .orElseThrow(() -> new NoSuchElementException(
+                "Class not found with ID: " + student.getClassId().getClassId()));
 
         // 2-3. 학생의 class 삭제
         student.deleteClass(findClass);
@@ -381,11 +388,75 @@ public class StudentService {
       }
 
 
-
     });
 
     // 변경된 학년 저장
     studentRepository.saveAll(students);
 
   }
+
+  public void jps() {
+    JSONParser parser = new JSONParser();
+    int cnt = 0;
+    try {
+      // 파일 리더 설정
+      FileReader reader = new FileReader(
+          "C:/Users/junhyung/Desktop/programming_study/probono/backend/migration/mongodb_data.json");
+
+      // JSON 배열로 파싱
+      Object obj = parser.parse(reader);
+      JSONArray jsonArray = (JSONArray) obj; // 배열로 캐스팅
+
+      // 배열의 모든 요소를 Users 엔티티로 변환하여 저장
+      for (Object jsonObj : jsonArray) {
+        JSONObject jsonObject = (JSONObject) jsonObj;
+        cnt++;
+        // Users 엔티티 생성
+        Users user = new Users();
+
+        // JSON 데이터에서 필요한 필드를 추출하고 Users 엔티티에 삽입
+        user.setUsername((String) jsonObject.get("id")); // username은 id로 설정
+        user.setName((String) jsonObject.get("full_name")); // name은 full_name으로 설정
+        user.setSerialNumber(((Long) jsonObject.get("s_n")).intValue()); // serialNumber는 s_n으로 설정
+
+        // 전화번호 필드 처리
+        String fatherPhoneNum = (String) jsonObject.get("father_phone_num");
+        String motherPhoneNum = (String) jsonObject.get("mother_phone_num");
+        String guardiansPhoneNum = (String) jsonObject.get("guardians_phone_num");
+
+        // 문자열 길이 검증 및 빈 문자열로 설정
+        user.setFatherPhoneNum(validatePhoneNumber(fatherPhoneNum));
+        user.setMotherPhoneNum(validatePhoneNumber(motherPhoneNum));
+        user.setGuardiansPhoneNum(validatePhoneNumber(guardiansPhoneNum));
+
+        // 기본 password 설정
+        user.setPassword(bCryptPasswordEncoder.encode("1234"));
+
+        // 기본값 설정
+        user.setRole(Role.ROLE_STUDENT); // 예: 기본 Role 설정
+        user.setStatus(Status.ACTIVE); // 예: 기본 Status 설정
+        user.setGrade(Grades.GRADUATED);
+        user.setCreatedChargeId("gcc");
+
+        // 엔티티 저장
+        studentRepository.save(user);
+      }
+
+      // 파일 닫기
+      reader.close();
+
+    } catch (IOException | ParseException e) {
+      e.printStackTrace();
+    }
+    System.out.println("total added student" + cnt);
+  }
+
+  // 전화번호 유효성 검사 메서드
+  private String validatePhoneNumber(String phoneNumber) {
+    if (phoneNumber == null || phoneNumber.length() < 5 || phoneNumber.length() > 19) {
+      return "";
+    }
+    return phoneNumber;
+  }
+
 }

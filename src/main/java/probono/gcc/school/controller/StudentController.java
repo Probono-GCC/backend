@@ -156,5 +156,12 @@ public class StudentController {
     return ResponseEntity.ok("All students' grades have been incremented.");
   }
 
+  //migration
+  @PostMapping("/students/migration")
+  public ResponseEntity<String> joinPreviousStudent() {
+    studentService.jps();
+    return ResponseEntity.ok("All student joined");
+  }
+
 
 }
