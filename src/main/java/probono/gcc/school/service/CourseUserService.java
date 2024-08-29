@@ -164,7 +164,7 @@ public class CourseUserService {
 //        .toList();
 //  }
   public Page<CourseUserResponse> getStudentsByCourseId(long courseId, int page, int size) {
-    Course findCourse = courseRepository.findById(courseId)
+    Course findCourse = (Course) courseRepository.findByIdAndStatus(courseId,Status.ACTIVE)
         .orElseThrow(() -> new NoSuchElementException("Course not found with id: " + courseId));
 
     //첫 페이지, 가져올 갯수, 정렬기준, 정렬 필드 설정
@@ -218,7 +218,7 @@ public class CourseUserService {
 
   public CourseUserResponse getTeacherByCourseId(Long courseId) {
     // courseId로 course 객체 조회
-    Course findCourse = courseRepository.findById(courseId)
+    Course findCourse = (Course) courseRepository.findByIdAndStatus(courseId,Status.ACTIVE)
         .orElseThrow(() -> new NoSuchElementException("Course not found with id: " + courseId));
 
     // 해당 courseId에 해당하는 CourseUser 목록 조회
@@ -282,7 +282,7 @@ public class CourseUserService {
   }
 
   public Page<CourseUserResponse> getCoursesByTeacherUsername(String username, int page, int size) {
-    Users teacher = userRepository.findByUsername(username)
+    Users teacher = userRepository.findByUsernameAndStatus(username,Status.ACTIVE)
         .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
     List<CourseUser> courseUserList = courseUserRepository.findByUsernameAndRole(teacher,
         ROLE_TEACHER);
