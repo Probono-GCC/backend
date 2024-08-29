@@ -51,7 +51,7 @@ public class TranslateService {
         Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
 
 
-// 특정 키에 접근하여 DTO에 값 설정
+        // 특정 키에 접근하여 DTO에 값 설정
         translateResponseDTO.setTranslatedText((String) responseBody.get("translatedText"));
         translateResponseDTO.setStatus(String.valueOf(responseBody.get("status"))); // Boolean to String
         translateResponseDTO.setMessage((String) responseBody.get("message"));
