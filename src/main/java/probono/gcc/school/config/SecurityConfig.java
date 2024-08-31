@@ -58,7 +58,7 @@ public class SecurityConfig {
 
                 configuration.setAllowedOrigins(
                     Arrays.asList("http://localhost:3000", "http://52.78.104.115",
-                        "http://211.54.52.199"));
+                        "http://211.54.52.199", "http://www.cla-school.site", "http://cla-school.site/"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedHeaders(Collections.singletonList("*"));
