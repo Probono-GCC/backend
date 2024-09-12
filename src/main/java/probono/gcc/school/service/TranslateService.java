@@ -2,6 +2,7 @@ package probono.gcc.school.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import probono.gcc.school.model.dto.TranslateRequestDTO;
 import probono.gcc.school.model.dto.TranslateResponseDTO;
 
 @Service
+@Slf4j
 public class TranslateService {
 
   @Autowired
@@ -24,10 +26,8 @@ public class TranslateService {
   @Autowired
   private ObjectMapper objectMapper;  // ObjectMapper를 사용해 JSON 파싱
 
-  private static final Logger logger = LoggerFactory.getLogger(TranslateService.class);
-
   public TranslateResponseDTO translateText(TranslateRequestDTO translateRequestDTO) {
-    logger.info("into translateText in TranslateService!!!!");
+    log.info("into translateText in TranslateService!!!!");
     String url = "http://localhost:8000/translate";
 
     // 헤더 설정
@@ -40,7 +40,7 @@ public class TranslateService {
     // POST 요청 보내기
     ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
-    logger.info("response.getStatusCode() : {}",response.getStatusCode());
+    log.info("response.getStatusCode() : {}",response.getStatusCode());
 
     // 응답 처리
     TranslateResponseDTO translateResponseDTO = new TranslateResponseDTO();
@@ -57,9 +57,11 @@ public class TranslateService {
         translateResponseDTO.setMessage((String) responseBody.get("message"));
 
       } catch (Exception e) {
+        log.info("Failed to parse translation response : "+translateRequestDTO.getText());
         throw new IllegalStateException("Failed to parse translation response", e);
       }
     } else {
+      log.info("Failed to translate : "+translateRequestDTO.getText());
       throw new IllegalStateException("Failed to translate: " + response.getStatusCode());
     }
 
