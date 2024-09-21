@@ -1,11 +1,13 @@
 package probono.gcc.school.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,6 +28,7 @@ public class TranslateService {
   @Autowired
   private ObjectMapper objectMapper;  // ObjectMapper를 사용해 JSON 파싱
 
+  @Cacheable(value = "translations", key = "#translateRequestDTO.text + '_' + #translateRequestDTO.to")
   public TranslateResponseDTO translateText(TranslateRequestDTO translateRequestDTO) {
     log.info("into translateText in TranslateService!!!!");
     String url = "http://localhost:8000/translate";
