@@ -50,7 +50,7 @@ public class Notice {
   private Timestamp createdAt;
 
   @Column
-  @UpdateTimestamp
+//  @UpdateTimestamp
   private Timestamp updatedAt;
 
   @Column(nullable = false)
