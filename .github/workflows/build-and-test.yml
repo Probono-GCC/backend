@@ -8,9 +8,9 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  AWS_S3_BUCKET: probono-gcc-bucket
-  AWS_CODE_DEPLOY_APPLICATION: probono-gcc-codedeploy-app
-  AWS_CODE_DEPLOY_GROUP: probono-gcc-codedeploy-group
+  AWS_S3_BUCKET: github-actions-deploy-s3bucket
+  AWS_CODE_DEPLOY_APPLICATION: Application-CodeDeploy
+  AWS_CODE_DEPLOY_GROUP: Deployment-Group
 
 jobs:
   build:
@@ -70,4 +70,4 @@ jobs:
 
       #test comments
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -x test --warning-mode=all
+        run: ./gradlew build -x test --warning-mode=all --info --stacktrace
