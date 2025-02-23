@@ -20,14 +20,14 @@ import probono.gcc.school.model.dto.NoticeResponse;
 import probono.gcc.school.model.dto.UpdateNoticeRequest;
 import probono.gcc.school.model.enums.NoticeType;
 import probono.gcc.school.service.NoticeService;
-import probono.gcc.school.service.S3ImageService;
+//import probono.gcc.school.service.S3ImageService;
 
 @RestController
 @RequiredArgsConstructor
 public class NoticeController {
 
   private final NoticeService noticeService;
-  private final S3ImageService s3ImageService;
+//  private final S3ImageService s3ImageService;
 
   @PostMapping("/notice")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
