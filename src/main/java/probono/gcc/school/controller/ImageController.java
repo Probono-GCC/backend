@@ -21,7 +21,7 @@ import probono.gcc.school.exception.S3Exception;
 import probono.gcc.school.model.dto.image.ImageRequestDTO;
 import probono.gcc.school.model.dto.image.CreateImageResponseDTO;
 import probono.gcc.school.service.ImageService;
-import probono.gcc.school.service.S3ImageService;
+//import probono.gcc.school.service.S3ImageService;
 
 @RestController
 @AllArgsConstructor
@@ -30,13 +30,14 @@ public class ImageController {
   private final ImageService imageService;
   private ModelMapper modelMapper;
 
-  private S3ImageService s3ImageService;
+//  private S3ImageService s3ImageService;
 
   @PostMapping("/profile/images/{username}")
   @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
   public ResponseEntity<?> createProfileImage(@RequestPart("image") MultipartFile image,@PathVariable String username) {
     try {
-      String profileImageUrl = s3ImageService.upload(image);
+//      String profileImageUrl = s3ImageService.upload(image);
+      String profileImageUrl = "";
       ImageRequestDTO requestDto = new ImageRequestDTO();
       requestDto.setImagePath(profileImageUrl);
       requestDto.setUsername(username);
