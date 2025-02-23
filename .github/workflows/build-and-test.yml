@@ -66,8 +66,8 @@ jobs:
 
 
       - name: Run Tests with Gradle Wrapper
-        run: ./gradlew test --warning-mode=all
+        run: ./gradlew test --warning-mode=all --info --stacktrace
 
       #test comments
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -x test --warning-mode=all
+        run: ./gradlew build -x test --warning-mode=all --info --stacktrace
