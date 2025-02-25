@@ -70,4 +70,4 @@ jobs:
 
       #test comments
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -x test --warning-mode=all
+        run: ./gradlew build -x test --warning-mode=all --info --stacktrace
