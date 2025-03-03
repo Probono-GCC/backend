@@ -19,11 +19,11 @@
 //  private final UserRepository userRepository;
 //  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 //
-//  @Value("${admin.username}")
-//  private String adminUsername;
-//
-//  @Value("${admin.password}")
-//  private String adminPassword;
+////  @Value("${admin.username}")
+////  private String adminUsername;
+////
+////  @Value("${admin.password}")
+////  private String adminPassword;
 //
 //
 //  private String adUsername = "testAdmin";
@@ -42,20 +42,20 @@
 //
 //  @Override
 //  public void run(String... args) throws Exception {
-//    if (userRepository.findByUsername(adminUsername).isEmpty()) {
-//      Users admin = new Users();
-//      admin.setUsername(adminUsername);
-//      admin.setPassword(bCryptPasswordEncoder.encode(adminPassword));
-//      admin.setRole(Role.ROLE_ADMIN);
-//      admin.setName("ADMIN");
-//      admin.setStatus(Status.ACTIVE);
-//      LocalDateTime now = LocalDateTime.now();
-//      Timestamp timestamp = Timestamp.valueOf(now);
-//      admin.setCreatedAt(timestamp);
-//      admin.setUpdatedAt(timestamp);
-//      admin.setCreatedChargeId("gcc");
-//      userRepository.save(admin);
-//    }
+////    if (userRepository.findByUsername(adminUsername).isEmpty()) {
+////      Users admin = new Users();
+////      admin.setUsername(adminUsername);
+////      admin.setPassword(bCryptPasswordEncoder.encode(adminPassword));
+////      admin.setRole(Role.ROLE_ADMIN);
+////      admin.setName("ADMIN");
+////      admin.setStatus(Status.ACTIVE);
+////      LocalDateTime now = LocalDateTime.now();
+////      Timestamp timestamp = Timestamp.valueOf(now);
+////      admin.setCreatedAt(timestamp);
+////      admin.setUpdatedAt(timestamp);
+////      admin.setCreatedChargeId("gcc");
+////      userRepository.save(admin);
+////    }
 //
 //    if (userRepository.findByUsername(adUsername).isEmpty()) {
 //      Users tAdmin = new Users();
