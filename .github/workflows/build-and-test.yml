@@ -43,10 +43,11 @@ jobs:
           mysql password: ${{ secrets.DB_PASSWORD }} # Required if "mysql user" exists. The password for the "mysql user"
 
       - uses: actions/checkout@v4
-      - run: touch ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.JWT_SECRET }}" >> ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.ADMIN_ACCOUNT }}" >> ./src/main/resources/application-private.properties
+      - run: touch ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.JWT_SECRET }}" >> ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.ADMIN_ACCOUNT }}" >> ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.LOCAL_DB_URL }}" >> ./src/main/resources/application-local.properties
       - run: cat ./src/main/resources/application-private.properties
 
 
@@ -66,8 +67,8 @@ jobs:
 
 
       - name: Run Tests with Gradle Wrapper
-        run: ./gradlew test --warning-mode=all
+        run: ./gradlew test -Dspring.profiles.active=local --warning-mode=all
 
       #test comments
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -x test --warning-mode=all --info --stacktrace
+        run: ./gradlew build -x test -Dspring.profiles.active=local --warning-mode=all --info --stacktrace
