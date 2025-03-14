@@ -48,7 +48,7 @@ jobs:
       - run: echo "${{ secrets.JWT_SECRET }}" >> ./src/main/resources/application-local.properties
       - run: echo "${{ secrets.ADMIN_ACCOUNT }}" >> ./src/main/resources/application-local.properties
       - run: echo "${{ secrets.LOCAL_DB_URL }}" >> ./src/main/resources/application-local.properties
-      - run: cat ./src/main/resources/application-private.properties
+      - run: cat ./src/main/resources/application-local.properties
 
 
       - name: Set up JDK 17
