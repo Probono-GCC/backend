@@ -50,6 +50,8 @@ jobs:
       - run: echo "${{ secrets.PROD_DB_URL }}" >> ./src/main/resources/application-prod.properties
 
       - run: echo "spring.sql.init.mode=never" >> ./src/main/resources/application-prod.properties
+      - run: echo "logging.level.com.zaxxer.hikari=DEBUG" >> ./src/main/resources/application-prod.properties
+
 
       - run: cat ./src/main/resources/application-prod.properties
 
