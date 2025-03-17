@@ -66,8 +66,10 @@ jobs:
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
 
-      - name: Run Tests with Gradle Wrapper
-        run: ./gradlew test -Dspring.profiles.active=local --warning-mode=all --info --stacktrace
+      - name: Run Tests with local profile
+        run: ./gradlew test --warning-mode=all --info --stacktrace
+        env:
+          SPRING_PROFILES_ACTIVE: local
 
       #test comments
       - name: Build with Gradle Wrapper
