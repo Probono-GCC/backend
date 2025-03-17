@@ -43,11 +43,17 @@ jobs:
           mysql password: ${{ secrets.DB_PASSWORD }} # Required if "mysql user" exists. The password for the "mysql user"
 
       - uses: actions/checkout@v4
-      - run: touch ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.JWT_SECRET }}" >> ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.ADMIN_ACCOUNT }}" >> ./src/main/resources/application-private.properties
-      - run: cat ./src/main/resources/application-private.properties
+      - run: touch ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.JWT_SECRET }}" >> ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.ADMIN_ACCOUNT }}" >> ./src/main/resources/application-local.properties
+      - run: echo "${{ secrets.LOCAL_DB_URL }}" >> ./src/main/resources/application-local.properties
+      
+      - run: echo "spring.sql.init.mode=always" >> ./src/main/resources/application-local.properties
+      - run: echo "spring.jpa.hibernate.ddl-auto=none" >> ./src/main/resources/application-local.properties
+
+      
+      - run: cat ./src/main/resources/application-local.properties
 
 
       - name: Set up JDK 17
@@ -65,9 +71,11 @@ jobs:
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
 
-      - name: Run Tests with Gradle Wrapper
-        run: ./gradlew test --warning-mode=all
+      - name: Run Tests with local profile
+        run: ./gradlew test --warning-mode=all --info --stacktrace
+        env:
+          SPRING_PROFILES_ACTIVE: local
 
       #test comments
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -x test --warning-mode=all --info --stacktrace
+        run: ./gradlew build -x test -Dspring.profiles.active=local --warning-mode=all --info --stacktrace

@@ -54,6 +54,23 @@ dependencies {
 
 }
 
+
+////   ./gradlew bootRun -Pprofile=prod로 명령어 실행
+//bootRun {
+//    if (project.hasProperty('profile')) {
+//        systemProperty 'spring.profiles.active', project.getProperty('profile')
+//    } else {
+//        systemProperty 'spring.profiles.active', 'local'
+//    }
+//}
+
+bootRun {
+    systemProperty "spring.profiles.active", System.getProperty("spring.profiles.active") ?: "local"
+}
+
+
+
+
 tasks.named('bootBuildImage') {
     builder = 'paketobuildpacks/builder-jammy-base:latest'
 }
