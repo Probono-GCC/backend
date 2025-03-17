@@ -43,11 +43,15 @@ jobs:
           mysql password: ${{ secrets.DB_PASSWORD }} # Required if "mysql user" exists. The password for the "mysql user"
 
       - uses: actions/checkout@v4
-      - run: touch ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.JWT_SECRET }}" >> ./src/main/resources/application-private.properties
-      - run: echo "${{ secrets.ADMIN_ACCOUNT }}" >> ./src/main/resources/application-private.properties
-      - run: cat ./src/main/resources/application-private.properties
+      - run: touch ./src/main/resources/application-prod.properties
+      - run: echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application-prod.properties
+      - run: echo "${{ secrets.JWT_SECRET }}" >> ./src/main/resources/application-prod.properties
+      - run: echo "${{ secrets.ADMIN_ACCOUNT }}" >> ./src/main/resources/application-prod.properties
+      - run: echo "${{ secrets.PROD_DB_URL }}" >> ./src/main/resources/application-prod.properties
+
+      - run: echo "spring.sql.init.mode=never" >> ./src/main/resources/application-prod.properties
+
+      - run: cat ./src/main/resources/application-prod.properties
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -65,6 +69,8 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
+        env:
+          SPRING_PROFILES_ACTIVE: prod
 
       - name: Setting AWS credential
         uses: aws-actions/configure-aws-credentials@v1
