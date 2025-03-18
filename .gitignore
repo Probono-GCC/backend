@@ -38,4 +38,7 @@ out/
 
 
 application-private.properties
+application-local.properties
+application-prod.properties
+
 
