@@ -71,8 +71,6 @@ jobs:
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build -x test --info --stacktrace
-        env:
-          SPRING_PROFILES_ACTIVE: prod
 
       - name: Setting AWS credential
         uses: aws-actions/configure-aws-credentials@v1
