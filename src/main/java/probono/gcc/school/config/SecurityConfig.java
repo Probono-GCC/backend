@@ -1,11 +1,13 @@
 package probono.gcc.school.config;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +32,7 @@ public class SecurityConfig {
   //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
   private final AuthenticationConfiguration authenticationConfiguration;
   private final JWTUtil jwtUtil;
+  private final MeterRegistry meterRegistry;
 
 
   //AuthenticationManager Bean 등록
@@ -94,7 +97,7 @@ public class SecurityConfig {
 
     //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
     http
-        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil,meterRegistry),
             UsernamePasswordAuthenticationFilter.class); // addFilterAt은 기존 필터자리에 새로운필터 등록(새로등록할 필터, 기존 필터)
 
     http
