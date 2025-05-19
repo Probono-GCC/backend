@@ -13,16 +13,22 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import probono.gcc.school.model.dto.CustomUserDetails;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final AuthenticationManager authenticationManager;
   private final JWTUtil jwtUtil;
+  private final MeterRegistry meterRegistry;
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
       HttpServletResponse response) throws AuthenticationException {
+
+
+    Timer.Sample sample = Timer.start(meterRegistry);
 
     //클라이언트 요청에서 username, password 추출
     String username = obtainUsername(request);
@@ -34,6 +40,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
         username, password, null);
 
+    sample.stop(meterRegistry.timer("login.step", "phase", "login_authentication"));
     return authenticationManager.authenticate(authToken);
   }
 
@@ -42,6 +49,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       FilterChain chain, Authentication authentication) {
+
+    Timer.Sample sample = Timer.start(meterRegistry);
     //UserDetailsS
     CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
@@ -56,6 +65,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     String token = jwtUtil.createJwt(username, role, 60 * 60 * 100000L);
 
     response.addHeader("Authorization", "Bearer " + token);
+    sample.stop(meterRegistry.timer("login.step", "phase", "create_jwt"));
   }
 
   //로그인 실패시 실행하는 메소드
