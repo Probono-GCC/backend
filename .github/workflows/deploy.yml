@@ -53,7 +53,7 @@ jobs:
 #      - run: echo "logging.level.com.zaxxer.hikari=DEBUG" >> ./src/main/resources/application-prod.properties
 
       - name: SSH into EC2-A and run deploy.sh
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.0 
         with:
           host: ${{ secrets.WAS_EC2_HOST }}
           username: ubuntu
