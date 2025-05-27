@@ -37,7 +37,7 @@ public class ClassController {
 
   @GetMapping("/test")
   public String test() {
-    return "blue-green test";
+    return "blue-green test2";
   }
 
   @GetMapping("/test2")
