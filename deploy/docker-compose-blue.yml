@@ -5,5 +5,6 @@ services:
     image: rupiyeon/probono-backend:latest
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=prod
+    command: ["--spring.profiles.active=prod"]
