@@ -41,7 +41,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         username, password, null);
 
     sample.stop(meterRegistry.timer("login.step", "phase", "login_authentication"));
-    return authenticationManager.authenticate(authToken);
+
+    // 인증 매니저 호출 (여기까지의 시간 측정 포함)
+    Authentication authentication = authenticationManager.authenticate(authToken);
+
+    // authenticate()가 끝난 시점에 타이머 종료
+    sample.stop(meterRegistry.timer("login.step", "phase", "login_authentication"));
+
+    return authentication;
   }
 
 
