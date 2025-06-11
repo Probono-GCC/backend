@@ -44,6 +44,5 @@ ssh -i ~/.ssh/web-server.pem -o StrictHostKeyChecking=no $WEB_SERVER_USER@$WEB_S
   sudo systemctl reload nginx
 "
 
-
 docker stop probono-$STOP_TARGET && docker rm probono-$STOP_TARGET
 docker image prune -af
