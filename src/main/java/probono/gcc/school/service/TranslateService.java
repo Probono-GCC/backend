@@ -31,7 +31,7 @@ public class TranslateService {
   @Cacheable(value = "translations", key = "#translateRequestDTO.text + '_' + #translateRequestDTO.to")
   public TranslateResponseDTO translateText(TranslateRequestDTO translateRequestDTO) {
     log.info("into translateText in TranslateService!!!!");
-    String url = "http://localhost:8000/translate";
+    String url = "http://172.31.47.247:8000/translate"; //blue-green docker 구조로 localhost->private ip
 
     // 헤더 설정
     HttpHeaders headers = new HttpHeaders();
