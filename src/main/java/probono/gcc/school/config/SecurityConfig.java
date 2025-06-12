@@ -60,7 +60,8 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 configuration.setAllowedOrigins(
-                    Arrays.asList("http://localhost:3000", "http://43.202.12.44", "http://www.cla-school.site", "http://cla-school.site/"));
+                    Arrays.asList("http://localhost:8080",
+                        "http://localhost:3000", "http://43.202.12.44", "http://www.cla-school.site", "http://cla-school.site/"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedHeaders(Collections.singletonList("*"));

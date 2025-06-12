@@ -1,11 +1,15 @@
 package probono.gcc.school.model.dto;
 
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class TranslateResponseDTO {
+@AllArgsConstructor
+@NoArgsConstructor
+public class TranslateResponseDTO implements Serializable {
   private String translatedText;
-  private String status;
+  private Boolean status;
   private String message;
-
 }
