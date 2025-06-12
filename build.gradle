@@ -53,6 +53,11 @@ dependencies {
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.micrometer:micrometer-core'
 
+    //레디스 캐싱
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+
+
 }
 
 
