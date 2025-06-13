@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import probono.gcc.school.model.dto.CustomUserDetails;
 import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.model.projection.UserLoginProjection;
 import probono.gcc.school.repository.UserRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -22,7 +23,12 @@ public class CustomUserDetailsService implements UserDetailsService {
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     Timer.Sample sample = Timer.start(meterRegistry);
     /*DB 조회 - 시작*/
-    Users userData = userRepository.findByUsername(username).get();
+//    Users userData = userRepository.findByUsername(username).get();
+
+    // Projection으로 유저 정보 조회
+    UserLoginProjection userData = userRepository.findProjectedByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
     /*끝*/
     sample.stop(meterRegistry.timer("login.step", "phase", "DB_user_lookup"));
     if (userData != null) {
