@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import probono.gcc.school.model.dto.CustomUserDetails;
+import probono.gcc.school.model.dto.users.UserLoginDTO;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Role;
 
@@ -55,10 +56,12 @@ public class JWTFilter extends OncePerRequestFilter {
     String role = jwtUtil.getRole(token);
 
     //userEntity를 생성하여 값 set
-    Users user = new Users();
-    user.setUsername(username);
-    user.setPassword("temppassword");
-    user.setRole(Role.valueOf(role));
+    //Users user = new Users();
+//    user.setUsername(username);
+//    user.setPassword("temppassword");
+//    user.setRole(Role.valueOf(role));
+
+    UserLoginDTO user = new UserLoginDTO(username, "temppassword", Role.valueOf(role));
 
     //UserDetails에 회원 정보 객체 담기
     CustomUserDetails customUserDetails = new CustomUserDetails(user);

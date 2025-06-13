@@ -11,6 +11,7 @@ import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Grades;
 import probono.gcc.school.model.enums.Role;
 import probono.gcc.school.model.enums.Status;
+import probono.gcc.school.model.projection.UserLoginProjection;
 
 public interface UserRepository extends JpaRepository<Users, Long> {
 
@@ -39,4 +40,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
       PageRequest pageRequest);
 
   List<Users> findByStatusAndRoleAndGradeNot(Status status, Role role, Grades grades);
+
+  // Projection용 메서드 추가
+  Optional<UserLoginProjection> findProjectedByUsername(String username);
 }
