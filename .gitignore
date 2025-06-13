@@ -43,7 +43,7 @@ application-prod.properties
 
 docker-compose-blue.yml
 docker-compose-green.yml
-
+docker-compose-test.yml
 
 
 
