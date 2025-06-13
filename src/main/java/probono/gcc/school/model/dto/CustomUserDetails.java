@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import probono.gcc.school.model.entity.Users;
+import probono.gcc.school.model.projection.UserLoginProjection;
 
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-  private final Users users;
+  //private final Users users;
+  private final UserLoginProjection users;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

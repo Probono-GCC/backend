@@ -40,7 +40,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
         username, password, null);
 
-    sample.stop(meterRegistry.timer("login.step", "phase", "login_authentication"));
+    //sample.stop(meterRegistry.timer("login.step", "phase", "login_authentication"));
 
     // 인증 매니저 호출 (여기까지의 시간 측정 포함)
     Authentication authentication = authenticationManager.authenticate(authToken);
