@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import probono.gcc.school.model.entity.Classes;
 import probono.gcc.school.model.entity.Users;
 import probono.gcc.school.model.enums.Grades;
@@ -42,5 +43,6 @@ public interface UserRepository extends JpaRepository<Users, Long> {
   List<Users> findByStatusAndRoleAndGradeNot(Status status, Role role, Grades grades);
 
   // Projection용 메서드 추가
+  @Transactional(readOnly = true)
   Optional<UserLoginProjection> findProjectedByUsername(String username);
 }
