@@ -36,12 +36,13 @@ WEB_SERVER_HOST=172.31.34.250               # EC2-B Private IP or Domain
 NGINX_CONFIG_PATH="/etc/nginx/sites-enabled/default"
 EC2_A_PRIVATE_IP=$(hostname -I | awk '{print $1}')
 
+
+
 ssh -i ~/.ssh/web-server.pem -o StrictHostKeyChecking=no $WEB_SERVER_USER@$WEB_SERVER_HOST "
   sudo sed -i \"s|proxy_pass http://$EC2_A_PRIVATE_IP:$STOP_PORT;|proxy_pass http://$EC2_A_PRIVATE_IP:$RUN_PORT;|\" $NGINX_CONFIG_PATH &&
   sudo nginx -t &&
   sudo systemctl reload nginx
 "
-
 
 docker stop probono-$STOP_TARGET && docker rm probono-$STOP_TARGET
 docker image prune -af
